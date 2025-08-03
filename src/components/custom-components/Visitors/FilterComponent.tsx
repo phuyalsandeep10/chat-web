@@ -96,10 +96,11 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
           ) : (
             <Icons.chevron_down className="text-theme-text-primary h-4 w-4" />
           )}
+          \
         </div>
         {isSortOpen && (
           <div className="border-grey-light space-y-3 rounded border p-3">
-            {sortOptions.map((option) => {
+            {sortOptions?.map((option) => {
               const isSelected = sortOption === option;
               return (
                 <label

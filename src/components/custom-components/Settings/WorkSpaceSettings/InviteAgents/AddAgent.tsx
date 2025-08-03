@@ -173,7 +173,7 @@ const AddAgent: React.FC<AddAgentProps> = ({
                   <ToggleGroup
                     type="single"
                     className="border-grey-light flex w-full gap-7 border px-[13px] py-1"
-                    value={field.value}
+                    value={field.value ?? undefined}
                     onValueChange={(value) => {
                       field.onChange(value);
                       setOpen(false);
