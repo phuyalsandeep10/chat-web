@@ -6,8 +6,8 @@ import {
   DialogContent,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Icons } from '../ui/Icons';
-import { Button, type ButtonProps } from '../ui/button';
+import { Icons } from '@/components/ui/Icons';
+import { Button, type ButtonProps } from '@/components/ui/button';
 interface DeleteModalProps {
   trigger?: React.ReactNode;
   open: boolean;

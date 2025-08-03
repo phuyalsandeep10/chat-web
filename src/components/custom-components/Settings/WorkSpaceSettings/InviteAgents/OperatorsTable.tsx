@@ -6,6 +6,7 @@ import ReusableDialog from './ReusableDialog';
 import AddAgent from './AddAgent';
 import { ReuseableTable } from './ReuseableTable';
 import { AgenChatHistoryCard } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgenChatHistoryCard';
+import DeleteModal from '@/components/modal/DeleteModal';
 
 export interface OrderRow {
   FullName: string;
@@ -34,10 +35,7 @@ interface OperatorsTableProps {
 export default function OperatorsTable({
   handleOpenDialog,
 }: OperatorsTableProps) {
-  const [modalData, setModalData] = useState<null | {
-    type: string;
-    row: OrderRow;
-  }>(null);
+  const [open, setOpen] = useState(false);
 
   const orders: OrderRow[] = [
     {
@@ -128,23 +126,22 @@ export default function OperatorsTable({
             <AgenChatHistoryCard submitButton="Edit Agent" />
           </ReusableDialog>
 
-          <button
-            aria-label="Delete agent"
-            onClick={() =>
-              handleOpenDialog({
-                heading: 'Delete Agent',
-                subheading:
-                  'This action will delete the agent. You can temporarily suspend the agent instead to retain their data.',
-                onAction: () => {
-                  console.log('Operator deleted');
-                },
-                headericon: <Icons.ri_delete_bin_7_fill />,
-              })
+          <DeleteModal
+            open={open}
+            onOpenChange={setOpen}
+            trigger={
+              <div className="flex items-center gap-2">
+                <Icons.ri_delete_bin_5_line className="text-red-500" />
+              </div>
             }
-            className="text-[#F61818]"
+            title="Delete Agent "
+            description="This action will delete agent , you can temporarily suspend agent which wont delete his/her data."
+            confirmText="Confirm & Delete"
+            onCancel={() => {}}
+            onConfirm={() => {}}
           >
-            <Icons.ri_delete_bin_5_line />
-          </button>
+            {/* <DeleteModal /> */}
+          </DeleteModal>
         </div>
       ),
     },

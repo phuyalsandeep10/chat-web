@@ -10,6 +10,7 @@ import AddMember from '@/components/custom-components/Settings/WorkSpaceSettings
 import CreateTeam from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/CreateTeam';
 import TeamEdit from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamEdit';
 import TeamView from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamView';
+import DeleteModal from '@/components/modal/DeleteModal';
 
 export interface OrderRow {
   TeamName: string;
@@ -34,6 +35,8 @@ interface TeamTableProps {
 }
 
 const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
+  const [open, setOpen] = React.useState(false);
+
   const orders: OrderRow[] = [
     {
       TeamName: 'Team A',
@@ -89,23 +92,22 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
           >
             <TeamView />
           </ReusableDialog>
-          <button
-            aria-label="Delete team"
-            onClick={() =>
-              handleOpenDialog({
-                heading: 'Delete Team',
-                subheading:
-                  'Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding.',
-                onAction: () => {
-                  console.log('Team deleted');
-                },
-                headericon: <Icons.ri_delete_bin_7_fill />,
-              })
+          <DeleteModal
+            open={open}
+            onOpenChange={setOpen}
+            trigger={
+              <div className="flex items-center gap-2">
+                <Icons.ri_delete_bin_5_line className="text-red-500" />
+              </div>
             }
-            className="text-[#F61818]"
+            title="Delete Team "
+            description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
+            confirmText="Confirm & Delete"
+            onCancel={() => {}}
+            onConfirm={() => {}}
           >
-            <Icons.ri_delete_bin_5_line />
-          </button>
+            {/* <DeleteModal /> */}
+          </DeleteModal>
         </div>
       ),
     },

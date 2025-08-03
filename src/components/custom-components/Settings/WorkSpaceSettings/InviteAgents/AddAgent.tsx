@@ -40,20 +40,32 @@ const AddAgent: React.FC<AddAgentProps> = ({
   submitButton,
 }) => {
   const form = useForm<FormValues>({
-    defaultValues: defaultValues || {
+    defaultValues: {
+      day: 'sunday',
+      shift: 'morning',
       email: '',
       fullName: '',
       role: '',
       clientHandled: '',
-      day: null,
-      shift: '',
       startTime: '',
       endTime: '',
       totalHours: '',
       team: '',
     },
   });
+  // states
   const [open, setOpen] = React.useState(false);
+
+  // day picker data
+  const weekDays = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
 
   return (
     <>
@@ -136,7 +148,7 @@ const AddAgent: React.FC<AddAgentProps> = ({
             />
           </div>
 
-          {/* form date picker  */}
+          {/* form day picker  */}
 
           <Controller
             control={form.control}
@@ -149,8 +161,8 @@ const AddAgent: React.FC<AddAgentProps> = ({
                     className="w-full justify-between font-normal text-black"
                   >
                     {field.value
-                      ? new Date(field.value).toLocaleDateString()
-                      : 'Pick a date'}
+                      ? weekDays.find((d) => d.toLowerCase() === field.value)
+                      : 'Sunday'}
                     <Icons.ri_calendar_line />
                   </Button>
                 </PopoverTrigger>
@@ -158,15 +170,25 @@ const AddAgent: React.FC<AddAgentProps> = ({
                   className="w-auto overflow-hidden p-0"
                   align="start"
                 >
-                  <Calendar
-                    mode="single"
-                    selected={field.value ? new Date(field.value) : undefined}
-                    captionLayout="dropdown"
-                    onSelect={(date) => {
-                      field.onChange(date?.toISOString());
+                  <ToggleGroup
+                    type="single"
+                    className="border-grey-light flex w-full gap-7 border px-[13px] py-1"
+                    value={field.value}
+                    onValueChange={(value) => {
+                      field.onChange(value);
                       setOpen(false);
                     }}
-                  />
+                  >
+                    {weekDays.map((day) => (
+                      <ToggleGroupItem
+                        key={day}
+                        className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
+                        value={day.toLowerCase()} // lowercase or as you prefer for form values
+                      >
+                        {day.substring(0, 3)}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
                 </PopoverContent>
               </Popover>
             )}
@@ -244,6 +266,8 @@ const AddAgent: React.FC<AddAgentProps> = ({
             </ToggleGroupItem>
           </ToggleGroup>
         </div> */}
+
+          {/* time shift field */}
 
           <Controller
             name="shift"

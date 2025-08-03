@@ -4,13 +4,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 type FilterComponentProps = {
   statusOptions: string[];
-  sortOptions: string[];
+  sortOptions?: string[];
   onStatusChange?: (selectedStatuses: string[]) => void;
   onSortChange?: (selectedSort: string) => void;
   statusLabel?: string;
   sortLabel?: string;
   className?: string;
   getSortIcon?: (option: string, isSelected: boolean) => React.ReactNode;
+  hideFilter?: string; //added by rahul
+  showDivider?: string; //added by rahul
 };
 
 const FilterComponent: React.FC<FilterComponentProps> = ({
@@ -22,6 +24,8 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
   sortLabel,
   className,
   getSortIcon,
+  hideFilter,
+  showDivider,
 }) => {
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<string>('');
@@ -80,8 +84,8 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
         )}
       </div>
 
-      <div className="bg-brand-light h-12 w-[1px]" />
-      <div className="w-[178px]">
+      <div className={`bg-brand-light h-12 w-[1px] ${showDivider}`} />
+      <div className={`w-[178px] ${hideFilter}`}>
         <div
           className="border-grey-light text-theme-text-primary mb-2 flex cursor-pointer items-center justify-between rounded border px-3 py-2 text-[12px] font-semibold"
           onClick={() => setIsSortOpen((prev) => !prev)}

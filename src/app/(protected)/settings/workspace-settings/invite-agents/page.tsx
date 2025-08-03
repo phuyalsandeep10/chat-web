@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, ReactNode } from 'react';
+import React, { useState, useRef, ReactNode, useEffect } from 'react';
 import { Icons } from '@/components/ui/Icons';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ReusableDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReusableDialog';
 import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
 import InviteTable from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Invites/InviteTable';
+import FilterComponent from '@/components/custom-components/Visitors/FilterComponent';
 
 // Define the modalProps type
 type ModalProps = {
@@ -51,6 +52,82 @@ const InviteAgents = () => {
     });
     alertRef.current?.open();
   };
+
+  // to know which table is active
+  const [activeTable, setActiveTable] = useState('Invites');
+
+  // toggle filter option
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filterPosition, setFilterPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+  const filterIconRef = useRef<HTMLDivElement | null>(null);
+
+  // adjust position of  filter
+  // Called when user clicks the filter icon
+  const handleFilterClick = () => {
+    if (filterIconRef.current) {
+      const rect = filterIconRef.current.getBoundingClientRect();
+      setFilterPosition({
+        top: rect.height + 8,
+        left:
+          activeTable === 'Operators' || activeTable === 'Invites'
+            ? -435
+            : -222,
+      });
+      setIsFilterOpen((prev) => !prev);
+    }
+  };
+
+  // Called when active table changes — keep filter correctly positioned
+  useEffect(() => {
+    if (isFilterOpen && filterIconRef.current) {
+      const rect = filterIconRef.current.getBoundingClientRect();
+      setFilterPosition({
+        top: rect.height + 8,
+        left:
+          activeTable === 'Operators' || activeTable === 'Invites'
+            ? -435
+            : -222,
+      });
+    }
+  }, [activeTable]);
+
+  // close filter when clicked outside of the filter container
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      if (
+        filterIconRef.current &&
+        !filterIconRef.current.contains(target) &&
+        !document.getElementById('filter-popup')?.contains(target)
+      ) {
+        setIsFilterOpen(false);
+      }
+    };
+
+    if (isFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFilterOpen]);
+
+  // label for filter
+  // operation table filter shifts
+  const statuses = ['Morning', 'Day', 'Night'];
+
+  // Invites table filter shifts
+  const inviteStatuses = ['Sent', 'Rejected'];
+
+  // Roles table filter shifts
+  const RoleStatuses = ['Admin', 'Agent', 'Moderator'];
+
+  const sortOptions = ['Admin', 'Agent'];
 
   return (
     <Settings>
@@ -117,7 +194,12 @@ const InviteAgents = () => {
           {/* buttons to navigate to different pages */}
 
           <div>
-            <Tabs defaultValue="Operators" className="w-full gap-[12px]">
+            <Tabs
+              defaultValue="Invites"
+              value={activeTable}
+              onValueChange={setActiveTable}
+              className="w-full gap-[12px]"
+            >
               <div className="flex justify-between border-b">
                 <TabsList className="border-grey-light flex gap-[35px] bg-transparent p-0 pb-1">
                   <TabsTrigger
@@ -145,8 +227,66 @@ const InviteAgents = () => {
                     Roles
                   </TabsTrigger>
                 </TabsList>
-                <div className="text-brand-primary w-">
-                  <Icons.filter />
+                <div className="relative">
+                  <div
+                    id="filter-popup"
+                    className="text-brand-primary"
+                    ref={filterIconRef}
+                    onClick={handleFilterClick}
+                  >
+                    <Icons.filter />
+                  </div>
+
+                  {/* toggle filter components according to table */}
+                  {isFilterOpen &&
+                    filterPosition &&
+                    (() => {
+                      const filterConfig: Record<string, any> = {
+                        Operators: {
+                          statusOptions: statuses,
+                          statusLabel: 'Filter By Shift',
+                          sortLabel: 'Filter By Roles',
+                        },
+                        Invites: {
+                          statusOptions: inviteStatuses,
+                          statusLabel: 'Filter By Status',
+                          sortLabel: 'Filter By Roles',
+                        },
+                        Teams: {
+                          statusOptions: inviteStatuses,
+                          statusLabel: 'Filter By Status',
+                          sortLabel: 'Filter By Roles',
+                          hideFilter: 'hidden',
+                          showDivider: 'hidden',
+                        },
+                        Roles: {
+                          statusOptions: RoleStatuses,
+                          statusLabel: 'Filter By Role Name',
+                          hideFilter: 'hidden',
+                          showDivider: 'hidden',
+                        },
+                      };
+
+                      const config = filterConfig[activeTable];
+                      if (!config) return null;
+
+                      return (
+                        <div
+                          className="absolute z-[1000]"
+                          style={{
+                            top: filterPosition.top,
+                            left: filterPosition.left,
+                          }}
+                        >
+                          <FilterComponent
+                            {...config}
+                            sortOptions={sortOptions}
+                            onStatusChange={() => {}}
+                            onSortChange={() => {}}
+                          />
+                        </div>
+                      );
+                    })()}
                 </div>
               </div>
 
@@ -165,8 +305,6 @@ const InviteAgents = () => {
               </TabsContent>
             </Tabs>
           </div>
-
-          {/* table of operators */}
 
           {/* delete card */}
 

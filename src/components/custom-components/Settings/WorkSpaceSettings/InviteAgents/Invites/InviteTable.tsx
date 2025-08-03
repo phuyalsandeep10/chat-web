@@ -8,6 +8,8 @@ import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpac
 import { AgenChatHistoryCard } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgenChatHistoryCard';
 import MailIcon from '@/assets/images/mailIcon.svg';
 import Image from 'next/image';
+import DeleteModal from '@/components/modal/DeleteModal';
+import { Button, type ButtonProps } from '@/components/ui/button';
 
 export interface OrderRow {
   invite: string;
@@ -35,10 +37,8 @@ export interface InviteAgentProps {
 }
 
 export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
-  const [modalData, setModalData] = useState<null | {
-    type: string;
-    row: OrderRow;
-  }>(null);
+  const [open, setOpen] = useState(false);
+  const [openReminder, setOpenReminder] = useState(false);
 
   const orders: OrderRow[] = [
     {
@@ -59,6 +59,7 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
     },
   ];
 
+  // invit etable column define
   const columns: Column<OrderRow>[] = [
     { key: 'invite', label: 'Invited' },
     {
@@ -69,29 +70,42 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
       key: 'status',
       label: 'Status',
       render: (row) => (
-        <div
-          className="flex items-center gap-2"
-          onClick={() =>
-            handleOpenDialog({
-              heading: 'Send Reminder',
-              subheading:
-                'Do you want to notify about the invitation you sent to join the workspace ?',
-              onAction: () => {
-                console.log('Operator deleted');
-              },
-              headericon: <Icons.ri_time_fill />,
-            })
-          }
-        >
-          <span>{row.status}</span>
-          {row.status.toLowerCase().includes('sent') && (
-            <Image
-              src={MailIcon}
-              alt="Mail Icon"
-              width={16}
-              height={16}
-              className="h-4 w-4"
-            />
+        <div className="flex gap-2">
+          {row.status.toLowerCase().includes('sent') ? (
+            <>
+              {' '}
+              <DeleteModal
+                open={openReminder}
+                onOpenChange={setOpenReminder}
+                trigger={
+                  <div className="flex items-center gap-2">
+                    <span>{row.status}</span>
+                    {row.status.toLowerCase().includes('sent') && (
+                      <Image
+                        src={MailIcon}
+                        alt="Mail Icon"
+                        width={16}
+                        height={16}
+                        className="h-4 w-4"
+                      />
+                    )}
+                  </div>
+                }
+                title="Send Reminder"
+                description="Do you want to notify about the invitation you sent to join the workspace ?"
+                icon={<Icons.ri_time_fill className="text-brand-primary" />}
+                iconBgColor="bg-brand-light"
+                descriptionColor="text-brand-primary"
+                confirmVariant="default"
+                confirmText="Send Reminder"
+                onCancel={() => {}}
+                onConfirm={() => {}}
+              >
+                {/* <DeleteModal /> */}
+              </DeleteModal>
+            </>
+          ) : (
+            <span>{row.status}</span>
           )}
         </div>
       ),
@@ -118,27 +132,22 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
       key: 'actions',
       label: 'Actions',
       render: (row) => (
-        <div className="flex gap-2">
-          {/* delete icon */}
-
-          <button
-            aria-label="Delete agent"
-            onClick={() =>
-              handleOpenDialog({
-                heading: 'Delete Agent',
-                subheading:
-                  'This action will delete the agent. You can temporarily suspend the agent instead to retain their data.',
-                onAction: () => {
-                  console.log('Operator deleted');
-                },
-                headericon: <Icons.ri_delete_bin_7_fill />,
-              })
-            }
-            className="text-[#F61818]"
-          >
-            <Icons.ri_delete_bin_5_line />
-          </button>
-        </div>
+        <DeleteModal
+          open={open}
+          onOpenChange={setOpen}
+          trigger={
+            <div className="flex items-center gap-2">
+              <Icons.ri_delete_bin_5_line className="text-red-500" />
+            </div>
+          }
+          title="Delete Invitation "
+          description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
+          confirmText="Confirm & Delete"
+          onCancel={() => {}}
+          onConfirm={() => {}}
+        >
+          {/* <DeleteModal /> */}
+        </DeleteModal>
       ),
     },
   ];

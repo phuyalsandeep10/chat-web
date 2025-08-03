@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
 import ReusableDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReusableDialog';
 import RoleForm from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Roles/RoleForm';
 import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
+import DeleteModal from '@/components/modal/DeleteModal';
 
 export interface OrderRow {
   RoleName: string;
@@ -32,6 +33,7 @@ interface RolesTableProps {
 }
 
 const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
+  const [open, setOpen] = useState(false);
   const orders: OrderRow[] = [
     {
       RoleName: 'Agent',
@@ -57,40 +59,43 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
     {
       key: 'actions',
       label: 'Actions',
-      render: (row) => (
-        <div className="flex gap-[10px]">
-          <ReusableDialog
-            trigger={
-              <button aria-label="Edit role">
-                <Icons.ri_edit2_fill className="text-black" />
-              </button>
-            }
-            dialogClass="!max-w-[676px] px-5 py-10 gap-0"
-          >
-            <RoleForm
-              defaultValues={{}}
-              onSubmit={(data) => console.log('Edited role:', data)}
-              roleHead="Edit Role"
-            />
-          </ReusableDialog>
+      render: (row) => {
+        return (
+          <div className="flex gap-[10px]">
+            <ReusableDialog
+              trigger={
+                <button aria-label="Edit role">
+                  <Icons.ri_edit2_fill className="text-black" />
+                </button>
+              }
+              dialogClass="!max-w-[676px] px-5 py-10 gap-0"
+            >
+              <RoleForm
+                defaultValues={{}}
+                onSubmit={(data) => console.log('Edited role:', data)}
+                roleHead="Edit Role"
+              />
+            </ReusableDialog>
 
-          <button
-            aria-label="Delete role"
-            onClick={() =>
-              handleOpenDialog({
-                heading: 'Delete Role',
-                subheading:
-                  'This will remove all permissions assigned to this role. Are you sure you want to continue?',
-                onAction: () => console.log('Deleted role:', row.RoleName),
-                headericon: <Icons.ri_delete_bin_7_fill />,
-              })
-            }
-            className="text-[#F61818]"
-          >
-            <Icons.ri_delete_bin_5_line />
-          </button>
-        </div>
-      ),
+            <DeleteModal
+              open={open}
+              onOpenChange={setOpen}
+              trigger={
+                <div className="flex items-center gap-2">
+                  <Icons.ri_delete_bin_5_line className="text-red-500" />
+                </div>
+              }
+              title="Delete Member "
+              description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
+              confirmText="Confirm & Delete"
+              onCancel={() => {}}
+              onConfirm={() => {}}
+            >
+              {/* <DeleteModal /> */}
+            </DeleteModal>
+          </div>
+        );
+      },
     },
   ];
 
