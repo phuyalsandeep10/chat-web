@@ -28,13 +28,13 @@ type FormValues = {
   team: string;
 };
 
-interface AddAgentProps {
+interface AddOrEditAgentFormProps {
   defaultValues: Partial<FormValues>;
   onSubmit: (data: FormValues) => void;
   submitButton: string;
 }
 
-const AddAgent: React.FC<AddAgentProps> = ({
+const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   defaultValues,
   onSubmit,
   submitButton,
@@ -71,7 +71,9 @@ const AddAgent: React.FC<AddAgentProps> = ({
     <>
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit((data) => {
+            console.log('Add Form Data', data);
+          })}
           className="grid grid-cols-1 gap-6 md:grid-cols-2"
         >
           {/* Input Fields */}
@@ -137,13 +139,12 @@ const AddAgent: React.FC<AddAgentProps> = ({
               required
               placeholder="0-6"
               control={form.control}
-              className="text-red-400"
               options={[
-                { value: 'client1', label: '0-6' },
-                { value: 'client2', label: '7-20' },
-                { value: 'client3', label: '21-50' },
-                { value: 'client4', label: '50-120' },
-                { value: 'client5', label: '120-200' },
+                { value: '0-6', label: '0-6' },
+                { value: '7-20', label: '7-20' },
+                { value: '21-50', label: '21-50' },
+                { value: '50-120', label: '50-120' },
+                { value: '120-200', label: '120-200' },
               ]}
             />
           </div>
@@ -193,79 +194,6 @@ const AddAgent: React.FC<AddAgentProps> = ({
               </Popover>
             )}
           />
-
-          {/* <div>
-          <Label
-            className="pb-3 text-base leading-[26px] font-medium" //
-            htmlFor="day"
-            required
-          >
-            Day
-          </Label>
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <span id="date" className="w-full justify-between font-normal">
-                <Button
-                  variant="outline"
-                  id="date"
-                  className="border-grey-light !hover:bg-transparent w-full justify-between font-normal text-black"
-                >
-                  {date ? date.toLocaleDateString() : 'Pick a date'}
-                  <Icons.ri_calendar_line />
-                </Button> */}
-          {/* <ChevronDownIcon /> */}
-          {/* </span>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-auto overflow-hidden p-0"
-              align="start"
-            >
-              <Calendar
-                mode="single"
-                selected={date}
-                captionLayout="dropdown"
-                onSelect={(date) => {
-                  setDate(date);
-                  setOpen(false);
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-        </div> */}
-
-          {/* Toggle Group */}
-          {/* <div>
-          <Label
-            className="pb-3 text-base leading-[26px] font-medium" //
-            htmlFor="shift"
-            required
-          >
-            Shift 
-          </Label>
-          <ToggleGroup
-            type="single"
-            className="border-grey-light flex w-full gap-7 border px-[13px] py-1"
-          >
-            <ToggleGroupItem
-              className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
-              value="morning"
-            >
-              Morning
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
-              value="day"
-            >
-              Day
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
-              value="night"
-            >
-              Night
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div> */}
 
           {/* time shift field */}
 
@@ -396,7 +324,7 @@ const AddAgent: React.FC<AddAgentProps> = ({
             type="submit"
             className="col-span-full mt-4 h-full max-h-[36px] w-full rounded-lg px-[22px] py-2.5 text-xs leading-4 font-semibold"
           >
-            {submitButton}
+            Add Agent
           </Button>
         </form>
       </Form>
@@ -404,4 +332,4 @@ const AddAgent: React.FC<AddAgentProps> = ({
   );
 };
 
-export default AddAgent;
+export default AddOrEditAgentForm;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
 import {
@@ -10,10 +10,12 @@ import {
 } from '@/components/ui/card';
 import Image from 'next/image';
 import TeamProfile from '@/assets/images/team_profile.svg';
-import ReusableDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReusableDialog';
+import AddAgentDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgentDialog';
 import TeamMemberInfo from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamMemberInfo';
+import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
 
 const TeamView: React.FC = () => {
+  const [openTeamInfo, setOpenTeamInfo] = useState(false);
   return (
     <Card className="w-full max-w-full border-0 p-0 px-5 shadow-none">
       <CardHeader className="inline-flex items-center gap-x-[17px] gap-y-[14px] p-0">
@@ -45,15 +47,22 @@ const TeamView: React.FC = () => {
             </div>
           </div>
 
-          <ReusableDialog
-            trigger={
-              <button aria-label="View team member info">
-                <Icons.info className="text-brand-primary" />
-              </button>
-            }
-          >
-            <TeamMemberInfo />
-          </ReusableDialog>
+          {/* view team info */}
+          <div>
+            <div
+              className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+              onClick={() => setOpenTeamInfo(true)}
+            >
+              <Icons.info className="text-brand-primary" />
+              {/* <Icons.ri_edit2_fill /> */}
+            </div>
+            <AgentInviteModal
+              open={openTeamInfo}
+              onOpenChange={setOpenTeamInfo}
+            >
+              <TeamMemberInfo />
+            </AgentInviteModal>
+          </div>
         </div>
       </CardContent>
 

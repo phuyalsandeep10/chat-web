@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import { Icons } from '@/components/ui/Icons';
-import ReusableDialog from './ReusableDialog';
+import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
 import AddAgent from './AddAgent';
 import { ReuseableTable } from './ReuseableTable';
 import { AgenChatHistoryCard } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgenChatHistoryCard';
 import DeleteModal from '@/components/modal/DeleteModal';
+import AddOrEditAgentForm from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddOrEditAgentForm';
 
 export interface OrderRow {
   FullName: string;
@@ -35,7 +36,11 @@ interface OperatorsTableProps {
 export default function OperatorsTable({
   handleOpenDialog,
 }: OperatorsTableProps) {
+  // states to toggle modal
   const [open, setOpen] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [openTeamView, setOpenTeamView] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
   const orders: OrderRow[] = [
     {
@@ -96,7 +101,7 @@ export default function OperatorsTable({
       label: 'Actions',
       render: (row) => (
         <div className="flex gap-2">
-          <ReusableDialog
+          {/* <ReusableDialog
             trigger={
               <button aria-label="Edit agent">
                 <Icons.ri_edit2_fill className="text-black" />
@@ -112,23 +117,50 @@ export default function OperatorsTable({
               }}
               submitButton="Edit Agent"
             />
-          </ReusableDialog>
+          </ReusableDialog> */}
 
-          {/* view agent chat */}
-          <ReusableDialog
-            trigger={
-              <button aria-label="View agent">
-                <Icons.ri_eye_fill />
-              </button>
-            }
-            dialogClass="gap-0 !max-w-[554px]"
-          >
-            <AgenChatHistoryCard submitButton="Edit Agent" />
-          </ReusableDialog>
+          {/* edit form */}
+          <div className="flex gap-5">
+            <div
+              className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+              onClick={() => setOpenEdit(true)}
+            >
+              <Icons.ri_edit2_fill className="text-black" />
+            </div>
+            {/* add agennt button */}
+            <AgentInviteModal
+              open={openEdit}
+              onOpenChange={setOpenEdit}
+              dialogTitle="Edit Information"
+              dialogClass="!max-w-[768px]"
+            >
+              <AddOrEditAgentForm />
+            </AgentInviteModal>
+          </div>
+
+          {/* view modal */}
+
+          <div className="flex gap-5">
+            <div
+              className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+              onClick={() => setOpenTeamView(true)}
+            >
+              <Icons.ri_eye_fill className="text-black" />
+              {/* <Icons.ri_edit2_fill /> */}
+            </div>
+            {/* add agennt button */}
+            <AgentInviteModal
+              open={openTeamView}
+              onOpenChange={setOpenTeamView}
+              dialogClass="gap-0 !max-w-[554px]"
+            >
+              <AgenChatHistoryCard submitButton="Edit Agent" />
+            </AgentInviteModal>
+          </div>
 
           <DeleteModal
-            open={open}
-            onOpenChange={setOpen}
+            open={openDeleteModal}
+            onOpenChange={setOpenDeleteModal}
             trigger={
               <div className="flex items-center gap-2">
                 <Icons.ri_delete_bin_5_line className="text-red-500" />
@@ -139,9 +171,7 @@ export default function OperatorsTable({
             confirmText="Confirm & Delete"
             onCancel={() => {}}
             onConfirm={() => {}}
-          >
-            {/* <DeleteModal /> */}
-          </DeleteModal>
+          ></DeleteModal>
         </div>
       ),
     },

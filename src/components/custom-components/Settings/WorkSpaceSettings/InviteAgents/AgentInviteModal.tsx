@@ -1,7 +1,7 @@
 // components/ui/ReusableDialog.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTrigger,
@@ -10,8 +10,11 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
 
-type ReusableDialogProps = {
+type AgentInviteModalProps = {
+  open?: boolean; // allow controlled use
+  onOpenChange?: (open: boolean) => void;
   trigger: React.ReactNode;
   children?: React.ReactNode;
   dialogClass?: string;
@@ -19,16 +22,23 @@ type ReusableDialogProps = {
   dialogDescription?: string;
 };
 
-const ReusableDialog: React.FC<ReusableDialogProps> = ({
+const AgentInviteModal: React.FC<AgentInviteModalProps> = ({
   trigger,
   children = null,
   dialogClass = '',
   dialogTitle = '',
   dialogDescription = '',
+  open,
+  onOpenChange,
 }) => {
+  const handleOpenChange = () => {
+    onOpenChange(false);
+  };
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {/* <DialogTrigger asChild>{trigger}</DialogTrigger> */}
       <DialogContent className={`!w-full !max-w-[1240px] gap-8 ${dialogClass}`}>
         <DialogHeader className="gap-0">
           <DialogTitle className="text-xl leading-[30px] font-semibold">
@@ -42,4 +52,4 @@ const ReusableDialog: React.FC<ReusableDialogProps> = ({
   );
 };
 
-export default ReusableDialog;
+export default AgentInviteModal;

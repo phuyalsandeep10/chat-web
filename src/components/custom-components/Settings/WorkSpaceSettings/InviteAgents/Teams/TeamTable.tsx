@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
-import ReusableDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReusableDialog';
+import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
 import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
 import AddMember from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/AddMember';
@@ -11,6 +11,7 @@ import CreateTeam from '@/components/custom-components/Settings/WorkSpaceSetting
 import TeamEdit from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamEdit';
 import TeamView from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamView';
 import DeleteModal from '@/components/modal/DeleteModal';
+import AddOrEditAgentForm from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddOrEditAgentForm';
 
 export interface OrderRow {
   TeamName: string;
@@ -35,7 +36,14 @@ interface TeamTableProps {
 }
 
 const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
-  const [open, setOpen] = React.useState(false);
+  // states to toggle modal
+  const [open, setOpen] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  // const [openTeamView, setOpenTeamView] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [openCreateTeam, setOpenCreateTeam] = useState(false);
+  const [openTeamView, setOpenTeamView] = useState(false);
+  const [openInviteMember, setOpenInviteMember] = useState(false);
 
   const orders: OrderRow[] = [
     {
@@ -72,7 +80,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
       label: 'Actions',
       render: () => (
         <div className="flex items-center gap-[10px]">
-          <ReusableDialog
+          {/* <AddOrEditAgentForm
             trigger={
               <button aria-label="Edit team">
                 <Icons.ri_edit2_fill className="text-black" />
@@ -81,8 +89,8 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
             dialogClass="!max-w-[768px] gap-0 px-5 py-10"
           >
             <TeamEdit onSubmit={() => {}} />
-          </ReusableDialog>
-          <ReusableDialog
+          </AddOrEditAgentForm>
+          <AddOrEditAgentForm
             trigger={
               <button aria-label="View team">
                 <Icons.ri_eye_fill />
@@ -91,15 +99,54 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
             dialogClass="!max-w-[411px] gap-0 inline-block"
           >
             <TeamView />
-          </ReusableDialog>
+          </AddOrEditAgentForm> */}
+          {/* edit form */}
+          <div>
+            <div
+              className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+              onClick={() => setOpenEdit(true)}
+            >
+              <Icons.ri_edit2_fill className="text-black" />
+            </div>
+            <AgentInviteModal
+              open={openEdit}
+              onOpenChange={setOpenEdit}
+              dialogTitle="Edit Information"
+              dialogClass="!max-w-[768px]"
+            >
+              <AddOrEditAgentForm />
+            </AgentInviteModal>
+          </div>
+
+          {/* view team */}
+          <div>
+            <div
+              className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+              onClick={() => setOpenTeamView(true)}
+            >
+              <Icons.ri_eye_fill className="text-black" />
+            </div>
+            <AgentInviteModal
+              open={openTeamView}
+              onOpenChange={setOpenTeamView}
+              dialogTitle="Edit Information"
+              dialogClass="!max-w-[768px]"
+            >
+              <TeamView />
+            </AgentInviteModal>
+          </div>
+
+          {/* delete modal */}
+          <div
+            className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+            onClick={() => setOpenDeleteModal(true)}
+          >
+            <Icons.ri_delete_bin_5_line className="text-red-500" />
+            {/* <Icons.ri_edit2_fill /> */}
+          </div>
           <DeleteModal
-            open={open}
-            onOpenChange={setOpen}
-            trigger={
-              <div className="flex items-center gap-2">
-                <Icons.ri_delete_bin_5_line className="text-red-500" />
-              </div>
-            }
+            open={openDeleteModal}
+            onOpenChange={setOpenDeleteModal}
             title="Delete Team "
             description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
             confirmText="Confirm & Delete"
@@ -128,32 +175,46 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
 
       {/* Action Buttons */}
       <div className="flex justify-end gap-4 pb-[13px]">
-        <ReusableDialog
-          trigger={
-            <Button className="h-[36px] rounded px-[22px] py-2.5 text-xs leading-4 font-semibold">
-              <Icons.plus_circle />
-              Create New Team
-            </Button>
-          }
-          dialogClass="!max-w-[387px] py-10 w-full px-5 gap-0 inline-block"
-        >
-          <CreateTeam onSubmit={(data) => console.log('Team created:', data)} />
-        </ReusableDialog>
+        {/* create new team */}
+        <div>
+          <Button
+            className="h-[36px] rounded px-[22px] py-2.5 text-xs leading-4 font-semibold"
+            onClick={() => setOpenCreateTeam(true)}
+          >
+            <Icons.plus_circle />
+            Create New Team
+          </Button>
+          <AgentInviteModal
+            open={openCreateTeam}
+            onOpenChange={setOpenCreateTeam}
+            dialogClass="!max-w-[387px] py-10 w-full px-5 gap-0 inline-block"
+          >
+            <CreateTeam
+              onSubmit={(data) => console.log('Team created:', data)}
+            />
+          </AgentInviteModal>
+        </div>
 
-        <ReusableDialog
-          trigger={
-            <Button
-              variant="outline"
-              className="bg-brand-primary h-[36px] rounded px-[22px] py-2.5 text-xs leading-4 font-semibold text-white"
-            >
-              <Icons.plus_circle />
-              Invite New Member
-            </Button>
-          }
-          dialogClass="!max-w-[768px] py-[27px] px-10 gap-0"
-        >
-          <AddMember onSubmit={(data) => console.log('Team created:', data)} />
-        </ReusableDialog>
+        {/* invite new member */}
+        <div>
+          <Button
+            variant="outline"
+            className="bg-brand-primary h-[36px] rounded px-[22px] py-2.5 text-xs leading-4 font-semibold text-white"
+            onClick={() => setOpenInviteMember(true)}
+          >
+            <Icons.plus_circle />
+            Invite New Member
+          </Button>
+          <AgentInviteModal
+            open={openInviteMember}
+            onOpenChange={setOpenInviteMember}
+            dialogClass="!max-w-[768px] py-[27px] px-10 gap-0"
+          >
+            <AddMember
+              onSubmit={(data) => console.log('Team created:', data)}
+            />
+          </AgentInviteModal>
+        </div>
       </div>
 
       {/* Team table */}

@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
-import ReusableDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReusableDialog';
+import AddAgentDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgentDialog';
 import RoleForm from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Roles/RoleForm';
 import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
 import DeleteModal from '@/components/modal/DeleteModal';
+import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
 
 export interface OrderRow {
   RoleName: string;
@@ -33,7 +34,11 @@ interface RolesTableProps {
 }
 
 const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
+  // toggle modal
   const [open, setOpen] = useState(false);
+  const [openRole, setOpenRole] = useState(false);
+  const [openCreateRole, setOpenCreateRole] = useState(false);
+
   const orders: OrderRow[] = [
     {
       RoleName: 'Agent',
@@ -62,37 +67,49 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
       render: (row) => {
         return (
           <div className="flex gap-[10px]">
-            <ReusableDialog
-              trigger={
-                <button aria-label="Edit role">
-                  <Icons.ri_edit2_fill className="text-black" />
-                </button>
-              }
-              dialogClass="!max-w-[676px] px-5 py-10 gap-0"
-            >
-              <RoleForm
-                defaultValues={{}}
-                onSubmit={(data) => console.log('Edited role:', data)}
-                roleHead="Edit Role"
-              />
-            </ReusableDialog>
+            {/* // edit role */}
+            <div>
+              <div
+                className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+                onClick={() => setOpenRole(true)}
+              >
+                <Icons.ri_edit2_fill className="text-black" />
+                {/* <Icons.ri_edit2_fill /> */}
+              </div>
 
-            <DeleteModal
-              open={open}
-              onOpenChange={setOpen}
-              trigger={
-                <div className="flex items-center gap-2">
-                  <Icons.ri_delete_bin_5_line className="text-red-500" />
-                </div>
-              }
-              title="Delete Member "
-              description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
-              confirmText="Confirm & Delete"
-              onCancel={() => {}}
-              onConfirm={() => {}}
-            >
-              {/* <DeleteModal /> */}
-            </DeleteModal>
+              <AgentInviteModal
+                open={openRole}
+                onOpenChange={setOpenRole}
+                dialogClass="!max-w-[676px] px-5 py-10 gap-0"
+              >
+                <RoleForm
+                  defaultValues={{}}
+                  onSubmit={(data) => console.log('Edited role:', data)}
+                  roleHead="Edit Role"
+                />
+              </AgentInviteModal>
+            </div>
+            {/* // delete role */}
+            <div>
+              <div
+                className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+                onClick={() => setOpen(true)}
+              >
+                <Icons.ri_delete_bin_5_line className="text-red-500" />
+                {/* <Icons.ri_edit2_fill /> */}
+              </div>
+              <DeleteModal
+                open={open}
+                onOpenChange={setOpen}
+                title="Delete Member "
+                description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
+                confirmText="Confirm & Delete"
+                onCancel={() => {}}
+                onConfirm={() => {}}
+              >
+                {/* <DeleteModal /> */}
+              </DeleteModal>
+            </div>
           </div>
         );
       },
@@ -113,16 +130,17 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
 
       {/* Create Role Button */}
       <div className="flex justify-end gap-4 pb-4">
-        <ReusableDialog
-          trigger={
-            <Button
-              variant="outline"
-              className="bg-brand-primary h-full max-h-[36px] rounded px-6 py-2.5 text-xs font-semibold text-white"
-            >
-              <Icons.plus_circle />
-              Create New Role
-            </Button>
-          }
+        <Button
+          variant="outline"
+          className="bg-brand-primary h-full max-h-[36px] rounded px-6 py-2.5 text-xs font-semibold text-white"
+          onClick={() => setOpenCreateRole(true)}
+        >
+          <Icons.plus_circle />
+          Create New Role
+        </Button>
+        <AgentInviteModal
+          open={openCreateRole}
+          onOpenChange={setOpenCreateRole}
           dialogClass="!max-w-[676px] px-5"
         >
           <RoleForm
@@ -131,7 +149,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
             }}
             roleHead="Create Role"
           />
-        </ReusableDialog>
+        </AgentInviteModal>
       </div>
 
       {/* Table */}
