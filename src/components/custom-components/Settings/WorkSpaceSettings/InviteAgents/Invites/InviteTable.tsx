@@ -2,14 +2,15 @@
 
 import React, { useState } from 'react';
 import { Icons } from '@/components/ui/Icons';
-import ReusableDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReusableDialog';
-import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
+// import ReusableDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReusableDialog';
+// import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents//ReuseableTable';
 import { AgenChatHistoryCard } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgenChatHistoryCard';
 import MailIcon from '@/assets/images/mailIcon.svg';
 import Image from 'next/image';
 import DeleteModal from '@/components/modal/DeleteModal';
 import { Button, type ButtonProps } from '@/components/ui/button';
+import { TimePicker } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Invites/InviteClock';
 
 export interface OrderRow {
   invite: string;
@@ -152,5 +153,11 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
     },
   ];
 
-  return <ReuseableTable columns={columns} data={orders} />;
+  return (
+    <>
+      <ReuseableTable columns={columns} data={orders} />
+      {/* <InviteClockModal /> */}
+      <TimePicker />
+    </>
+  );
 }

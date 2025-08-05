@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import { Icons } from '@/components/ui/Icons';
 import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
-import AddAgent from './AddAgent';
-import { ReuseableTable } from './ReuseableTable';
+// import { ReuseableTable } from './ReuseableTable';
 import { AgenChatHistoryCard } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgenChatHistoryCard';
 import DeleteModal from '@/components/modal/DeleteModal';
 import AddOrEditAgentForm from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddOrEditAgentForm';
+import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
 
 export interface OrderRow {
   FullName: string;

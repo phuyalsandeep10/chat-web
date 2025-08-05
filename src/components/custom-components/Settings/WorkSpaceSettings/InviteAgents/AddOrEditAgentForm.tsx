@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Icons } from '@/components/ui/Icons';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import {
@@ -10,10 +9,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectGroup,
+} from '@/components/ui/select';
 import { InputField } from '@/components/common/hook-form/InputField';
 import Label from '@/components/common/hook-form/Label';
-import { SelectField } from '@/components/common/hook-form/SelectField';
 import { Form } from '@/components/ui/form';
+import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
+import AddMember from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/AddMember';
+import { SelectField } from '@/components/common/hook-form/SelectField';
 
 type FormValues = {
   email: string;
@@ -29,15 +38,15 @@ type FormValues = {
 };
 
 interface AddOrEditAgentFormProps {
-  defaultValues: Partial<FormValues>;
-  onSubmit: (data: FormValues) => void;
-  submitButton: string;
+  defaultValues?: Partial<FormValues>;
+  onSubmit?: (data: FormValues) => void;
+  submitButton?: string;
 }
 
 const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   defaultValues,
   onSubmit,
-  submitButton,
+  submitButton = 'Add Agent',
 }) => {
   const form = useForm<FormValues>({
     defaultValues: {
@@ -51,12 +60,19 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
       endTime: '',
       totalHours: '',
       team: '',
+      ...defaultValues,
     },
   });
-  // states
-  const [open, setOpen] = React.useState(false);
 
-  // day picker data
+  const [open, setOpen] = useState(false);
+  const [openInviteMember, setOpenInviteMember] = useState(false);
+  const [teams, setTeams] = useState([
+    { value: 'team1', label: 'Team 1' },
+    { value: 'team2', label: 'Team 2' },
+    { value: 'team3', label: 'Team 3' },
+    { value: 'team4', label: 'Team 4' },
+  ]);
+
   const weekDays = [
     'Sunday',
     'Monday',
@@ -67,99 +83,134 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
     'Saturday',
   ];
 
+  const handleAddTeamMember = (data: any) => {
+    console.log('New team member:', data);
+    // Here you would typically:
+    // 1. Create the new team member
+    // 2. Add them to your team
+    // 3. Close the modal
+    setOpenInviteMember(false);
+  };
+
   return (
     <>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit((data) => {
-            console.log('Add Form Data', data);
+            console.log('Form data:', data);
+            onSubmit?.(data);
           })}
-          className="grid grid-cols-1 gap-6 md:grid-cols-2"
+          className="font-outfit grid grid-cols-1 gap-6 text-xs leading-[21px] font-normal md:grid-cols-2"
         >
-          {/* Input Fields */}
-
-          {/* Enter agent’s Email * */}
+          {/* Email Field */}
           <div>
             <Label
               required
-              className="pb-3 text-base leading-[26px] font-medium" //
+              className="pb-3 text-base leading-[26px] font-medium"
               htmlFor="email"
             >
-              Enter agent’s Email
+              Enter Agent Email
             </Label>
-            <InputField name="email" control={form.control} />
+            <InputField
+              name="email"
+              inputClassName="!text-xs leading-[21px] font-normal !text-black"
+              control={form.control}
+            />
           </div>
 
-          {/* Full Name  * */}
+          {/* Full Name Field */}
           <div>
             <Label
-              className="pb-3 text-base leading-[26px] font-medium" //
+              required
+              className="pb-3 text-base leading-[26px] font-medium"
               htmlFor="fullName"
-              required
             >
-              Full Name 
+              Full Name
             </Label>
-            <InputField name="fullName" control={form.control} />
+            <InputField
+              name="fullName"
+              inputClassName="!text-xs leading-[21px] font-normal !text-black"
+              control={form.control}
+            />
           </div>
 
-          {/* Dropdown: Role */}
+          {/* Role Field */}
           <div>
             <Label
-              className="pb-3 text-base leading-[26px] font-medium" //
-              htmlFor="role"
               required
+              className="pb-3 text-base leading-[26px] font-medium"
+              htmlFor="role"
             >
               Roles
             </Label>
-            <SelectField
+            <Controller
               name="role"
-              required
               control={form.control}
-              placeholder="Admin"
-              options={[
-                { value: 'admin', label: 'Admin' },
-                { value: 'agent', label: 'Agent' },
-                { value: 'moderator', label: 'Moderator' },
-                { value: 'lead', label: 'Lead' },
-              ]}
+              render={({ field }) => (
+                <SelectField
+                  name="role"
+                  required
+                  control={form.control}
+                  placeholder="Admin"
+                  className="font-outfit rounded-md p-0 py-1 text-sm leading-[16px] font-medium"
+                  placeholderClassName="font-outfit rounded-md text-xs leading-[21px] font-normal text-black"
+                  options={[
+                    { value: 'admin', label: 'Admin' },
+                    { value: 'agent', label: 'Agent' },
+                    { value: 'moderator', label: 'Moderator' },
+                    { value: 'lead', label: 'Lead' },
+                  ]}
+                />
+              )}
             />
           </div>
 
-          {/* Dropdown: Client Handled */}
+          {/* Client Handled Field */}
           <div>
             <Label
-              className="pb-3 text-base leading-[26px] font-medium" //
-              htmlFor="clientHandled"
               required
+              className="pb-3 text-base leading-[26px] font-medium"
+              htmlFor="clientHandled"
             >
               Client Handled
             </Label>
-            <SelectField
+            <Controller
               name="clientHandled"
-              required
-              placeholder="0-6"
               control={form.control}
-              options={[
-                { value: '0-6', label: '0-6' },
-                { value: '7-20', label: '7-20' },
-                { value: '21-50', label: '21-50' },
-                { value: '50-120', label: '50-120' },
-                { value: '120-200', label: '120-200' },
-              ]}
+              render={({ field }) => (
+                <SelectField
+                  name="clientHandled"
+                  control={form.control}
+                  label=""
+                  placeholderClassName="font-outfit rounded-md text-xs leading-[21px] font-normal text-black"
+                  options={[
+                    { value: '0-6', label: '0-6' },
+                    { value: '7-20', label: '7-20' },
+                    { value: '21-50', label: '21-50' },
+                    { value: '50-120', label: '50-120' },
+                    { value: '120-200', label: '120-200' },
+                  ]}
+                  placeholder="0-6"
+                  required
+                  className="font-outfit rounded-md py-1 text-sm leading-[16px] font-medium"
+                />
+              )}
             />
           </div>
 
-          {/* form day picker  */}
-
+          {/* Day Picker */}
           <Controller
             control={form.control}
             name="day"
             render={({ field }) => (
               <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
+                <PopoverTrigger
+                  asChild
+                  className="px-4 py-2 text-xs leading-[21px] hover:bg-transparent"
+                >
                   <Button
                     variant="outline"
-                    className="w-full justify-between font-normal text-black"
+                    className="w-full justify-between text-xs leading-[21px] font-normal text-black"
                   >
                     {field.value
                       ? weekDays.find((d) => d.toLowerCase() === field.value)
@@ -173,7 +224,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                 >
                   <ToggleGroup
                     type="single"
-                    className="border-grey-light flex w-full gap-7 border px-[13px] py-1"
+                    className="border-grey-light flex w-full gap-7 border px-3 py-1"
                     value={field.value ?? undefined}
                     onValueChange={(value) => {
                       field.onChange(value);
@@ -184,7 +235,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                       <ToggleGroupItem
                         key={day}
                         className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
-                        value={day.toLowerCase()} // lowercase or as you prefer for form values
+                        value={day.toLowerCase()}
                       >
                         {day.substring(0, 3)}
                       </ToggleGroupItem>
@@ -195,8 +246,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
             )}
           />
 
-          {/* time shift field */}
-
+          {/* Shift Field */}
           <Controller
             name="shift"
             control={form.control}
@@ -208,7 +258,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                 onValueChange={field.onChange}
               >
                 <ToggleGroupItem
-                  className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
+                  className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] text-xs leading-[21px] font-normal data-[state=on]:border data-[state=on]:text-white"
                   value="morning"
                 >
                   Morning
@@ -229,7 +279,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
             )}
           />
 
-          {/* Work Schedule   */}
+          {/* Work Schedule */}
           <div className="col-span-full">
             <Label
               htmlFor="Workschedule"
@@ -238,48 +288,54 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
             >
               Work Schedule
             </Label>
-
             <div className="flex w-[100%] basis-full gap-[26px]">
-              {/* start time */}
               <div className="w-full">
                 <Label
-                  className="pb-3 text-base leading-[26px] font-medium" //
+                  className="pb-3 text-base leading-[26px] font-medium"
                   htmlFor="startTime"
                   required
                 >
                   Start Time
                 </Label>
-                <InputField
-                  type="time"
+                <Controller
                   name="startTime"
                   control={form.control}
-                  required
-                  className="!w-[100%]"
+                  render={({ field }) => (
+                    <div className="relative !w-full">
+                      <input
+                        type="time"
+                        {...field}
+                        className="w-full rounded-lg border-2 border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                      />
+                    </div>
+                  )}
                 />
               </div>
-
-              {/* end time */}
               <div className="w-full">
                 <Label
-                  className="pb-3 text-base leading-[26px] font-medium" //
+                  className="pb-3 text-base leading-[26px] font-medium"
                   htmlFor="endTime"
                   required
                 >
                   End Time
                 </Label>
-                <InputField
-                  type="time"
+                <Controller
                   name="endTime"
                   control={form.control}
-                  required
-                  className="!w-[100%]"
+                  render={({ field }) => (
+                    <div className="relative !w-full">
+                      <input
+                        type="time"
+                        {...field}
+                        className="w-full rounded-lg border-2 border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                      />
+                    </div>
+                  )}
                 />
               </div>
-
-              {/*toatl hours: Input Fields */}
               <div className="w-full">
                 <Label
-                  className="pb-3 text-base leading-[26px] font-medium" //
+                  className="pb-3 text-base leading-[26px] font-medium"
                   htmlFor="totalHours"
                   required
                 >
@@ -289,34 +345,57 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                   name="totalHours"
                   control={form.control}
                   placeholder="8"
-                  //   control={form.control}
-                  //   label="Enter agent’s Email"
+                  inputClassName="!text-xs leading-[21px] font-normal"
                 />
               </div>
             </div>
           </div>
 
-          {/* dropdown team */}
+          {/* Team Selection */}
           <div className="col-span-full">
             <Label
-              className="pb-3 text-base leading-[26px] font-medium" //
+              className="pb-3 text-base leading-[26px] font-medium"
               htmlFor="team"
               required
             >
               Team
             </Label>
-            <SelectField
+            <Controller
               name="team"
-              required
               control={form.control}
-              placeholder="Select Team"
-              options={[
-                { value: 'team1', label: 'Team 1' },
-                { value: 'team2', label: 'Team 2' },
-                { value: 'team3', label: 'Team 3' },
-                { value: 'team4', label: 'Team 4' },
-                { value: 'add_team', label: 'Add Team' },
-              ]}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={(value) => {
+                    if (value === 'add_team') {
+                      setOpenInviteMember(true);
+                      field.onChange('');
+                    } else {
+                      field.onChange(value);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="border-gray-light font-outfit w-full rounded-md border text-xs leading-[21px] font-normal !text-black">
+                    <SelectValue className="" placeholder="Select Team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {teams.map((team) => (
+                        <SelectItem key={team.value} value={team.value}>
+                          <span className="font-outfit rounded-md px-3 py-1 text-sm leading-[16px] font-medium">
+                            {team.label}
+                          </span>
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="add_team" className="bg-brand-primary">
+                        <span className="font-outfit rounded-md px-3 py-1 text-sm leading-[16px] font-medium">
+                          Add Team
+                        </span>
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
             />
           </div>
 
@@ -324,10 +403,19 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
             type="submit"
             className="col-span-full mt-4 h-full max-h-[36px] w-full rounded-lg px-[22px] py-2.5 text-xs leading-4 font-semibold"
           >
-            Add Agent
+            {submitButton}
           </Button>
         </form>
       </Form>
+
+      {/* Add Team Member Modal */}
+      <AgentInviteModal
+        open={openInviteMember}
+        onOpenChange={setOpenInviteMember}
+        dialogClass="!max-w-[768px] py-[27px] px-10 gap-0"
+      >
+        <AddMember onSubmit={handleAddTeamMember} />
+      </AgentInviteModal>
     </>
   );
 };

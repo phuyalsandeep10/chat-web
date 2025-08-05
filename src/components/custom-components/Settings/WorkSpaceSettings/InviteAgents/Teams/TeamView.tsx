@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/card';
 import Image from 'next/image';
 import TeamProfile from '@/assets/images/team_profile.svg';
-import AddAgentDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgentDialog';
+// import AddAgentDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgentDialog';
 import TeamMemberInfo from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamMemberInfo';
 import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
 

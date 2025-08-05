@@ -13,7 +13,7 @@ type ModalProps = {
   heading: string;
   subheading: string;
   onAction: () => void;
-  headericon?: ReactNode; // Use ReactNode for components, strings, etc.
+  headericon?: React.ReactNode; // Use ReactNode for components, strings, etc.
 };
 
 const InviteAgentsTabsHeader = () => {
@@ -81,7 +81,7 @@ const InviteAgentsTabsHeader = () => {
             : -222,
       });
     }
-  }, [activeTable]);
+  }, [activeTable, isFilterOpen]);
 
   // close filter when clicked outside of the filter container
   useEffect(() => {

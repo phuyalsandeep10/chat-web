@@ -23,6 +23,7 @@ type SelectFieldProps<T extends FieldValues> = {
   className?: string;
   colorMap?: Record<string, string>; // Add this prop for color mapping
   LabelClassName?: string;
+  placeholderClassName?: string;
 };
 
 export function SelectField<T extends FieldValues>({
@@ -35,6 +36,7 @@ export function SelectField<T extends FieldValues>({
   className = '',
   colorMap,
   LabelClassName = '',
+  placeholderClassName,
 }: SelectFieldProps<T>) {
   return (
     <div className={cn('flex flex-col gap-1', className)}>
@@ -66,14 +68,14 @@ export function SelectField<T extends FieldValues>({
                     <span
                       className={cn(
                         colorMap?.[field.value],
-                        'rounded-md px-3 py-1 text-sm capitalize',
+                        'rounded-md py-1 text-sm capitalize',
                       )}
                     >
                       {options.find((opt) => opt.value === field.value)
                         ?.label ?? field.value}
                     </span>
                   ) : (
-                    <SelectValue placeholder={placeholder} />
+                    <span className={placeholderClassName}>{placeholder}</span>
                   )}
                 </SelectTrigger>
 
