@@ -10,7 +10,7 @@ import MailIcon from '@/assets/images/mailIcon.svg';
 import Image from 'next/image';
 import DeleteModal from '@/components/modal/DeleteModal';
 import { Button, type ButtonProps } from '@/components/ui/button';
-import { TimePicker } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Invites/InviteClock';
+import TimePicker from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Invites/InviteClock';
 
 export interface OrderRow {
   invite: string;
@@ -156,8 +156,6 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
   return (
     <>
       <ReuseableTable columns={columns} data={orders} />
-      {/* <InviteClockModal /> */}
-      <TimePicker />
     </>
   );
 }

@@ -88,6 +88,8 @@ import {
   RiContactsBookLine,
   RiCloseCircleFill,
   RiTimeFill,
+  RiArrowDropUpLine,
+  RiTimeLine,
 } from '@remixicon/react';
 
 // register your icons here as your requirements
@@ -179,4 +181,6 @@ export const Icons = {
   loader: Loader2,
   Eye: Eye,
   ri_time_fill: RiTimeFill, //added arrow down by rahul
+  ri_arrow_drop_up_line: RiArrowDropUpLine,
+  ri_time_line: RiTimeLine,
 };

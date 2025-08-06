@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,8 @@ import { Form } from '@/components/ui/form';
 import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
 import AddMember from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/AddMember';
 import { SelectField } from '@/components/common/hook-form/SelectField';
+import { useTimeStore } from '@/components/store/timeStore';
+import TimePicker from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Invites/InviteClock';
 
 type FormValues = {
   email: string;
@@ -73,6 +75,12 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
     { value: 'team4', label: 'Team 4' },
   ]);
 
+  const savedTime = useTimeStore((state) => state.savedTime);
+  const { setValue } = form; // Get setValue from the main form instance
+
+  // toggle time picker/clock dial
+  const [openStartTime, setOpenStartTime] = useState(false);
+  const [openEndTime, setOpenEndTime] = useState(false);
   const weekDays = [
     'Sunday',
     'Monday',
@@ -85,12 +93,25 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
 
   const handleAddTeamMember = (data: any) => {
     console.log('New team member:', data);
-    // Here you would typically:
-    // 1. Create the new team member
-    // 2. Add them to your team
-    // 3. Close the modal
-    setOpenInviteMember(false);
+    setValue(false);
   };
+
+  // When savedTime changes, update the appropriate form input value
+  useEffect(() => {
+    if (savedTime) {
+      const formatted = `${savedTime.hours
+        .toString()
+        .padStart(2, '0')}:${savedTime.minutes
+        .toString()
+        .padStart(2, '0')} ${savedTime.period}`;
+
+      if (openStartTime) {
+        setValue('startTime', formatted);
+      } else if (openEndTime) {
+        setValue('endTime', formatted);
+      }
+    }
+  }, [savedTime, setValue, openStartTime, openEndTime]);
 
   return (
     <>
@@ -289,7 +310,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
               Work Schedule
             </Label>
             <div className="flex w-[100%] basis-full gap-[26px]">
-              <div className="w-full">
+              <div className="relative w-full">
                 <Label
                   className="pb-3 text-base leading-[26px] font-medium"
                   htmlFor="startTime"
@@ -297,21 +318,28 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                 >
                   Start Time
                 </Label>
-                <Controller
+                <InputField
                   name="startTime"
                   control={form.control}
-                  render={({ field }) => (
-                    <div className="relative !w-full">
-                      <input
-                        type="time"
-                        {...field}
-                        className="w-full rounded-lg border-2 border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                      />
-                    </div>
-                  )}
+                  placeholder="8"
+                  inputClassName="!text-xs leading-[21px] font-normal"
                 />
+                <div>
+                  <Icons.ri_time_line
+                    className="absolute top-[60%] right-2"
+                    onClick={() => setOpenStartTime(true)}
+                  />
+                  {/* add agennt button */}
+                  <AgentInviteModal
+                    open={openStartTime}
+                    onOpenChange={setOpenStartTime}
+                    dialogClass="gap-0 !max-w-[335px] !border-theme-text-light !w-full !rounded-[0.86px] !shadow-[0px_4.55px_4.55px_0px_#00000040] p-8"
+                  >
+                    <TimePicker />
+                  </AgentInviteModal>
+                </div>
               </div>
-              <div className="w-full">
+              <div className="relative w-full">
                 <Label
                   className="pb-3 text-base leading-[26px] font-medium"
                   htmlFor="endTime"
@@ -319,19 +347,24 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                 >
                   End Time
                 </Label>
-                <Controller
+                <InputField
                   name="endTime"
                   control={form.control}
-                  render={({ field }) => (
-                    <div className="relative !w-full">
-                      <input
-                        type="time"
-                        {...field}
-                        className="w-full rounded-lg border-2 border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                      />
-                    </div>
-                  )}
+                  placeholder="8"
+                  inputClassName="!text-xs leading-[21px] font-normal"
                 />
+                <Icons.ri_time_line
+                  className="absolute top-[60%] right-2"
+                  onClick={() => setOpenEndTime(true)}
+                />
+                {/* add agennt button */}
+                <AgentInviteModal
+                  open={openEndTime}
+                  onOpenChange={setOpenEndTime}
+                  dialogClass="gap-0 !max-w-[335px] !border-theme-text-light !w-full !rounded-[0.86px] !shadow-[0px_4.55px_4.55px_0px_#00000040] p-8"
+                >
+                  <TimePicker />
+                </AgentInviteModal>
               </div>
               <div className="w-full">
                 <Label
