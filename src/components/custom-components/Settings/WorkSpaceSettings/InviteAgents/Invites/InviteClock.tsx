@@ -11,7 +11,15 @@ type TimeType = {
   period: 'AM' | 'PM';
 };
 
-export default function TimePicker() {
+interface TimePickerProps {
+  onClose: () => void; // 👈 add this prop
+  setFieldValue: (value: string) => void;
+}
+
+export default function TimePicker({
+  onClose,
+  setFieldValue,
+}): TimePickerProps {
   const [time, setTime] = useState<TimeType>({
     hours: 7,
     minutes: 0,
@@ -22,7 +30,13 @@ export default function TimePicker() {
 
   const handleOk = () => {
     setSavedTime(time);
+    const hours = time.hours.toString().padStart(2, '0');
+    const minutes = time.minutes.toString().padStart(2, '0');
+    const formatted = `${hours}:${minutes} ${time.period}`;
+
+    setFieldValue(formatted);
     console.log('Start Time', time);
+    onClose();
   };
 
   const [isDragging, setIsDragging] = useState<'hour' | 'minute' | null>(null);

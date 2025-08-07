@@ -75,23 +75,24 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
           {row.status.toLowerCase().includes('sent') ? (
             <>
               {' '}
+              <div
+                className="flex items-center gap-2"
+                onClick={() => setOpenReminder(true)}
+              >
+                <span>{row.status}</span>
+                {row.status.toLowerCase().includes('sent') && (
+                  <Image
+                    src={MailIcon}
+                    alt="Mail Icon"
+                    width={16}
+                    height={16}
+                    className="h-4 w-4"
+                  />
+                )}
+              </div>
               <DeleteModal
                 open={openReminder}
                 onOpenChange={setOpenReminder}
-                trigger={
-                  <div className="flex items-center gap-2">
-                    <span>{row.status}</span>
-                    {row.status.toLowerCase().includes('sent') && (
-                      <Image
-                        src={MailIcon}
-                        alt="Mail Icon"
-                        width={16}
-                        height={16}
-                        className="h-4 w-4"
-                      />
-                    )}
-                  </div>
-                }
                 title="Send Reminder"
                 description="Do you want to notify about the invitation you sent to join the workspace ?"
                 icon={<Icons.ri_time_fill className="text-brand-primary" />}
@@ -133,22 +134,23 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
       key: 'actions',
       label: 'Actions',
       render: (row) => (
-        <DeleteModal
-          open={open}
-          onOpenChange={setOpen}
-          trigger={
-            <div className="flex items-center gap-2">
-              <Icons.ri_delete_bin_5_line className="text-red-500" />
-            </div>
-          }
-          title="Delete Invitation "
-          description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
-          confirmText="Confirm & Delete"
-          onCancel={() => {}}
-          onConfirm={() => {}}
-        >
-          {/* <DeleteModal /> */}
-        </DeleteModal>
+        <>
+          <Icons.ri_delete_bin_5_line
+            className="text-red-500"
+            onClick={() => setOpen(true)}
+          />
+          <DeleteModal
+            open={open}
+            onOpenChange={setOpen}
+            title="Delete Invitation "
+            description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
+            confirmText="Confirm & Delete"
+            onCancel={() => {}}
+            onConfirm={() => {}}
+          >
+            {/* <DeleteModal /> */}
+          </DeleteModal>
+        </>
       ),
     },
   ];

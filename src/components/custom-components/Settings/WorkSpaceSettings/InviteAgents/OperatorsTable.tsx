@@ -158,14 +158,15 @@ export default function OperatorsTable({
             </AgentInviteModal>
           </div>
 
+          <div className="flex items-center gap-2">
+            <Icons.ri_delete_bin_5_line
+              className="text-red-500"
+              onClick={() => setOpenDeleteModal(true)}
+            />
+          </div>
           <DeleteModal
             open={openDeleteModal}
             onOpenChange={setOpenDeleteModal}
-            trigger={
-              <div className="flex items-center gap-2">
-                <Icons.ri_delete_bin_5_line className="text-red-500" />
-              </div>
-            }
             title="Delete Agent "
             description="This action will delete agent , you can temporarily suspend agent which wont delete his/her data."
             confirmText="Confirm & Delete"

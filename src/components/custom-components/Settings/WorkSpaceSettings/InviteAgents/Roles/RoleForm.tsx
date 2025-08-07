@@ -19,6 +19,9 @@ import {
 } from '@/components/ui/card';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
 import { DialogClose } from '@/components/ui/dialog'; // to close dialog on cancel
+import { useMutation } from '@tanstack/react-query';
+import { RolesService } from '@/services/staffmanagment/roles/roles.service';
+import { useCreateRole } from '@/hooks/staffmanagment/roles/useCreateRoles';
 
 type FormValues = {
   role: string;
@@ -62,6 +65,37 @@ const RoleForm: React.FC<RoleFormProps> = ({
     { permissions: 'Service Level Agreement' },
   ];
 
+  // create role
+  const { mutate: createRole, isPending, isSuccess } = useCreateRole();
+
+  const [permissionsState, setPermissionsState] = React.useState(() =>
+    orders.map((order, index) => ({
+      permission: `permission ${index + 1}`,
+      Able_to_edit: false,
+      Able_to_view: false,
+      Able_to_delete: false,
+    })),
+  );
+
+  const handleSubmit = (formData: FormValues) => {
+    const payload = {
+      role: formData.role,
+      permissions: permissionsState.map(
+        ({ permission, Able_to_edit, Able_to_view, Able_to_delete }) => ({
+          permission,
+          Able_to_edit,
+          Able_to_view,
+          Able_to_delete,
+        }),
+      ),
+    };
+
+    console.log('Payload for API:', payload);
+
+    // Call the onSubmit prop function passed from parent
+    onSubmit(payload);
+  };
+
   const columns: Column<OrderRow>[] = [
     {
       key: 'permissions',
@@ -70,32 +104,67 @@ const RoleForm: React.FC<RoleFormProps> = ({
     {
       key: 'edit',
       label: 'Able to edit',
-      render: (row) => (
-        <Checkbox
-          aria-label={`Edit ${row.permissions}`}
-          className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
-        />
-      ),
+      render: (row) => {
+        const rowIndex = orders.findIndex(
+          (o) => o.permissions === row.permissions,
+        );
+        return (
+          <Checkbox
+            checked={permissionsState[rowIndex]?.Able_to_edit}
+            onCheckedChange={(checked) => {
+              const updated = [...permissionsState];
+              updated[rowIndex].Able_to_edit = checked;
+              setPermissionsState(updated);
+            }}
+            aria-label={`Edit ${row.permissions}`}
+            className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
+          />
+        );
+      },
     },
     {
       key: 'view',
       label: 'Able to view',
-      render: (row) => (
-        <Checkbox
-          aria-label={`View ${row.permissions}`}
-          className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
-        />
-      ),
+      render: (row) => {
+        const rowIndex = orders.findIndex(
+          (o) => o.permissions === row.permissions,
+        );
+
+        return (
+          <Checkbox
+            checked={permissionsState[rowIndex]?.Able_to_view}
+            onCheckedChange={(checked) => {
+              const updated = [...permissionsState];
+              updated[rowIndex].Able_to_view = checked;
+              setPermissionsState(updated);
+            }}
+            aria-label={`View ${row.permissions}`}
+            className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
+          />
+        );
+      },
     },
     {
       key: 'delete',
       label: 'Able to delete',
-      render: (row) => (
-        <Checkbox
-          aria-label={`Delete ${row.permissions}`}
-          className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
-        />
-      ),
+      render: (row) => {
+        const rowIndex = orders.findIndex(
+          (o) => o.permissions === row.permissions,
+        );
+
+        return (
+          <Checkbox
+            checked={permissionsState[rowIndex]?.Able_to_delete}
+            onCheckedChange={(checked) => {
+              const updated = [...permissionsState];
+              updated[rowIndex].Able_to_delete = checked;
+              setPermissionsState(updated);
+            }}
+            aria-label={`Delete ${row.permissions}`}
+            className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
+          />
+        );
+      },
     },
   ];
 
@@ -113,7 +182,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
 
       <CardContent className="p-0">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(handleSubmit)}>
             {/* Role Input */}
             <div className="pb-[49px]">
               <Label

@@ -43,12 +43,14 @@ interface AddOrEditAgentFormProps {
   defaultValues?: Partial<FormValues>;
   onSubmit?: (data: FormValues) => void;
   submitButton?: string;
+  onClose?: () => void;
 }
 
 const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   defaultValues,
   onSubmit,
   submitButton = 'Add Agent',
+  onClose,
 }) => {
   const form = useForm<FormValues>({
     defaultValues: {
@@ -78,6 +80,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   const savedTime = useTimeStore((state) => state.savedTime);
   const { setValue } = form; // Get setValue from the main form instance
 
+  console.log(setValue);
   // toggle time picker/clock dial
   const [openStartTime, setOpenStartTime] = useState(false);
   const [openEndTime, setOpenEndTime] = useState(false);
@@ -93,7 +96,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
 
   const handleAddTeamMember = (data: any) => {
     console.log('New team member:', data);
-    setValue(false);
+    setOpenInviteMember(false);
   };
 
   // When savedTime changes, update the appropriate form input value
@@ -120,6 +123,8 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
           onSubmit={form.handleSubmit((data) => {
             console.log('Form data:', data);
             onSubmit?.(data);
+            form.reset();
+            onClose?.();
           })}
           className="font-outfit grid grid-cols-1 gap-6 text-xs leading-[21px] font-normal md:grid-cols-2"
         >
@@ -335,7 +340,10 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                     onOpenChange={setOpenStartTime}
                     dialogClass="gap-0 !max-w-[335px] !border-theme-text-light !w-full !rounded-[0.86px] !shadow-[0px_4.55px_4.55px_0px_#00000040] p-8"
                   >
-                    <TimePicker />
+                    <TimePicker
+                      onClose={() => setOpenStartTime(false)}
+                      setFieldValue={(val) => form.setValue('startTime', val)}
+                    />
                   </AgentInviteModal>
                 </div>
               </div>
@@ -363,7 +371,10 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                   onOpenChange={setOpenEndTime}
                   dialogClass="gap-0 !max-w-[335px] !border-theme-text-light !w-full !rounded-[0.86px] !shadow-[0px_4.55px_4.55px_0px_#00000040] p-8"
                 >
-                  <TimePicker />
+                  <TimePicker
+                    onClose={() => setOpenEndTime(false)}
+                    setFieldValue={(val) => form.setValue('endTime', val)}
+                  />
                 </AgentInviteModal>
               </div>
               <div className="w-full">

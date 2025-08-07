@@ -35,8 +35,6 @@ const AgentInviteModal: React.FC<AgentInviteModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      {/* {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>} */}
-      {/* <DialogTrigger asChild>{trigger}</DialogTrigger> */}
       <DialogContent className={`!w-full !max-w-[1240px] gap-8 ${dialogClass}`}>
         <DialogHeader className="gap-0">
           <DialogTitle className="text-xl leading-[30px] font-semibold">

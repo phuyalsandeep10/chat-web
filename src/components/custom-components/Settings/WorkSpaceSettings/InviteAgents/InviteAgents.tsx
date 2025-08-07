@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
 import AddOrEditAgentForm from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddOrEditAgentForm';
 const InviteAgents = () => {
-  // trigger open/close modal
   const [open, setOpen] = useState(false);
 
   return (
