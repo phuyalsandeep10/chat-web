@@ -15,14 +15,14 @@ import {
 type AgentInviteModalProps = {
   open?: boolean; // allow controlled use
   onOpenChange?: (open: boolean) => void;
-  children?: React.ReactNode;
+  children?: any;
   dialogClass?: string;
   dialogTitle?: string;
   dialogDescription?: string;
 };
 
 const AgentInviteModal: React.FC<AgentInviteModalProps> = ({
-  children = null,
+  children,
   dialogClass = '',
   dialogTitle = '',
   dialogDescription = '',

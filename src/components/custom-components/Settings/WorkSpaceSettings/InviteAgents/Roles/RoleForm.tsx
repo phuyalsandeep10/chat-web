@@ -113,7 +113,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
             checked={permissionsState[rowIndex]?.Able_to_edit}
             onCheckedChange={(checked) => {
               const updated = [...permissionsState];
-              updated[rowIndex].Able_to_edit = checked;
+              updated[rowIndex].Able_to_edit = checked === true;
               setPermissionsState(updated);
             }}
             aria-label={`Edit ${row.permissions}`}
@@ -135,7 +135,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
             checked={permissionsState[rowIndex]?.Able_to_view}
             onCheckedChange={(checked) => {
               const updated = [...permissionsState];
-              updated[rowIndex].Able_to_view = checked;
+              updated[rowIndex].Able_to_view = checked === true;
               setPermissionsState(updated);
             }}
             aria-label={`View ${row.permissions}`}
@@ -157,7 +157,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
             checked={permissionsState[rowIndex]?.Able_to_delete}
             onCheckedChange={(checked) => {
               const updated = [...permissionsState];
-              updated[rowIndex].Able_to_delete = checked;
+              updated[rowIndex].Able_to_delete = checked === true;
               setPermissionsState(updated);
             }}
             aria-label={`Delete ${row.permissions}`}

@@ -342,7 +342,9 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                   >
                     <TimePicker
                       onClose={() => setOpenStartTime(false)}
-                      setFieldValue={(val) => form.setValue('startTime', val)}
+                      setFieldValue={(val: string) =>
+                        form.setValue('startTime', val)
+                      }
                     />
                   </AgentInviteModal>
                 </div>
@@ -373,7 +375,9 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                 >
                   <TimePicker
                     onClose={() => setOpenEndTime(false)}
-                    setFieldValue={(val) => form.setValue('endTime', val)}
+                    setFieldValue={(val: string) =>
+                      form.setValue('endTime', val)
+                    }
                   />
                 </AgentInviteModal>
               </div>

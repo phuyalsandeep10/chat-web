@@ -16,16 +16,16 @@ export class RolesService {
   }
 
   // Edit Organizations Role
-  static async EditRoles(payload: any) {
-    try {
-      const res = await axiosInstance.post(
-        `${baseURL}/organizations/roles/{role_id}`,
-        payload,
-      );
-      console.log('EDit role data', res);
-      return res.data;
-    } catch (error) {
-      throw error;
-    }
-  }
+  // static async EditRoles(payload: any) {
+  //   try {
+  //     const res = await axiosInstance.post(
+  //       `${baseURL}/organizations/roles/{role_id}`,
+  //       payload,
+  //     );
+  //     console.log('Edit role data', res);
+  //     return res.data;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 }

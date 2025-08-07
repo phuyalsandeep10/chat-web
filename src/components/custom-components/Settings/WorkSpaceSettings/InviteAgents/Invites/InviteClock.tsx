@@ -12,14 +12,14 @@ type TimeType = {
 };
 
 interface TimePickerProps {
-  onClose: () => void; // 👈 add this prop
+  onClose: () => void;
   setFieldValue: (value: string) => void;
 }
 
 export default function TimePicker({
   onClose,
   setFieldValue,
-}): TimePickerProps {
+}: TimePickerProps) {
   const [time, setTime] = useState<TimeType>({
     hours: 7,
     minutes: 0,
