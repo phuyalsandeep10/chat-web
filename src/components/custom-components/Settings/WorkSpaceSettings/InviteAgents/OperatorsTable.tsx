@@ -101,24 +101,6 @@ export default function OperatorsTable({
       label: 'Actions',
       render: (row) => (
         <div className="flex gap-2">
-          {/* <ReusableDialog
-            trigger={
-              <button aria-label="Edit agent">
-                <Icons.ri_edit2_fill className="text-black" />
-              </button>
-            }
-            dialogTitle="Edit Information"
-            dialogClass="!max-w-[768px] "
-          >
-            <AddAgent
-              defaultValues={{}}
-              onSubmit={(data) => {
-                console.log('Submitted', data);
-              }}
-              submitButton="Edit Agent"
-            />
-          </ReusableDialog> */}
-
           {/* edit form */}
           <div className="flex gap-5">
             <div

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { InputField } from '@/components/common/hook-form/InputField';
@@ -19,13 +19,21 @@ import {
 } from '@/components/ui/card';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
 import { DialogClose } from '@/components/ui/dialog'; // to close dialog on cancel
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { RolesService } from '@/services/staffmanagment/roles/roles.service';
 import { useCreateRole } from '@/hooks/staffmanagment/roles/useCreateRoles';
+import { useGetAllPermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllPermissionGroup';
+import { format } from 'date-fns';
 
 type FormValues = {
-  role: string;
+  name: string;
 };
+
+// const date = new Date(isoDate);
+
+// const formatted = format(date, 'dd,MMMM,yyyy');
+
+// console.log(formatted);
 
 interface RoleFormProps {
   defaultValues?: Partial<FormValues>;
@@ -51,46 +59,62 @@ const RoleForm: React.FC<RoleFormProps> = ({
 }) => {
   const form = useForm<FormValues>({
     defaultValues: defaultValues || {
-      role: '',
+      name: '',
     },
   });
 
-  const orders: OrderRow[] = [
-    { permissions: 'Canned Response' },
-    { permissions: 'Workflows' },
-    { permissions: 'Tags & Properties' },
-    { permissions: 'Billings' },
-    { permissions: 'Project preferences' },
-    { permissions: 'Project reports' },
-    { permissions: 'Service Level Agreement' },
-  ];
-
   // create role
   const { mutate: createRole, isPending, isSuccess } = useCreateRole();
+  const { data, error, isLoading } = useGetAllPermissionGroup();
 
-  const [permissionsState, setPermissionsState] = React.useState(() =>
-    orders.map((order, index) => ({
-      permission: `permission ${index + 1}`,
-      Able_to_edit: false,
-      Able_to_view: false,
-      Able_to_delete: false,
-    })),
-  );
+  const [selectedTab, setSelectedTab] = useState('setting');
+
+  const orders: OrderRow[] = React.useMemo(() => {
+    const tabData =
+      data?.[selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)] || [];
+    return tabData.map((perm) => ({
+      permissions: perm.name,
+      id: perm.id,
+    }));
+  }, [data, selectedTab]);
+
+  const [permissionsState, setPermissionsState] = React.useState<
+    {
+      permission_id: number;
+      is_changeable: boolean;
+      is_viewable: boolean;
+      is_deletable: boolean;
+      8;
+    }[]
+  >([]);
+
+  React.useEffect(() => {
+    if (orders.length > 0) {
+      setPermissionsState(
+        orders.map((order) => ({
+          permission_id: order.id || 0,
+          is_changeable: false,
+          is_viewable: false,
+          is_deletable: false,
+        })),
+      );
+    }
+  }, [orders]);
 
   const handleSubmit = (formData: FormValues) => {
     const payload = {
-      role: formData.role,
+      name: formData.name,
+      description: 'Administrator role',
+
       permissions: permissionsState.map(
-        ({ permission, Able_to_edit, Able_to_view, Able_to_delete }) => ({
-          permission,
-          Able_to_edit,
-          Able_to_view,
-          Able_to_delete,
+        ({ permission_id, is_changeable, is_viewable, is_deletable }) => ({
+          permission_id,
+          is_changeable,
+          is_viewable,
+          is_deletable,
         }),
       ),
     };
-
-    console.log('Payload for API:', payload);
 
     // Call the onSubmit prop function passed from parent
     onSubmit(payload);
@@ -105,15 +129,13 @@ const RoleForm: React.FC<RoleFormProps> = ({
       key: 'edit',
       label: 'Able to edit',
       render: (row) => {
-        const rowIndex = orders.findIndex(
-          (o) => o.permissions === row.permissions,
-        );
+        const rowIndex = orders.findIndex((o) => o.id === row.id);
         return (
           <Checkbox
-            checked={permissionsState[rowIndex]?.Able_to_edit}
+            checked={permissionsState[rowIndex]?.is_changeable}
             onCheckedChange={(checked) => {
               const updated = [...permissionsState];
-              updated[rowIndex].Able_to_edit = checked === true;
+              updated[rowIndex].is_changeable = checked === true;
               setPermissionsState(updated);
             }}
             aria-label={`Edit ${row.permissions}`}
@@ -132,10 +154,10 @@ const RoleForm: React.FC<RoleFormProps> = ({
 
         return (
           <Checkbox
-            checked={permissionsState[rowIndex]?.Able_to_view}
+            checked={permissionsState[rowIndex]?.is_viewable}
             onCheckedChange={(checked) => {
               const updated = [...permissionsState];
-              updated[rowIndex].Able_to_view = checked === true;
+              updated[rowIndex].is_viewable = checked === true;
               setPermissionsState(updated);
             }}
             aria-label={`View ${row.permissions}`}
@@ -154,10 +176,10 @@ const RoleForm: React.FC<RoleFormProps> = ({
 
         return (
           <Checkbox
-            checked={permissionsState[rowIndex]?.Able_to_delete}
+            checked={permissionsState[rowIndex]?.is_deletable}
             onCheckedChange={(checked) => {
               const updated = [...permissionsState];
-              updated[rowIndex].Able_to_delete = checked === true;
+              updated[rowIndex].is_deletable = checked === true;
               setPermissionsState(updated);
             }}
             aria-label={`Delete ${row.permissions}`}
@@ -186,14 +208,14 @@ const RoleForm: React.FC<RoleFormProps> = ({
             {/* Role Input */}
             <div className="pb-[49px]">
               <Label
-                htmlFor="role"
+                htmlFor="name"
                 required
                 className="pb-3 text-base leading-[26px] font-medium"
               >
                 Role Name
               </Label>
               <InputField
-                name="role"
+                name="name"
                 placeholder="Moderator"
                 control={form.control}
                 className="border-brand-primary rounded-sm border"
@@ -207,6 +229,8 @@ const RoleForm: React.FC<RoleFormProps> = ({
               <div className="h-auto w-auto">
                 <Tabs
                   defaultValue="setting"
+                  value={selectedTab}
+                  onValueChange={setSelectedTab}
                   className="flex w-full flex-col gap-[12px]"
                 >
                   <div className="border-brand-dark flex h-[201px] flex-col items-start border-r-4 pr-6 pb-3">

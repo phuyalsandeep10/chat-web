@@ -9,6 +9,9 @@ import RoleForm from '@/components/custom-components/Settings/WorkSpaceSettings/
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
 import DeleteModal from '@/components/modal/DeleteModal';
 import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
+import { useCreateRole } from '@/hooks/staffmanagment/roles/useCreateRoles';
+import { useGetAllRolePermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllRolePermissionGroup';
+import { format } from 'date-fns';
 
 export interface OrderRow {
   RoleName: string;
@@ -38,23 +41,6 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
   const [open, setOpen] = useState(false);
   const [openRole, setOpenRole] = useState(false);
   const [openCreateRole, setOpenCreateRole] = useState(false);
-
-  const orders: OrderRow[] = [
-    {
-      RoleName: 'Agent',
-      agents: 12,
-      permission: 'Permission 1, Permission 2, Permission 3',
-      date: '23, June, 2025',
-      Actions: '',
-    },
-    {
-      RoleName: 'Admin',
-      agents: 7,
-      permission: 'Permission 1, Permission 2, Permission 3',
-      date: '06, August, 2025',
-      Actions: '',
-    },
-  ];
 
   const columns: Column<OrderRow>[] = [
     { key: 'RoleName', label: 'Role Name' },
@@ -115,6 +101,48 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
       },
     },
   ];
+  // create role
+  const { mutate: createRole, isPending, isSuccess } = useCreateRole();
+  const {
+    data: roleTableData,
+    isPending: roleDataPending,
+    isSuccess: roleSuccess,
+  } = useGetAllRolePermissionGroup();
+
+  console.log('roleTableData', roleTableData?.data);
+
+  // const orders: OrderRow[] = [
+  //   {
+  //     RoleName: 'Agent',
+  //     agents: 12,
+  //     permission: 'Permission 1, Permission 2, Permission 3',
+  //     date: '23, June, 2025',
+  //     Actions: '',
+  //   },
+  //   {
+  //     RoleName: 'Admin',
+  //     agents: 7,
+  //     permission: 'Permission 1, Permission 2, Permission 3',
+  //     date: '06, August, 2025',
+  //     Actions: '',
+  //   },
+  // ];
+
+  const orders: OrderRow[] = React.useMemo(() => {
+    return (
+      roleTableData?.data?.map((roleTableDataItems) => ({
+        permissions: roleTableDataItems.name,
+        id: roleTableDataItems.id,
+        RoleName: roleTableDataItems.role_name,
+        agents: roleTableDataItems.no_of_agents,
+        permission: '',
+        date: roleTableDataItems.created_at
+          ? format(new Date(roleTableDataItems.created_at), 'dd MMMM yyyy')
+          : 'N/A',
+        Actions: '',
+      })) || []
+    );
+  }, [roleTableData]);
 
   return (
     <div>
@@ -146,6 +174,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
           <RoleForm
             onSubmit={(data) => {
               console.log('New role created:', data);
+              createRole(data);
             }}
             roleHead="Create Role"
           />

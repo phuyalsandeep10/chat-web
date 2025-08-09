@@ -8,24 +8,31 @@ export class RolesService {
         `${baseURL}/organizations/roles`,
         payload,
       );
-      console.log('crete role data', res);
       return res.data;
     } catch (error) {
       throw error;
     }
   }
 
-  // Edit Organizations Role
-  // static async EditRoles(payload: any) {
-  //   try {
-  //     const res = await axiosInstance.post(
-  //       `${baseURL}/organizations/roles/{role_id}`,
-  //       payload,
-  //     );
-  //     console.log('Edit role data', res);
-  //     return res.data;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
+  // Get all  Permission groups
+  static async GetAllPermissionGroup() {
+    try {
+      const res = await axiosInstance.get(
+        `${baseURL}/staff-management/permission-groups`,
+      );
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Get Get All Role Permission Group
+  static async GetAllRolePermissionGroup() {
+    try {
+      const res = await axiosInstance.get(`${baseURL}/organizations/roles`);
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
