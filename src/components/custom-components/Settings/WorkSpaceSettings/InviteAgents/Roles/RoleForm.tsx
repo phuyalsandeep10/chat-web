@@ -23,17 +23,12 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { RolesService } from '@/services/staffmanagment/roles/roles.service';
 import { useCreateRole } from '@/hooks/staffmanagment/roles/useCreateRoles';
 import { useGetAllPermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllPermissionGroup';
+import { useUpdateRoles } from '@/hooks/staffmanagment/roles/useUpdateRoles';
 import { format } from 'date-fns';
 
 type FormValues = {
   name: string;
 };
-
-// const date = new Date(isoDate);
-
-// const formatted = format(date, 'dd,MMMM,yyyy');
-
-// console.log(formatted);
 
 interface RoleFormProps {
   defaultValues?: Partial<FormValues>;
@@ -65,14 +60,23 @@ const RoleForm: React.FC<RoleFormProps> = ({
 
   // create role
   const { mutate: createRole, isPending, isSuccess } = useCreateRole();
+
+  //get all permissions
   const { data, error, isLoading } = useGetAllPermissionGroup();
+
+  //Edit Role
+  const {
+    mutate: updateRole,
+    isPending: updateRolePending,
+    isSuccess: updateRoleSuccess,
+  } = useUpdateRoles();
 
   const [selectedTab, setSelectedTab] = useState('setting');
 
   const orders: OrderRow[] = React.useMemo(() => {
     const tabData =
       data?.[selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)] || [];
-    return tabData.map((perm) => ({
+    return tabData.map((perm: any) => ({
       permissions: perm.name,
       id: perm.id,
     }));
@@ -84,7 +88,6 @@ const RoleForm: React.FC<RoleFormProps> = ({
       is_changeable: boolean;
       is_viewable: boolean;
       is_deletable: boolean;
-      8;
     }[]
   >([]);
 
@@ -105,7 +108,6 @@ const RoleForm: React.FC<RoleFormProps> = ({
     const payload = {
       name: formData.name,
       description: 'Administrator role',
-
       permissions: permissionsState.map(
         ({ permission_id, is_changeable, is_viewable, is_deletable }) => ({
           permission_id,
@@ -116,8 +118,17 @@ const RoleForm: React.FC<RoleFormProps> = ({
       ),
     };
 
-    // Call the onSubmit prop function passed from parent
-    onSubmit(payload);
+    console.log('Submitting payload:', payload);
+
+    if (defaultValues?.id) {
+      // Editing an existing role
+      console.log('Updating role with ID:', defaultValues.id);
+      updateRole({ roleId: defaultValues.id, payload });
+    } else {
+      // Creating a new role
+      console.log('Creating new role');
+      createRole(payload);
+    }
   };
 
   const columns: Column<OrderRow>[] = [

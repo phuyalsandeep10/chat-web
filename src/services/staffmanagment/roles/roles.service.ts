@@ -35,4 +35,29 @@ export class RolesService {
       throw error;
     }
   }
+
+  //Edit Role
+  static async UpdateRoles(role_id: string, payload: any) {
+    try {
+      const res = await axiosInstance.patch(
+        `${baseURL}/organizations/roles/${role_id}`,
+        payload,
+      );
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //Delete Role
+  static async DeleteRoles(role_id: string) {
+    try {
+      const res = await axiosInstance.delete(
+        `${baseURL}/organizations/roles/${role_id}`,
+      );
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

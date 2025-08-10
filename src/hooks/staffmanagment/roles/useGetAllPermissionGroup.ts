@@ -3,19 +3,25 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { RolesService } from '@/services/staffmanagment/roles/roles.service';
 
+// Define the expected data structure returned by the API
+type Permission = { id: number; name: string };
+
+type PermissionGroupResponse = Record<string, Permission[]>;
+
 export const useGetAllPermissionGroup = () => {
-  return useQuery({
+  return useQuery<PermissionGroupResponse>({
     queryKey: ['getAllPermissionGroup'],
 
     queryFn: RolesService.GetAllPermissionGroup,
-    onSuccess: (data) => {
-      toast.success('Get Set Permission Successfully');
-      // Optional: refetch roles or close modal here
-    },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message || 'Failed to get set permission',
-      );
+    meta: {
+      onSuccess: (data: PermissionGroupResponse) => {
+        toast.success('Get Set Permission Successfully');
+      },
+      onError: (error: any) => {
+        toast.error(
+          error?.response?.data?.message || 'Failed to get set permission',
+        );
+      },
     },
   });
 };

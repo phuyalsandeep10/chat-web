@@ -12,6 +12,8 @@ import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceS
 import { useCreateRole } from '@/hooks/staffmanagment/roles/useCreateRoles';
 import { useGetAllRolePermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllRolePermissionGroup';
 import { format } from 'date-fns';
+import { useUpdateRoles } from '@/hooks/staffmanagment/roles/useUpdateRoles';
+import { useDeleteRole } from '@/hooks/staffmanagment/roles/useDeleteRole';
 
 export interface OrderRow {
   RoleName: string;
@@ -37,10 +39,46 @@ interface RolesTableProps {
 }
 
 const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
+  // create role
+  const { mutate: createRole, isPending, isSuccess } = useCreateRole();
+  const {
+    data: roleTableData,
+    isPending: roleDataPending,
+    isSuccess: roleSuccess,
+  } = useGetAllRolePermissionGroup();
+
+  //update role
+  const { mutate: updateRole } = useUpdateRoles();
+
+  //delete role
+  const {
+    mutate: deleteRole,
+    isPending: deletePending,
+    isSuccess: deleteSuccess,
+  } = useDeleteRole();
+
   // toggle modal
   const [open, setOpen] = useState(false);
   const [openRole, setOpenRole] = useState(false);
   const [openCreateRole, setOpenCreateRole] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<any>(null);
+
+  // New function to handle delete confirmation
+  const handleDeleteConfirm = () => {
+    if (!selectedRole?.id) return;
+
+    deleteRole(selectedRole.id, {
+      onSuccess: () => {
+        setOpen(false);
+        setSelectedRole(null);
+        // refetch roles here or trigger update UI logic
+      },
+      onError: (error) => {
+        console.error('Failed to delete role:', error);
+        // Optionally show error message/toast
+      },
+    });
+  };
 
   const columns: Column<OrderRow>[] = [
     { key: 'RoleName', label: 'Role Name' },
@@ -57,7 +95,10 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
             <div>
               <div
                 className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
-                onClick={() => setOpenRole(true)}
+                onClick={() => {
+                  setSelectedRole(row); // store clicked role's data
+                  setOpenRole(true); // open modal
+                }}
               >
                 <Icons.ri_edit2_fill className="text-black" />
                 {/* <Icons.ri_edit2_fill /> */}
@@ -69,8 +110,15 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
                 dialogClass="!max-w-[676px] px-5 py-10 gap-0"
               >
                 <RoleForm
-                  defaultValues={{}}
-                  onSubmit={(data) => console.log('Edited role:', data)}
+                  defaultValues={{
+                    id: selectedRole?.id,
+                    name: selectedRole?.RoleName,
+                    // you can also map existing permissions here if your RoleForm supports it
+                  }}
+                  onSubmit={(data) => {
+                    console.log('Edited role:', data);
+                    updateRole({ roleId: selectedRole?.id, payload: data });
+                  }}
                   roleHead="Edit Role"
                 />
               </AgentInviteModal>
@@ -79,9 +127,12 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
             <div>
               <div
                 className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
-                onClick={() => setOpen(true)}
+                onClick={() => {
+                  setSelectedRole(row); // <-- set the role here
+                  setOpen(true);
+                }}
               >
-                <Icons.ri_delete_bin_5_line className="text-red-500" />
+                <Icons.ri_delete_bin_5_line className="text-alert-prominent" />
                 {/* <Icons.ri_edit2_fill /> */}
               </div>
               <DeleteModal
@@ -90,8 +141,11 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
                 title="Delete Member "
                 description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
                 confirmText="Confirm & Delete"
-                onCancel={() => {}}
-                onConfirm={() => {}}
+                onCancel={() => {
+                  setOpen(false);
+                  setSelectedRole(null);
+                }}
+                onConfirm={handleDeleteConfirm}
               >
                 {/* <DeleteModal /> */}
               </DeleteModal>
@@ -101,15 +155,6 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
       },
     },
   ];
-  // create role
-  const { mutate: createRole, isPending, isSuccess } = useCreateRole();
-  const {
-    data: roleTableData,
-    isPending: roleDataPending,
-    isSuccess: roleSuccess,
-  } = useGetAllRolePermissionGroup();
-
-  console.log('roleTableData', roleTableData?.data);
 
   // const orders: OrderRow[] = [
   //   {
@@ -130,7 +175,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
 
   const orders: OrderRow[] = React.useMemo(() => {
     return (
-      roleTableData?.data?.map((roleTableDataItems) => ({
+      roleTableData?.data?.map((roleTableDataItems: any) => ({
         permissions: roleTableDataItems.name,
         id: roleTableDataItems.id,
         RoleName: roleTableDataItems.role_name,
