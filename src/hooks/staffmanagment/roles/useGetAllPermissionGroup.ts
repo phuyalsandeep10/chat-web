@@ -15,7 +15,7 @@ export const useGetAllPermissionGroup = () => {
     queryFn: RolesService.GetAllPermissionGroup,
     meta: {
       onSuccess: (data: PermissionGroupResponse) => {
-        toast.success('Get Set Permission Successfully');
+        toast.success('Get Set Permission Successfully'); //data.message
       },
       onError: (error: any) => {
         toast.error(

@@ -96,18 +96,41 @@ const RoleForm: React.FC<RoleFormProps> = ({
       setPermissionsState(
         orders.map((order) => ({
           permission_id: order.id || 0,
-          is_changeable: false,
-          is_viewable: false,
-          is_deletable: false,
+          is_changeable: order.is_changeable || false,
+          is_viewable: order.is_viewable || false,
+          is_deletable: order.is_deletable || false,
         })),
       );
     }
   }, [orders]);
 
+  // React.useEffect(() => {
+  //   if (defaultValues?.permissions?.length) {
+  //     setPermissionsState(
+  //       defaultValues.groups?.Setting.concat(
+  //         defaultValues.groups?.Channels,
+  //         defaultValues.groups?.['Inbox & Contact'],
+  //         defaultValues.groups?.Analystics,
+  //         defaultValues.groups?.['Section Access'],
+  //       ).map((perm) => {
+  //         const match = defaultValues.permissions.find(
+  //           (p) => p.permission_id === perm.id,
+  //         );
+  //         return {
+  //           permission_id: perm.id,
+  //           is_changeable: match?.is_changeable || false,
+  //           is_viewable: match?.is_viewable || false,
+  //           is_deletable: match?.is_deletable || false,
+  //         };
+  //       }),
+  //     );
+  //   }
+  // }, [defaultValues]);
+
   const handleSubmit = (formData: FormValues) => {
     const payload = {
       name: formData.name,
-      description: 'Administrator role',
+      description: '',
       permissions: permissionsState.map(
         ({ permission_id, is_changeable, is_viewable, is_deletable }) => ({
           permission_id,
@@ -122,12 +145,27 @@ const RoleForm: React.FC<RoleFormProps> = ({
 
     if (defaultValues?.id) {
       // Editing an existing role
-      console.log('Updating role with ID:', defaultValues.id);
-      updateRole({ roleId: defaultValues.id, payload });
+      updateRole(
+        { role_id: defaultValues.role_id, payload },
+        {
+          onSuccess: (response) => {
+            console.log('Role updated successfully:', response);
+          },
+          onError: (error) => {
+            console.error('Error updating role:', error);
+          },
+        },
+      );
     } else {
       // Creating a new role
-      console.log('Creating new role');
-      createRole(payload);
+      createRole(payload, {
+        onSuccess: (response) => {
+          console.log('Create role response:', response);
+        },
+        onError: (error) => {
+          console.error('Create role error:', error);
+        },
+      });
     }
   };
 
@@ -218,19 +256,13 @@ const RoleForm: React.FC<RoleFormProps> = ({
           <form onSubmit={form.handleSubmit(handleSubmit)}>
             {/* Role Input */}
             <div className="pb-[49px]">
-              <Label
-                htmlFor="name"
-                required
-                className="pb-3 text-base leading-[26px] font-medium"
-              >
-                Role Name
-              </Label>
               <InputField
+                label="Role Name"
                 name="name"
                 placeholder="Moderator"
+                labelClassName="text-sm"
                 control={form.control}
-                className="border-brand-primary rounded-sm border"
-                inputClassName="border-brand-primary rounded-sm placeholder:text-sm placeholder:leading-[21px] placeholder:font-normal placeholder:text-black"
+                required
               />
             </div>
 

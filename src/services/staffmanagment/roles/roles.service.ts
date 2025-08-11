@@ -39,12 +39,31 @@ export class RolesService {
   //Edit Role
   static async UpdateRoles(role_id: string, payload: any) {
     try {
-      const res = await axiosInstance.patch(
-        `${baseURL}/organizations/roles/${role_id}`,
+      console.log(role_id, payload);
+      const res = await axiosInstance.put(
+        `${baseURL}/staff-management/permission-groups?role_id=${14}`,
         payload,
       );
+      console.log('UpdateRoles response:', res.data); // <-- Log response here
       return res.data;
     } catch (error) {
+      console.error('UpdateRoles error:', error); // Also log errors if any
+      throw error;
+    }
+  }
+
+  // get existing data in role table
+  static async getAllPermissionsForEdit(role_id) {
+    console.log(role_id);
+    try {
+      console.log(role_id);
+      const res = await axiosInstance.post(
+        `${baseURL}/staff-management/permission-groups?role_id=${role_id}`,
+      );
+      console.log('UpdateRoles response:', res.data); // <-- Log response here
+      return res.data;
+    } catch (error) {
+      console.error('UpdateRoles error:', error); // Also log errors if any
       throw error;
     }
   }
