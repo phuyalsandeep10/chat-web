@@ -73,7 +73,6 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
   // New function to handle delete confirmation
   const handleDeleteConfirm = () => {
     if (!selectedRole?.id) return;
-
     deleteRole(selectedRole.id, {
       onSuccess: () => {
         setOpen(false);
@@ -88,13 +87,13 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
   };
 
   // handle edit click
-  const handleEditClick = (row) => {
+  const handleEditClick = (row: any) => {
     GetAllRolesPermissionsForEdit(
       { role_id: row.id },
       {
         onSuccess: (res) => {
           const mappedPermissions = (res.role_permissions || []).map(
-            (perm) => ({
+            (perm: any) => ({
               permission_id: perm.permission_id,
               is_changeable: perm.is_changeable ?? false,
               is_viewable: perm.is_viewable ?? false,
@@ -149,13 +148,13 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
                 {selectedRole && (
                   <RoleForm
                     defaultValues={{
-                      id: selectedRole.id,
+                      role_id: selectedRole.id,
                       name: selectedRole.RoleName,
                       permissions: selectedRole.permissions,
                       groups: selectedRole.groups,
                     }}
                     onSubmit={(data) => {
-                      updateRole({ roleId: selectedRole.id, payload: data });
+                      updateRole({ role_id: selectedRole.id, payload: data });
                     }}
                     roleHead="Edit Role"
                   />
@@ -261,6 +260,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
             onSubmit={(data) => {
               console.log('New role created:', data);
               createRole(data);
+              // setOpenCreateRole(false);
             }}
             roleHead="Create Role"
           />

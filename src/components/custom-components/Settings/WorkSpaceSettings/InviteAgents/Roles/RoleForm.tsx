@@ -25,20 +25,41 @@ import { useCreateRole } from '@/hooks/staffmanagment/roles/useCreateRoles';
 import { useGetAllPermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllPermissionGroup';
 import { useUpdateRoles } from '@/hooks/staffmanagment/roles/useUpdateRoles';
 import { format } from 'date-fns';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { RoleSchema } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Roles/RoleSchema';
+
+type PermissionState = {
+  permission_id: number;
+  is_changeable: boolean;
+  is_viewable: boolean;
+  is_deletable: boolean;
+};
+
+type GroupPermissions = Record<string, { id: number; name: string }[]>;
 
 type FormValues = {
   name: string;
+  id?: number;
+  role_id?: string;
+  permissions?: PermissionState[];
+  groups?: GroupPermissions;
 };
 
 interface RoleFormProps {
   defaultValues?: Partial<FormValues>;
   onSubmit: (data: FormValues) => void;
   roleHead: string;
+  is_changeable?: boolean;
+  is_viewable?: boolean;
+  is_deletable?: boolean;
 }
 
 type OrderRow = {
   permissions: string;
   id?: number;
+  is_changeable?: boolean;
+  is_viewable?: boolean;
+  is_deletable?: boolean;
 };
 
 type Column<T> = {
@@ -53,6 +74,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
   roleHead,
 }) => {
   const form = useForm<FormValues>({
+    resolver: zodResolver(RoleSchema),
     defaultValues: defaultValues || {
       name: '',
     },
@@ -92,45 +114,64 @@ const RoleForm: React.FC<RoleFormProps> = ({
   >([]);
 
   React.useEffect(() => {
-    if (orders.length > 0) {
-      setPermissionsState(
-        orders.map((order) => ({
-          permission_id: order.id || 0,
-          is_changeable: order.is_changeable || false,
-          is_viewable: order.is_viewable || false,
-          is_deletable: order.is_deletable || false,
-        })),
-      );
-    }
-  }, [orders]);
+    if (orders.length === 0) return;
 
-  // React.useEffect(() => {
-  //   if (defaultValues?.permissions?.length) {
-  //     setPermissionsState(
-  //       defaultValues.groups?.Setting.concat(
-  //         defaultValues.groups?.Channels,
-  //         defaultValues.groups?.['Inbox & Contact'],
-  //         defaultValues.groups?.Analystics,
-  //         defaultValues.groups?.['Section Access'],
-  //       ).map((perm) => {
-  //         const match = defaultValues.permissions.find(
-  //           (p) => p.permission_id === perm.id,
-  //         );
-  //         return {
-  //           permission_id: perm.id,
-  //           is_changeable: match?.is_changeable || false,
-  //           is_viewable: match?.is_viewable || false,
-  //           is_deletable: match?.is_deletable || false,
-  //         };
-  //       }),
-  //     );
-  //   }
-  // }, [defaultValues]);
+    // Step 1: Start from current orders (only one per permission_id)
+    let mergedPermissions = orders.map((order) => ({
+      permission_id: order.id || 0,
+      is_changeable: order.is_changeable || false,
+      is_viewable: order.is_viewable || false,
+      is_deletable: order.is_deletable || false,
+    }));
+
+    // Step 2: If editing, merge in saved values
+    if (defaultValues?.permissions?.length) {
+      mergedPermissions = mergedPermissions.map((perm) => {
+        const match = defaultValues.permissions!.find(
+          (p) => p.permission_id === perm.permission_id,
+        );
+        return match ? { ...perm, ...match } : perm;
+      });
+    }
+
+    // Step 3: Set state (ensuring unique permission IDs)
+    setPermissionsState((prev) => {
+      const all = [
+        ...prev.filter(
+          (p) =>
+            !mergedPermissions.some(
+              (mp) => mp.permission_id === p.permission_id,
+            ),
+        ),
+        ...mergedPermissions,
+      ];
+
+      // Ensure uniqueness
+      return all.filter(
+        (p, idx, arr) =>
+          arr.findIndex((x) => x.permission_id === p.permission_id) === idx,
+      );
+    });
+  }, [orders, defaultValues]);
 
   const handleSubmit = (formData: FormValues) => {
+    // Check if every permission has at least one permission selected
+    const isAllPermissionsValid = permissionsState.some(
+      ({ is_changeable, is_viewable, is_deletable }) =>
+        is_changeable || is_viewable || is_deletable,
+    );
+
+    if (!isAllPermissionsValid) {
+      console.log(
+        'Please select at least one permission (view/edit/delete) for each permission.',
+      );
+      return; // Stop submission
+    }
+
     const payload = {
       name: formData.name,
       description: '',
+      permission_group: '1',
       permissions: permissionsState.map(
         ({ permission_id, is_changeable, is_viewable, is_deletable }) => ({
           permission_id,
@@ -141,9 +182,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
       ),
     };
 
-    console.log('Submitting payload:', payload);
-
-    if (defaultValues?.id) {
+    if (defaultValues?.role_id || defaultValues?.id) {
       // Editing an existing role
       updateRole(
         { role_id: defaultValues.role_id, payload },
@@ -167,6 +206,8 @@ const RoleForm: React.FC<RoleFormProps> = ({
         },
       });
     }
+    console.log('defaultValues', payload);
+    return;
   };
 
   const columns: Column<OrderRow>[] = [
@@ -280,38 +321,19 @@ const RoleForm: React.FC<RoleFormProps> = ({
                     <p className="text-sm leading-[21px] font-semibold">
                       Set Permission
                     </p>
-                    <TabsList className="flex h-[201px] flex-col items-start bg-transparent">
-                      <TabsTrigger
-                        value="setting"
-                        className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
-                      >
-                        Setting
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="channels"
-                        className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
-                      >
-                        Channels
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="inbox"
-                        className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
-                      >
-                        Inbox & Contact
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="analytics"
-                        className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
-                      >
-                        Analytics
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="access"
-                        className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
-                      >
-                        Section Access
-                      </TabsTrigger>
-                    </TabsList>
+                    {data &&
+                      Object.entries(data).map(([groupName, permissions]) => (
+                        <>
+                          <TabsList className="flex h-[201px] flex-col items-start bg-transparent">
+                            <TabsTrigger
+                              value={groupName}
+                              className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
+                            >
+                              {groupName}
+                            </TabsTrigger>
+                          </TabsList>
+                        </>
+                      ))}
                   </div>
                 </Tabs>
               </div>

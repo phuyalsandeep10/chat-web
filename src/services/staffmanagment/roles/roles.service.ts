@@ -41,7 +41,7 @@ export class RolesService {
     try {
       console.log(role_id, payload);
       const res = await axiosInstance.put(
-        `${baseURL}/staff-management/permission-groups?role_id=${14}`,
+        `${baseURL}/organizations/roles/${role_id}`,
         payload,
       );
       console.log('UpdateRoles response:', res.data); // <-- Log response here
@@ -53,7 +53,7 @@ export class RolesService {
   }
 
   // get existing data in role table
-  static async getAllPermissionsForEdit(role_id) {
+  static async getAllPermissionsForEdit(role_id: any) {
     console.log(role_id);
     try {
       console.log(role_id);

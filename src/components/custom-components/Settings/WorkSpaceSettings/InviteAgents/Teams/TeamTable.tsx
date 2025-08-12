@@ -35,6 +35,24 @@ interface TeamTableProps {
   }) => void;
 }
 
+// const { mutate: createRoles, isPending, isSuccess } = useCreateTeams();
+
+// const handleSubmit = (formData: FormValues) => {
+//   const payload = {
+//     newteam: formData.newteam,
+//   };
+
+//   // Creating a new role
+//   createRoles(payload, {
+//     onSuccess: (response) => {
+//       console.log('Create Team response:', response);
+//     },
+//     onError: (error) => {
+//       console.error('Create Team error:', error);
+//     },
+//   });
+// };
+
 const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
   // states to toggle modal
   const [open, setOpen] = useState(false);

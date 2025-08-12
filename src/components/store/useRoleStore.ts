@@ -32,10 +32,10 @@ export const useRoleStore = create<RoleStore>((set, get) => ({
   setRoles: (roles) => set({ roles }),
   setSelectedRole: (role) => set({ selectedRole: role }),
   updatePermission: (permissionId, changes) =>
-    set((state) => ({
+    set((state: any) => ({
       selectedRole: {
         ...state.selectedRole,
-        permissions: state.selectedRole.permissions.map((p) =>
+        permissions: state.selectedRole.permissions.map((p: any) =>
           p.permission_id === permissionId ? { ...p, ...changes } : p,
         ),
       },
