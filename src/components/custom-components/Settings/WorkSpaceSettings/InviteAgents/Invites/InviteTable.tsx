@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icons } from '@/components/ui/Icons';
 // import ReusableDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReusableDialog';
 // import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
@@ -11,6 +11,7 @@ import Image from 'next/image';
 import DeleteModal from '@/components/modal/DeleteModal';
 import { Button, type ButtonProps } from '@/components/ui/button';
 import TimePicker from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Invites/InviteClock';
+import { useInvites } from '@/hooks/staffmanagment/invites/useInvites';
 
 export interface OrderRow {
   invite: string;
@@ -41,24 +42,46 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
   const [open, setOpen] = useState(false);
   const [openReminder, setOpenReminder] = useState(false);
 
-  const orders: OrderRow[] = [
-    {
-      invite: 'unish@yahoo.com',
-      invite_Sent: '08/07/2025',
-      status: 'Sent',
-      Roles: 'Admin',
-      OperatingHours: '9:00 - 17:00',
-      Actions: '',
-    },
-    {
-      invite: 'yubeshkoirala11@gmail.com',
-      invite_Sent: '08/07/2025',
-      status: 'Rejected',
-      Roles: 'Agent',
-      OperatingHours: '9:00 - 17:00',
-      Actions: '',
-    },
-  ];
+  const { data: getInviteMember, isPending, isSuccess } = useInvites();
+
+  useEffect(() => {
+    if (getInviteMember) {
+      console.log('Invite Data:', getInviteMember);
+      // no need to return here
+    }
+  }, [getInviteMember]);
+
+  const orders: OrderRow[] = React.useMemo(() => {
+    return (
+      getInviteMember?.data?.map((inviteMemberItems: any) => ({
+        invite: inviteMemberItems.email,
+        invite_Sent: inviteMemberItems.role_id,
+        status: inviteMemberItems.status,
+        Roles: inviteMemberItems.name,
+        OperatingHours: '',
+        Actions: '',
+      })) || []
+    );
+  }, [getInviteMember]);
+
+  // const orders: OrderRow[] = [
+  //   {
+  //     invite: 'unish@yahoo.com',
+  //     invite_Sent: '08/07/2025',
+  //     status: 'Sent',
+  //     Roles: 'Admin',
+  //     OperatingHours: '9:00 - 17:00',
+  //     Actions: '',
+  //   },
+  //   {
+  //     invite: 'yubeshkoirala11@gmail.com',
+  //     invite_Sent: '08/07/2025',
+  //     status: 'Rejected',
+  //     Roles: 'Agent',
+  //     OperatingHours: '9:00 - 17:00',
+  //     Actions: '',
+  //   },
+  // ];
 
   // invit etable column define
   const columns: Column<OrderRow>[] = [

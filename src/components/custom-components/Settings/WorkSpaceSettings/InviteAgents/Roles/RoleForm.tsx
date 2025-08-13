@@ -40,7 +40,7 @@ type GroupPermissions = Record<string, { id: number; name: string }[]>;
 type FormValues = {
   name: string;
   id?: number;
-  role_id?: string;
+  role_id?: number;
   permissions?: PermissionState[];
   groups?: GroupPermissions;
 };
@@ -67,6 +67,10 @@ type Column<T> = {
   label: string;
   render?: (row: T) => React.ReactNode;
 };
+
+interface DataType {
+  [key: string]: any;
+}
 
 const RoleForm: React.FC<RoleFormProps> = ({
   defaultValues,
@@ -185,7 +189,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
     if (defaultValues?.role_id || defaultValues?.id) {
       // Editing an existing role
       updateRole(
-        { role_id: defaultValues.role_id, payload },
+        { role_id: defaultValues.role_id!, payload }, //here changed
         {
           onSuccess: (response) => {
             console.log('Role updated successfully:', response);
@@ -362,7 +366,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
                 className="bg-brand-primary h-[36px] w-full max-w-[130px] rounded-lg px-4 py-3 text-xs leading-4 font-semibold text-white"
                 type="submit"
               >
-                Save Changes
+                {isPending ? 'Saving...' : 'Save'}
               </Button>
             </CardFooter>
           </form>

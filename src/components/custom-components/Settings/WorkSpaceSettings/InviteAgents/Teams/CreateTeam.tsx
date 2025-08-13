@@ -15,10 +15,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-type FormValues = {
-  newteam: string;
-};
-
 interface CreateTeamProps {
   defaultValues?: Partial<FormValues>;
   onSubmit: SubmitHandler<FormValues>;
@@ -32,7 +28,7 @@ const CreateTeam: React.FC<CreateTeamProps> = ({
 }) => {
   const form = useForm<FormValues>({
     defaultValues: {
-      newteam: '',
+      name: '',
       ...defaultValues,
     },
   });

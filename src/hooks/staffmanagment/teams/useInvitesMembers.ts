@@ -4,11 +4,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { TeamsService } from '@/services/staffmanagment/teams/teams.service';
 
-export const useCreateTeams = () => {
+export const useInvitesMembers = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: TeamsService.CreateTeams,
+    mutationFn: TeamsService.InviteTeams,
     onSuccess: (data) => {
       toast.success('Team created successfully');
       // Invalidate and refetch roles data

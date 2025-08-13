@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
 import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
@@ -12,6 +12,10 @@ import TeamEdit from '@/components/custom-components/Settings/WorkSpaceSettings/
 import TeamView from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamView';
 import DeleteModal from '@/components/modal/DeleteModal';
 import AddOrEditAgentForm from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddOrEditAgentForm';
+import { useCreateTeams } from '@/hooks/staffmanagment/teams/useCreateTeams';
+import { useInvitesMembers } from '@/hooks/staffmanagment/teams/useInvitesMembers';
+import { useDeleteTeam } from '@/hooks/staffmanagment/teams/useDeleteTeam';
+import { useGetTeams } from '@/hooks/staffmanagment/teams/useGetTeams';
 
 export interface OrderRow {
   TeamName: string;
@@ -35,23 +39,12 @@ interface TeamTableProps {
   }) => void;
 }
 
-// const { mutate: createRoles, isPending, isSuccess } = useCreateTeams();
-
-// const handleSubmit = (formData: FormValues) => {
-//   const payload = {
-//     newteam: formData.newteam,
-//   };
-
-//   // Creating a new role
-//   createRoles(payload, {
-//     onSuccess: (response) => {
-//       console.log('Create Team response:', response);
-//     },
-//     onError: (error) => {
-//       console.error('Create Team error:', error);
-//     },
-//   });
-// };
+type FormValues = {
+  newteam: string;
+  email: string;
+  fullName: string;
+  // description: string;
+};
 
 const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
   // states to toggle modal
@@ -63,20 +56,112 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
   const [openTeamView, setOpenTeamView] = useState(false);
   const [openInviteMember, setOpenInviteMember] = useState(false);
 
-  const orders: OrderRow[] = [
-    {
-      TeamName: 'Team A',
-      Lead: 'Joshna Khadka',
-      Status: 'Admin',
-      Actions: '',
-    },
-    {
-      TeamName: 'Team B',
-      Lead: 'Joshna Khadka',
-      Status: 'Admin',
-      Actions: '',
-    },
-  ];
+  //create new team
+  const { mutate: createRoles, isPending, isSuccess } = useCreateTeams();
+
+  //invite new member
+  const { mutate: inviteMembers } = useInvitesMembers();
+
+  //get all teams
+  const {
+    data: teamsData,
+    isPending: isTeamsPending,
+    isSuccess: isTeamsSuccess,
+  } = useGetTeams();
+
+  // delete teams
+
+  const {
+    mutate: deleteTeams,
+    isPending: deletePending,
+    isSuccess: deleteSuccess,
+  } = useDeleteTeam();
+
+  // useEffect(() => {
+  //   if (inviteMembers) {
+  //     console.log('teamsDatainviteMembers:', inviteMembers);
+  //   }
+  // }, [inviteMembers]);
+
+  const handleSubmit = (formData: FormValues) => {
+    const payload = {
+      name: formData.newteam,
+      // description: 'New team created',
+    };
+
+    // Creating a new role
+    createRoles(payload, {
+      onSuccess: (response) => {
+        console.log('Create Team response:', response);
+      },
+      onError: (error) => {
+        console.error('Create Team error:', error);
+      },
+    });
+  };
+
+  //invie new member
+  const handleInviteMember = (InviteData: FormValues) => {
+    const payload = {
+      email: InviteData.email,
+      name: InviteData.fullName,
+      role_ids: [Number(InviteData.role)],
+    };
+    console.log('Payload being sent to inviteMembers:', payload);
+
+    inviteMembers(payload, {
+      onSuccess: () => {
+        console.log('Invite member response:', payload);
+      },
+      onError: (error) => {
+        console.error('failed to Invite member:', error);
+      },
+    });
+  };
+
+  // handle delete Teams
+
+  const handleDeleteTeams = (teamId: any) => {
+    if (!teamId?.id) return;
+    deleteTeams(teamId.id, {
+      onSuccess: () => {
+        setOpenDeleteModal(false);
+        // Optionally, you can refetch the teams data or update the UI accordingly
+      },
+      onError: (error) => {
+        console.error('Failed to delete team:', error);
+        // Optionally show error message/toast
+      },
+    });
+  };
+
+  const orders: OrderRow[] = React.useMemo(() => {
+    return (
+      teamsData?.data?.map((teamsDataItems: any) => ({
+        permissions: teamsDataItems.permission_summary,
+        id: teamsDataItems.id,
+        TeamName: teamsDataItems.name,
+        // Lead: teamsDataItems.Lead,
+        // Status: teamsDataItems.Status,
+        Actions: '',
+      })) || []
+    );
+  }, [teamsData]);
+
+  // const orders: OrderRow[] = [
+  //   {
+  //     TeamName: 'Team A',
+  //     Lead: 'Joshna Khadka',
+  //     Status: 'Admin',
+  //     Actions: '',
+  //   },
+  //   {
+  //     TeamName: 'Team B',
+  //     Lead: 'Joshna Khadka',
+  //     Status: 'Admin',
+  //     Actions: '',
+  //   },
+  // ];
 
   const columns: Column<OrderRow>[] = [
     { key: 'TeamName', label: 'Team Name' },
@@ -169,7 +254,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
             description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
             confirmText="Confirm & Delete"
             onCancel={() => {}}
-            onConfirm={() => {}}
+            onConfirm={handleDeleteTeams}
           >
             {/* <DeleteModal /> */}
           </DeleteModal>
@@ -208,7 +293,8 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
             dialogClass="!max-w-[387px] py-10 w-full px-5 gap-0 inline-block"
           >
             <CreateTeam
-              onSubmit={(data) => console.log('Team created:', data)}
+              onSubmit={handleSubmit}
+              onCancel={() => setOpenCreateTeam(false)}
             />
           </AgentInviteModal>
         </div>
@@ -228,9 +314,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
             onOpenChange={setOpenInviteMember}
             dialogClass="!max-w-[768px] py-[27px] px-10 gap-0"
           >
-            <AddMember
-              onSubmit={(data) => console.log('Team created:', data)}
-            />
+            <AddMember onSubmit={handleInviteMember} />
           </AgentInviteModal>
         </div>
       </div>

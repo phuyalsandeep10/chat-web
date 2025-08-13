@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { InputField } from '@/components/common/hook-form/InputField';
 import Label from '@/components/common/hook-form/Label';
 import { SelectField } from '@/components/common/hook-form/SelectField';
 import { Form } from '@/components/ui/form';
+import { useGetAllRolePermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllRolePermissionGroup';
 
 import {
   Card,
@@ -21,9 +22,15 @@ type FormValues = {
   role: string;
 };
 
+// added role permission
+type RolePermission = {
+  role_id: any;
+  role_name: any;
+};
+
 interface AddMemberProps {
   defaultValues?: Partial<FormValues>;
-  onSubmit: (data: FormValues) => void;
+  onSubmit: (data: any) => void;
 }
 
 const AddMember: React.FC<AddMemberProps> = ({
@@ -38,6 +45,13 @@ const AddMember: React.FC<AddMemberProps> = ({
       ...defaultValues,
     },
   });
+
+  // get team members
+  const {
+    data: roleTableData,
+    isPending: roleDataPending,
+    isSuccess: roleSuccess,
+  } = useGetAllRolePermissionGroup();
 
   return (
     <Card className="w-full max-w-full border-0 p-0 shadow-none">
@@ -95,11 +109,16 @@ const AddMember: React.FC<AddMemberProps> = ({
                   name="role"
                   control={form.control}
                   placeholder="Select Role"
-                  options={[
-                    { value: 'admin', label: 'Admin' },
-                    { value: 'editor', label: 'Editor' },
-                    { value: 'viewer', label: 'Viewer' },
-                  ]}
+                  options={
+                    Array.isArray(roleTableData?.data)
+                      ? roleTableData.data.map((item) => {
+                          return {
+                            value: item.role_id.toString(),
+                            label: item.role_name,
+                          };
+                        })
+                      : []
+                  }
                 />
               </div>
             </div>

@@ -4,18 +4,17 @@ import { toast } from 'sonner';
 import { RolesService } from '@/services/staffmanagment/roles/roles.service';
 
 // Define the expected data structure returned by the API
-type Permission = { id: number; name: string };
-
-type PermissionGroupResponse = Record<string, Permission[]>;
+type RolePermission = { id: number; name: string };
 
 export const useGetAllPermissionGroup = () => {
-  return useQuery<PermissionGroupResponse>({
+  return useQuery<RolePermission[]>({
     queryKey: ['getAllPermissionGroup'],
 
     queryFn: RolesService.GetAllPermissionGroup,
     meta: {
-      onSuccess: (data: PermissionGroupResponse) => {
+      onSuccess: (data: any) => {
         toast.success('Get Set Permission Successfully'); //data.message
+        // queryClient.invalidateQueries({ queryKey: ['getAllPermissionGroup'] });
       },
       onError: (error: any) => {
         toast.error(

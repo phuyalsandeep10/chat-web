@@ -88,6 +88,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
 
   // handle edit click
   const handleEditClick = (row: any) => {
+    setOpenRole(true);
     GetAllRolesPermissionsForEdit(
       { role_id: row.id },
       {
@@ -113,7 +114,6 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
               'Section Access': res['Section Access'] || [],
             },
           });
-          setOpenRole(true);
         },
       },
     );
