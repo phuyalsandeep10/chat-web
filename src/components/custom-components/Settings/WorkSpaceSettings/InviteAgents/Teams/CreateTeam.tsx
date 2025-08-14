@@ -15,9 +15,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
+type FormValues = {
+  newteam: string;
+};
+
 interface CreateTeamProps {
   defaultValues?: Partial<FormValues>;
-  onSubmit: SubmitHandler<FormValues>;
+  // onSubmit: Subm  // onSubmit: SubmitHandler<FormValues>;
+  onSubmit: () => void;
   onCancel?: () => void;
 }
 
@@ -28,11 +33,10 @@ const CreateTeam: React.FC<CreateTeamProps> = ({
 }) => {
   const form = useForm<FormValues>({
     defaultValues: {
-      name: '',
+      newteam: '',
       ...defaultValues,
     },
   });
-
   return (
     <Card className="w-full max-w-full border-0 p-0 px-5 shadow-none">
       <CardHeader className="inline-flex flex-col gap-1 p-0">
@@ -49,17 +53,13 @@ const CreateTeam: React.FC<CreateTeamProps> = ({
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {' '}
             <div>
-              <Label
-                required
-                htmlFor="newteam"
-                className="pb-3 text-base leading-[26px] font-medium"
-              >
-                Enter new team
-              </Label>
               <InputField
                 className="w-full"
                 name="newteam"
                 control={form.control}
+                label="Enter new team"
+                labelClassName="pb-3 text-base leading-[26px] font-medium"
+                required
               />
             </div>
             <CardFooter className="mt-4 flex justify-end gap-4 p-0">

@@ -24,8 +24,8 @@ type FormValues = {
 
 // added role permission
 type RolePermission = {
-  role_id: any;
-  role_name: any;
+  role_id: string;
+  role_name: string;
 };
 
 interface AddMemberProps {
@@ -74,44 +74,38 @@ const AddMember: React.FC<AddMemberProps> = ({
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {/* Email Field */}
               <div>
-                <Label
+                <InputField
+                  name="email"
+                  control={form.control}
+                  label="Enter agent’s Email"
+                  labelClassName="text-base leading-[26px] font-medium"
                   required
-                  htmlFor="email"
-                  className="pb-3 text-base leading-[26px] font-medium"
-                >
-                  Enter agent’s Email
-                </Label>
-                <InputField name="email" control={form.control} />
+                />
               </div>
 
               {/* Full Name Field */}
               <div>
-                <Label
+                <InputField
+                  name="fullName"
+                  control={form.control}
+                  label="Full Name"
+                  labelClassName="text-base leading-[26px] font-medium"
                   required
-                  htmlFor="fullName"
-                  className="pb-3 text-base leading-[26px] font-medium"
-                >
-                  Full Name
-                </Label>
-                <InputField name="fullName" control={form.control} />
+                />
               </div>
 
               {/* Role Select Field */}
               <div className="col-span-full">
-                <Label
-                  required
-                  htmlFor="role"
-                  className="pb-3 text-base leading-[26px] font-medium"
-                >
-                  Role
-                </Label>
                 <SelectField
                   name="role"
                   control={form.control}
                   placeholder="Select Role"
+                  label="Role"
+                  labelClassName="pb-3 text-base leading-[26px] font-medium"
+                  required
                   options={
                     Array.isArray(roleTableData?.data)
-                      ? roleTableData.data.map((item) => {
+                      ? roleTableData.data.map((item: any) => {
                           return {
                             value: item.role_id.toString(),
                             label: item.role_name,

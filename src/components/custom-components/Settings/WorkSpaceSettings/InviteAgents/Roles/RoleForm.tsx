@@ -52,6 +52,7 @@ interface RoleFormProps {
   is_changeable?: boolean;
   is_viewable?: boolean;
   is_deletable?: boolean;
+  setOpenCreateRole?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 type OrderRow = {
@@ -76,6 +77,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
   defaultValues,
   onSubmit,
   roleHead,
+  setOpenCreateRole,
 }) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(RoleSchema),
@@ -100,8 +102,12 @@ const RoleForm: React.FC<RoleFormProps> = ({
   const [selectedTab, setSelectedTab] = useState('setting');
 
   const orders: OrderRow[] = React.useMemo(() => {
+    // const tabData =
+    //   data?.[selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)] || [];
     const tabData =
-      data?.[selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)] || [];
+      (data as any)?.[
+        selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)
+      ] || [];
     return tabData.map((perm: any) => ({
       permissions: perm.name,
       id: perm.id,
@@ -193,6 +199,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
         {
           onSuccess: (response) => {
             console.log('Role updated successfully:', response);
+            // setOpenCreateRole(false);
           },
           onError: (error) => {
             console.error('Error updating role:', error);
@@ -204,6 +211,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
       createRole(payload, {
         onSuccess: (response) => {
           console.log('Create role response:', response);
+          setOpenCreateRole((prev) => !prev);
         },
         onError: (error) => {
           console.error('Create role error:', error);
@@ -302,11 +310,11 @@ const RoleForm: React.FC<RoleFormProps> = ({
             {/* Role Input */}
             <div className="pb-[49px]">
               <InputField
-                label="Role Name"
                 name="name"
                 placeholder="Moderator"
-                labelClassName="text-sm"
                 control={form.control}
+                label="Role Name"
+                labelClassName="text-sm"
                 required
               />
             </div>

@@ -80,7 +80,6 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   const savedTime = useTimeStore((state) => state.savedTime);
   const { setValue } = form; // Get setValue from the main form instance
 
-  console.log(setValue);
   // toggle time picker/clock dial
   const [openStartTime, setOpenStartTime] = useState(false);
   const [openEndTime, setOpenEndTime] = useState(false);
@@ -95,7 +94,6 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   ];
 
   const handleAddTeamMember = (data: any) => {
-    console.log('New team member:', data);
     setOpenInviteMember(false);
   };
 
@@ -121,7 +119,6 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit((data) => {
-            console.log('Form data:', data);
             onSubmit?.(data);
             form.reset();
             onClose?.();
@@ -130,45 +127,29 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
         >
           {/* Email Field */}
           <div>
-            <Label
-              required
-              className="pb-3 text-base leading-[26px] font-medium"
-              htmlFor="email"
-            >
-              Enter Agent Email
-            </Label>
             <InputField
               name="email"
+              label="Enter Agent Email"
               inputClassName="!text-xs leading-[21px] font-normal !text-black"
+              labelClassName=" text-base leading-[26px] font-medium"
               control={form.control}
+              required
             />
           </div>
 
           {/* Full Name Field */}
           <div>
-            <Label
-              required
-              className="pb-3 text-base leading-[26px] font-medium"
-              htmlFor="fullName"
-            >
-              Full Name
-            </Label>
             <InputField
               name="fullName"
               inputClassName="!text-xs leading-[21px] font-normal !text-black"
               control={form.control}
+              label="Full Name"
+              labelClassName="text-base leading-[26px] font-medium"
             />
           </div>
 
           {/* Role Field */}
           <div>
-            <Label
-              required
-              className="pb-3 text-base leading-[26px] font-medium"
-              htmlFor="role"
-            >
-              Roles
-            </Label>
             <Controller
               name="role"
               control={form.control}
@@ -180,6 +161,8 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                   placeholder="Admin"
                   className="font-outfit rounded-md p-0 py-1 text-sm leading-[16px] font-medium"
                   placeholderClassName="font-outfit rounded-md text-xs leading-[21px] font-normal text-black"
+                  labelClassName="text-base leading-[26px] font-medium"
+                  label="Role"
                   options={[
                     { value: 'admin', label: 'Admin' },
                     { value: 'agent', label: 'Agent' },
@@ -193,13 +176,6 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
 
           {/* Client Handled Field */}
           <div>
-            <Label
-              required
-              className="pb-3 text-base leading-[26px] font-medium"
-              htmlFor="clientHandled"
-            >
-              Client Handled
-            </Label>
             <Controller
               name="clientHandled"
               control={form.control}
@@ -207,7 +183,9 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                 <SelectField
                   name="clientHandled"
                   control={form.control}
-                  label=""
+                  required
+                  labelClassName="pb-3 text-base leading-[26px] font-medium"
+                  label="Client Handled"
                   placeholderClassName="font-outfit rounded-md text-xs leading-[21px] font-normal text-black"
                   options={[
                     { value: '0-6', label: '0-6' },
@@ -217,7 +195,6 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                     { value: '120-200', label: '120-200' },
                   ]}
                   placeholder="0-6"
-                  required
                   className="font-outfit rounded-md py-1 text-sm leading-[16px] font-medium"
                 />
               )}
@@ -225,85 +202,103 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
           </div>
 
           {/* Day Picker */}
-          <Controller
-            control={form.control}
-            name="day"
-            render={({ field }) => (
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger
-                  asChild
-                  className="px-4 py-2 text-xs leading-[21px] hover:bg-transparent"
-                >
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between text-xs leading-[21px] font-normal text-black"
+          <div>
+            <Label
+              className="text-base leading-[26px] font-medium"
+              htmlFor="day"
+              required
+            >
+              Day
+            </Label>
+            <Controller
+              control={form.control}
+              name="day"
+              render={({ field }) => (
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger
+                    asChild
+                    className="border-grey-light h-[44px] px-4 text-xs leading-[21px] hover:bg-transparent"
                   >
-                    {field.value
-                      ? weekDays.find((d) => d.toLowerCase() === field.value)
-                      : 'Sunday'}
-                    <Icons.ri_calendar_line />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto overflow-hidden p-0"
-                  align="start"
-                >
-                  <ToggleGroup
-                    type="single"
-                    className="border-grey-light flex w-full gap-7 border px-3 py-1"
-                    value={field.value ?? undefined}
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      setOpen(false);
-                    }}
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between text-xs leading-[21px] font-normal text-black"
+                    >
+                      {field.value
+                        ? weekDays.find((d) => d.toLowerCase() === field.value)
+                        : 'Sunday'}
+                      <Icons.ri_calendar_line />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-auto overflow-hidden p-0"
+                    align="start"
                   >
-                    {weekDays.map((day) => (
-                      <ToggleGroupItem
-                        key={day}
-                        className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
-                        value={day.toLowerCase()}
-                      >
-                        {day.substring(0, 3)}
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
-                </PopoverContent>
-              </Popover>
-            )}
-          />
+                    <ToggleGroup
+                      type="single"
+                      className="border-grey-light flex w-full gap-7 border px-3"
+                      value={field.value ?? undefined}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setOpen(false);
+                      }}
+                    >
+                      {weekDays.map((day) => (
+                        <ToggleGroupItem
+                          key={day}
+                          className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
+                          value={day.toLowerCase()}
+                        >
+                          {day.substring(0, 3)}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
+          </div>
 
           {/* Shift Field */}
-          <Controller
-            name="shift"
-            control={form.control}
-            render={({ field }) => (
-              <ToggleGroup
-                type="single"
-                className="border-grey-light flex w-full gap-7 border px-[13px] py-1"
-                value={field.value}
-                onValueChange={field.onChange}
-              >
-                <ToggleGroupItem
-                  className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] text-xs leading-[21px] font-normal data-[state=on]:border data-[state=on]:text-white"
-                  value="morning"
+          <div>
+            <Label
+              className="text-base leading-[26px] font-medium"
+              htmlFor="day"
+              required
+            >
+              Shift
+            </Label>
+            <Controller
+              name="shift"
+              control={form.control}
+              render={({ field }) => (
+                <ToggleGroup
+                  type="single"
+                  className="border-grey-light flex w-full gap-7 border px-[13px] py-1"
+                  value={field.value}
+                  onValueChange={field.onChange}
                 >
-                  Morning
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
-                  value="day"
-                >
-                  Day
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
-                  value="night"
-                >
-                  Night
-                </ToggleGroupItem>
-              </ToggleGroup>
-            )}
-          />
+                  <ToggleGroupItem
+                    className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] text-xs leading-[21px] font-normal data-[state=on]:border data-[state=on]:text-white"
+                    value="morning"
+                  >
+                    Morning
+                  </ToggleGroupItem>
+                  <ToggleGroupItem
+                    className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
+                    value="day"
+                  >
+                    Day
+                  </ToggleGroupItem>
+                  <ToggleGroupItem
+                    className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
+                    value="night"
+                  >
+                    Night
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              )}
+            />
+          </div>
 
           {/* Work Schedule */}
           <div className="col-span-full">
@@ -316,18 +311,14 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
             </Label>
             <div className="flex w-[100%] basis-full gap-[26px]">
               <div className="relative w-full">
-                <Label
-                  className="pb-3 text-base leading-[26px] font-medium"
-                  htmlFor="startTime"
-                  required
-                >
-                  Start Time
-                </Label>
                 <InputField
                   name="startTime"
                   control={form.control}
                   placeholder="8"
                   inputClassName="!text-xs leading-[21px] font-normal"
+                  labelClassName="text-base leading-[26px] font-medium"
+                  label="Start Time"
+                  required
                 />
                 <div>
                   <Icons.ri_time_line
@@ -350,18 +341,14 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                 </div>
               </div>
               <div className="relative w-full">
-                <Label
-                  className="pb-3 text-base leading-[26px] font-medium"
-                  htmlFor="endTime"
-                  required
-                >
-                  End Time
-                </Label>
                 <InputField
                   name="endTime"
                   control={form.control}
                   placeholder="8"
                   inputClassName="!text-xs leading-[21px] font-normal"
+                  label="End Time"
+                  labelClassName=" text-base leading-[26px] font-medium"
+                  required
                 />
                 <Icons.ri_time_line
                   className="absolute top-[60%] right-2"
@@ -382,18 +369,14 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                 </AgentInviteModal>
               </div>
               <div className="w-full">
-                <Label
-                  className="pb-3 text-base leading-[26px] font-medium"
-                  htmlFor="totalHours"
-                  required
-                >
-                  Total Hours
-                </Label>
                 <InputField
                   name="totalHours"
                   control={form.control}
                   placeholder="8"
                   inputClassName="!text-xs leading-[21px] font-normal"
+                  label="Total Hours"
+                  labelClassName="text-base leading-[26px] font-mediumF"
+                  required
                 />
               </div>
             </div>
@@ -402,7 +385,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
           {/* Team Selection */}
           <div className="col-span-full">
             <Label
-              className="pb-3 text-base leading-[26px] font-medium"
+              className="text-base leading-[26px] font-medium"
               htmlFor="team"
               required
             >

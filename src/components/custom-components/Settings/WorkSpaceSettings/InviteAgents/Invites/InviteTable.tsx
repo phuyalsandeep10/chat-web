@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Icons } from '@/components/ui/Icons';
-// import ReusableDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReusableDialog';
-// import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents//ReuseableTable';
 import { AgenChatHistoryCard } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgenChatHistoryCard';
 import MailIcon from '@/assets/images/mailIcon.svg';
@@ -12,8 +10,11 @@ import DeleteModal from '@/components/modal/DeleteModal';
 import { Button, type ButtonProps } from '@/components/ui/button';
 import TimePicker from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Invites/InviteClock';
 import { useInvites } from '@/hooks/staffmanagment/invites/useInvites';
+import { useDeleteInvite } from '@/hooks/staffmanagment/invites/useDeleteInvite';
+import { format } from 'date-fns';
 
 export interface OrderRow {
+  id: string;
   invite: string;
   invite_Sent: string;
   status: string;
@@ -42,7 +43,18 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
   const [open, setOpen] = useState(false);
   const [openReminder, setOpenReminder] = useState(false);
 
-  const { data: getInviteMember, isPending, isSuccess } = useInvites();
+  // track which invite is selected
+  const [inviteToDeleteId, setInviteToDeleteId] = useState<string | null>(null);
+
+  // get all invited members
+  const { data: getInviteMember, isPending, isSuccess, refetch } = useInvites();
+
+  //delete role
+  const {
+    mutate: deleteInvite,
+    isPending: deletePending,
+    isSuccess: deleteSuccess,
+  } = useDeleteInvite();
 
   useEffect(() => {
     if (getInviteMember) {
@@ -54,10 +66,13 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
   const orders: OrderRow[] = React.useMemo(() => {
     return (
       getInviteMember?.data?.map((inviteMemberItems: any) => ({
+        id: inviteMemberItems.id,
         invite: inviteMemberItems.email,
-        invite_Sent: inviteMemberItems.role_id,
+        invite_Sent: inviteMemberItems.created_at
+          ? format(new Date(inviteMemberItems.created_at), 'dd/MM/yyyy')
+          : 'N/A',
         status: inviteMemberItems.status,
-        Roles: inviteMemberItems.name,
+        // Roles: inviteMemberItems.name,
         OperatingHours: '',
         Actions: '',
       })) || []
@@ -89,6 +104,11 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
     {
       key: 'invite_Sent',
       label: 'Invited sent on',
+      render: (row) => (
+        <>
+          <span>{row.invite_Sent}</span>
+        </>
+      ),
     },
     {
       key: 'status',
@@ -140,12 +160,12 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
       label: 'Roles',
       render: (row) => (
         <div className="flex items-center gap-2">
-          {row.Roles.toLowerCase().includes('admin') ? (
-            <Icons.ri_user_settings_fill />
-          ) : (
-            <Icons.ri_user_fill />
-          )}
-          <span>{row.Roles}</span>
+          {/* {row.Roles.toLowerCase().includes('admin') ? (
+              <Icons.ri_user_settings_fill />
+            ) : (
+              <Icons.ri_user_fill />
+            )}
+            <span>{row.Roles}</span> */}
         </div>
       ),
     },
@@ -160,27 +180,48 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
         <>
           <Icons.ri_delete_bin_5_line
             className="text-red-500"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setInviteToDeleteId(row.id);
+              setOpen(true);
+            }}
           />
-          <DeleteModal
-            open={open}
-            onOpenChange={setOpen}
-            title="Delete Invitation "
-            description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
-            confirmText="Confirm & Delete"
-            onCancel={() => {}}
-            onConfirm={() => {}}
-          >
-            {/* <DeleteModal /> */}
-          </DeleteModal>
         </>
       ),
     },
   ];
 
+  // handle delete invitation
+  // New function to handle delete confirmation
+  const handleDeleteConfirm = () => {
+    if (!inviteToDeleteId) return; // Guard clause
+    deleteInvite(inviteToDeleteId, {
+      onSuccess: () => {
+        setOpen(false);
+        setInviteToDeleteId(null);
+        refetch();
+      },
+      onError: (error) => {
+        console.error('Failed to delete invitation:', error);
+      },
+    });
+  };
+
   return (
     <>
       <ReuseableTable columns={columns} data={orders} />
+
+      {/* delete modal for invite agent */}
+      <DeleteModal
+        open={open}
+        onOpenChange={setOpen}
+        title="Delete Invitation "
+        description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
+        confirmText="Confirm & Delete"
+        onCancel={() => {}}
+        onConfirm={handleDeleteConfirm}
+      >
+        {/* <DeleteModal /> */}
+      </DeleteModal>
     </>
   );
 }

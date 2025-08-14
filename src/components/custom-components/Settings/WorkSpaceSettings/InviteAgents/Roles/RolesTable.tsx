@@ -50,10 +50,6 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
   const { mutate: GetAllRolesPermissionsForEdit } =
     useGetAllRolesPermissionsForEdit();
 
-  // console.log('GetAllRolesPermissionsForEdit', () =>
-  //   GetAllRolesPermissionsForEdit(),
-  // );
-
   //update role
   const { mutate: updateRole } = useUpdateRoles();
 
@@ -131,62 +127,23 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
         return (
           <div className="flex gap-[10px]">
             {/* // edit role */}
-            <div>
-              <div
-                className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
-                onClick={() => handleEditClick(row)}
-              >
-                <Icons.ri_edit2_fill className="text-black" />
-                {/* <Icons.ri_edit2_fill /> */}
-              </div>
-
-              <AgentInviteModal
-                open={openRole}
-                onOpenChange={setOpenRole}
-                dialogClass="!max-w-[676px] px-5 py-10 gap-0"
-              >
-                {selectedRole && (
-                  <RoleForm
-                    defaultValues={{
-                      role_id: selectedRole.id,
-                      name: selectedRole.RoleName,
-                      permissions: selectedRole.permissions,
-                      groups: selectedRole.groups,
-                    }}
-                    onSubmit={(data) => {
-                      updateRole({ role_id: selectedRole.id, payload: data });
-                    }}
-                    roleHead="Edit Role"
-                  />
-                )}
-              </AgentInviteModal>
+            <div
+              className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+              onClick={() => handleEditClick(row)}
+            >
+              <Icons.ri_edit2_fill className="text-black" />
+              {/* <Icons.ri_edit2_fill /> */}
             </div>
             {/* // delete role */}
-            <div>
-              <div
-                className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
-                onClick={() => {
-                  setSelectedRole(row); // <-- set the role here
-                  setOpen(true);
-                }}
-              >
-                <Icons.ri_delete_bin_5_line className="text-alert-prominent" />
-                {/* <Icons.ri_edit2_fill /> */}
-              </div>
-              <DeleteModal
-                open={open}
-                onOpenChange={setOpen}
-                title="Delete Member "
-                description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
-                confirmText="Confirm & Delete"
-                onCancel={() => {
-                  setOpen(false);
-                  setSelectedRole(null);
-                }}
-                onConfirm={handleDeleteConfirm}
-              >
-                {/* <DeleteModal /> */}
-              </DeleteModal>
+            <div
+              className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+              onClick={() => {
+                setSelectedRole(row); // <-- set the role here
+                setOpen(true);
+              }}
+            >
+              <Icons.ri_delete_bin_5_line className="text-alert-prominent" />
+              {/* <Icons.ri_edit2_fill /> */}
             </div>
           </div>
         );
@@ -227,49 +184,87 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
     );
   }, [roleTableData]);
 
-  console.log('orders', orders, 'roleTableData', roleTableData);
-
   return (
-    <div>
-      {/* Header */}
-      <div className="pb-6">
-        <p className="text-brand-dark pb-1 text-sm leading-[21px] font-semibold">
-          Workspace Roles
-        </p>
-        <span className="text-xs leading-[17px] font-normal">
-          Customize roles to control what each team member can see and do.
-        </span>
-      </div>
+    <>
+      <div>
+        {/* Header */}
+        <div className="pb-6">
+          <p className="text-brand-dark pb-1 text-sm leading-[21px] font-semibold">
+            Workspace Roles
+          </p>
+          <span className="text-xs leading-[17px] font-normal">
+            Customize roles to control what each team member can see and do.
+          </span>
+        </div>
 
-      {/* Create Role Button */}
-      <div className="flex justify-end gap-4 pb-4">
-        <Button
-          variant="outline"
-          className="bg-brand-primary h-full max-h-[36px] rounded px-6 py-2.5 text-xs font-semibold text-white"
-          onClick={() => setOpenCreateRole(true)}
-        >
-          <Icons.plus_circle />
-          Create New Role
-        </Button>
-        <AgentInviteModal
-          open={openCreateRole}
-          onOpenChange={setOpenCreateRole}
-          dialogClass="!max-w-[676px] px-5"
-        >
+        {/* Create Role Button */}
+        <div className="flex justify-end gap-4 pb-4">
+          <Button
+            variant="outline"
+            className="bg-brand-primary h-full max-h-[36px] rounded px-6 py-2.5 text-xs font-semibold text-white"
+            onClick={() => setOpenCreateRole(true)}
+          >
+            <Icons.plus_circle />
+            Create New Role
+          </Button>
+          <AgentInviteModal
+            open={openCreateRole}
+            onOpenChange={setOpenCreateRole}
+            dialogClass="!max-w-[676px] px-5"
+          >
+            <RoleForm
+              onSubmit={(data) => {
+                createRole(data);
+                // setOpenCreateRole(false);
+              }}
+              roleHead="Create Role"
+              setOpenCreateRole={setOpenCreateRole}
+            />
+          </AgentInviteModal>
+        </div>
+
+        {/* Table */}
+        <ReuseableTable columns={columns} data={orders} />
+      </div>
+      {/* Edit Role Modal in order */}
+      <AgentInviteModal
+        open={openRole}
+        onOpenChange={setOpenRole}
+        dialogClass="!max-w-[676px] px-5 py-10 gap-0"
+      >
+        {selectedRole && (
           <RoleForm
-            onSubmit={(data) => {
-              console.log('New role created:', data);
-              createRole(data);
-              // setOpenCreateRole(false);
+            defaultValues={{
+              role_id: selectedRole.id,
+              name: selectedRole.RoleName,
+              permissions: selectedRole.permissions,
+              groups: selectedRole.groups,
             }}
-            roleHead="Create Role"
+            onSubmit={(data) => {
+              updateRole({ role_id: selectedRole.id, payload: data });
+              setOpenRole(false);
+              setSelectedRole(null);
+            }}
+            roleHead="Edit Role"
           />
-        </AgentInviteModal>
-      </div>
-
-      {/* Table */}
-      <ReuseableTable columns={columns} data={orders} />
-    </div>
+        )}
+      </AgentInviteModal>
+      {/* Delete Role Confirmation Modal in order delete */}
+      <DeleteModal
+        open={open}
+        onOpenChange={setOpen}
+        title="Delete Member "
+        description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
+        confirmText="Confirm & Delete"
+        onCancel={() => {
+          setOpen(false);
+          setSelectedRole(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+      >
+        {/* <DeleteModal /> */}
+      </DeleteModal>
+    </>
   );
 };
 

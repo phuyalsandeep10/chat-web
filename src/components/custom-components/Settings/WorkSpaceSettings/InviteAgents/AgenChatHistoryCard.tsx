@@ -74,16 +74,13 @@ export function AgenChatHistoryCard({
           <form onSubmit={form.handleSubmit(handleSubmit)} className="pb-5">
             <div className="flex flex-col gap-6">
               <div>
-                <Label
-                  className="pb-2 text-base leading-[26px] font-medium" //
-                  htmlFor="role"
-                >
-                  Role
-                </Label>
                 <InputField
                   name="role"
                   placeholder="admin"
                   control={form.control}
+                  label="Role"
+                  labelClassName="pb-2 text-base leading-[26px] font-medium"
+                  required
                 />
               </div>
             </div>

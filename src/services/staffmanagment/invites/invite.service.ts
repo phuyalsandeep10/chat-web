@@ -12,4 +12,16 @@ export class InviteService {
       throw error;
     }
   }
+
+  //Delete Role
+  static async DeleteInvites(invitation_id: string) {
+    try {
+      const res = await axiosInstance.delete(
+        `${baseURL}/organizations/invitations/${invitation_id}`,
+      );
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
