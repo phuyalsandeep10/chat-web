@@ -101,7 +101,7 @@ const AddMember: React.FC<AddMemberProps> = ({
                   control={form.control}
                   placeholder="Select Role"
                   label="Role"
-                  labelClassName="pb-3 text-base leading-[26px] font-medium"
+                  // labelClassName="pb-3 text-base leading-[26px] font-medium"
                   required
                   options={
                     Array.isArray(roleTableData?.data)

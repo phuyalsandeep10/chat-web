@@ -161,7 +161,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                   placeholder="Admin"
                   className="font-outfit rounded-md p-0 py-1 text-sm leading-[16px] font-medium"
                   placeholderClassName="font-outfit rounded-md text-xs leading-[21px] font-normal text-black"
-                  labelClassName="text-base leading-[26px] font-medium"
+                  LabelClassName="text-base leading-[26px] font-medium"
                   label="Role"
                   options={[
                     { value: 'admin', label: 'Admin' },
@@ -184,7 +184,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                   name="clientHandled"
                   control={form.control}
                   required
-                  labelClassName="pb-3 text-base leading-[26px] font-medium"
+                  LabelClassName="pb-3 text-base leading-[26px] font-medium"
                   label="Client Handled"
                   placeholderClassName="font-outfit rounded-md text-xs leading-[21px] font-normal text-black"
                   options={[

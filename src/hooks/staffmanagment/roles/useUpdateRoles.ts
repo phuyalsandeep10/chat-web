@@ -9,7 +9,7 @@ export const useUpdateRoles = () => {
   return useMutation({
     mutationFn: ({ role_id, payload }: { role_id: number; payload: any }) =>
       RolesService.UpdateRoles(role_id.toString(), payload), //here changed
-    onSuccess: (data) => {
+    onSuccess: (data, variables, context) => {
       toast.success('Role updated successfully');
       // Invalidate and refetch roles data
       queryClient.invalidateQueries({ queryKey: ['allRolePermissionGroup'] });

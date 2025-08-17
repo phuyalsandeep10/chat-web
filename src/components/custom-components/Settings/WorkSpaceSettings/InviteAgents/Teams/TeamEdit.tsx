@@ -22,8 +22,8 @@ type FormValues = {
 };
 
 interface TeamEditProps {
-  defaultValues?: Partial<FormValues>;
-  onSubmit?: SubmitHandler<FormValues>;
+  defaultValues?: () => void;
+  onSubmit: () => void;
 }
 
 const TeamEdit: React.FC<TeamEditProps> = ({

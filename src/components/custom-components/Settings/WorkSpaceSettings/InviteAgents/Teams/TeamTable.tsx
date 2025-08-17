@@ -267,7 +267,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
         dialogTitle="Edit Information"
         dialogClass="!max-w-[768px]"
       >
-        <TeamEdit />
+        <TeamEdit onSubmit={() => {}} />
       </AgentInviteModal>
       {/* view modal for view team */}
       <AgentInviteModal

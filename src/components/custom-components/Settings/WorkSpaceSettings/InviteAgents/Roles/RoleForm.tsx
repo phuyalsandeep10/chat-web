@@ -20,11 +20,9 @@ import {
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
 import { DialogClose } from '@/components/ui/dialog'; // to close dialog on cancel
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { RolesService } from '@/services/staffmanagment/roles/roles.service';
 import { useCreateRole } from '@/hooks/staffmanagment/roles/useCreateRoles';
 import { useGetAllPermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllPermissionGroup';
 import { useUpdateRoles } from '@/hooks/staffmanagment/roles/useUpdateRoles';
-import { format } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RoleSchema } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Roles/RoleSchema';
 
@@ -182,44 +180,20 @@ const RoleForm: React.FC<RoleFormProps> = ({
       name: formData.name,
       description: '',
       permission_group: '1',
-      permissions: permissionsState.map(
-        ({ permission_id, is_changeable, is_viewable, is_deletable }) => ({
+      permissions: permissionsState
+        .filter(
+          ({ is_changeable, is_viewable, is_deletable }) =>
+            is_changeable || is_viewable || is_deletable, // keep only if at least one is true
+        )
+        .map(({ permission_id, is_changeable, is_viewable, is_deletable }) => ({
           permission_id,
-          is_changeable,
-          is_viewable,
-          is_deletable,
-        }),
-      ),
+          is_changeable: is_changeable ? 'true' : 'false',
+          is_viewable: is_viewable ? 'true' : 'false',
+          is_deletable: is_deletable ? 'true' : 'false',
+        })),
     };
 
-    if (defaultValues?.role_id || defaultValues?.id) {
-      // Editing an existing role
-      updateRole(
-        { role_id: defaultValues.role_id!, payload }, //here changed
-        {
-          onSuccess: (response) => {
-            console.log('Role updated successfully:', response);
-            // setOpenCreateRole(false);
-          },
-          onError: (error) => {
-            console.error('Error updating role:', error);
-          },
-        },
-      );
-    } else {
-      // Creating a new role
-      createRole(payload, {
-        onSuccess: (response) => {
-          console.log('Create role response:', response);
-          setOpenCreateRole((prev) => !prev);
-        },
-        onError: (error) => {
-          console.error('Create role error:', error);
-        },
-      });
-    }
-    console.log('defaultValues', payload);
-    return;
+    onSubmit(payload);
   };
 
   const columns: Column<OrderRow>[] = [
@@ -233,12 +207,29 @@ const RoleForm: React.FC<RoleFormProps> = ({
       render: (row) => {
         const rowIndex = orders.findIndex((o) => o.id === row.id);
         return (
+          // <Checkbox
+          //   checked={permissionsState[rowIndex]?.is_changeable}
+          //   onCheckedChange={(checked) => {
+          //     const updated = [...permissionsState];
+          //     updated[rowIndex].is_changeable = checked === true;
+          //     setPermissionsState(updated);
+          //   }}
+          //   aria-label={`Edit ${row.permissions}`}
+          //   className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
+          // />
           <Checkbox
-            checked={permissionsState[rowIndex]?.is_changeable}
+            checked={
+              permissionsState.find((p) => p.permission_id === row.id)
+                ?.is_changeable || false
+            }
             onCheckedChange={(checked) => {
-              const updated = [...permissionsState];
-              updated[rowIndex].is_changeable = checked === true;
-              setPermissionsState(updated);
+              setPermissionsState((prev) =>
+                prev.map((p) =>
+                  p.permission_id === row.id
+                    ? { ...p, is_changeable: checked === true }
+                    : p,
+                ),
+              );
             }}
             aria-label={`Edit ${row.permissions}`}
             className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
@@ -255,14 +246,31 @@ const RoleForm: React.FC<RoleFormProps> = ({
         );
 
         return (
+          // <Checkbox
+          //   checked={permissionsState[rowIndex]?.is_viewable}
+          //   onCheckedChange={(checked) => {
+          //     const updated = [...permissionsState];
+          //     updated[rowIndex].is_viewable = checked === true;
+          //     setPermissionsState(updated);
+          //   }}
+          //   aria-label={`View ${row.permissions}`}
+          //   className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
+          // />
           <Checkbox
-            checked={permissionsState[rowIndex]?.is_viewable}
+            checked={
+              permissionsState.find((p) => p.permission_id === row.id)
+                ?.is_viewable || false
+            }
             onCheckedChange={(checked) => {
-              const updated = [...permissionsState];
-              updated[rowIndex].is_viewable = checked === true;
-              setPermissionsState(updated);
+              setPermissionsState((prev) =>
+                prev.map((p) =>
+                  p.permission_id === row.id
+                    ? { ...p, is_viewable: checked === true }
+                    : p,
+                ),
+              );
             }}
-            aria-label={`View ${row.permissions}`}
+            aria-label={`Edit ${row.permissions}`}
             className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
           />
         );
@@ -277,14 +285,31 @@ const RoleForm: React.FC<RoleFormProps> = ({
         );
 
         return (
+          // <Checkbox
+          //   checked={permissionsState[rowIndex]?.is_deletable}
+          //   onCheckedChange={(checked) => {
+          //     const updated = [...permissionsState];
+          //     updated[rowIndex].is_deletable = checked === true;
+          //     setPermissionsState(updated);
+          //   }}
+          //   aria-label={`Delete ${row.permissions}`}
+          //   className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
+          // />
           <Checkbox
-            checked={permissionsState[rowIndex]?.is_deletable}
+            checked={
+              permissionsState.find((p) => p.permission_id === row.id)
+                ?.is_deletable || false
+            }
             onCheckedChange={(checked) => {
-              const updated = [...permissionsState];
-              updated[rowIndex].is_deletable = checked === true;
-              setPermissionsState(updated);
+              setPermissionsState((prev) =>
+                prev.map((p) =>
+                  p.permission_id === row.id
+                    ? { ...p, is_deletable: checked === true }
+                    : p,
+                ),
+              );
             }}
-            aria-label={`Delete ${row.permissions}`}
+            aria-label={`Edit ${row.permissions}`}
             className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
           />
         );
