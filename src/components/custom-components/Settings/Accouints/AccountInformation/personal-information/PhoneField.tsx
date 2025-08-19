@@ -67,6 +67,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field }) => {
         {/* Input Field */}
         <input
           type="text"
+          // name="contact"
           inputMode="numeric"
           placeholder="Enter phone number"
           {...field}

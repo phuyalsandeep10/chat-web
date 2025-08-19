@@ -11,6 +11,10 @@ import {
   verify2FaPayload,
   VerifyEmailpayload,
 } from './types';
+import LanguageDropdown from '@/components/custom-components/Auth/common/LanguageDropdown';
+import { Calligraffitti } from 'next/font/google';
+import { resolve } from 'path';
+import { UpdateProfileFormValues } from '@/components/custom-components/Settings/Accouints/AccountInformation/types';
 
 export class AuthService {
   // Login User
@@ -148,7 +152,10 @@ export class AuthService {
   // Verify 2fa otp
   static async verify2FAOtp(payload: verify2FaPayload) {
     try {
-      const response = await axiosInstance.post('/auth/2fa-verify', payload);
+      const response = await axios.patch(
+        `${baseURL}/auth/resend-verification-token`,
+        payload,
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -210,6 +217,20 @@ export class AuthService {
       localStorage.removeItem('authTokens');
     } catch (error) {
       console.error('Error clearing auth tokens', error);
+    }
+  }
+
+  // update account information
+  static async updatePersonalInformation(payload: UpdateProfileFormValues) {
+    try {
+      const response = await axiosInstance.patch('/auth/profile', payload);
+      console.log(payload.address);
+      console.log('internal here');
+      console.log(payload.name);
+      console.log(payload.country);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating Personal Information');
     }
   }
 }

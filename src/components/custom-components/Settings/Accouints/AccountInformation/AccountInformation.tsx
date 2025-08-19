@@ -14,7 +14,8 @@ const AccountInformation = () => {
       <ProfileSection
         name={authData?.data?.user?.name ?? ''}
         email={authData?.data?.user?.email ?? ''}
-        location={authData?.data?.user.location ?? ''}
+        address={authData?.data?.user.address ?? ''}
+        country={authData?.data?.user.country ?? ''}
         phone={authData?.data?.user?.phone ?? ''}
         profileImage={authData?.data?.user?.image ?? ''}
       />

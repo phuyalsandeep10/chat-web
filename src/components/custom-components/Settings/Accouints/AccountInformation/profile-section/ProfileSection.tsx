@@ -6,7 +6,8 @@ import { ProfileSectionProps } from '../types';
 export default function ProfileSection({
   name,
   email,
-  location,
+  country,
+  address,
   phone,
   profileImage,
 }: ProfileSectionProps) {
@@ -22,12 +23,12 @@ export default function ProfileSection({
       <div className="mt-11 flex items-center gap-[126px]">
         <div className="flex items-center gap-6">
           <div className="relative h-[167px] w-[167px] overflow-hidden rounded-[175px]">
-            <Image
+            {/* <Image
               src={profileImage ? profileImage : '/profile-placeholder.jpeg'}
               alt="Profile Image"
               fill
               className="object-cover"
-            />
+            /> */}
             <div className="bg-gray-bg-light absolute bottom-0 flex h-12 w-full items-center justify-center">
               <Icons.pencil className="text-brand-dark h-6 w-6" />
             </div>
@@ -43,7 +44,7 @@ export default function ProfileSection({
           {location && (
             <div className="flex items-center justify-end gap-2">
               <MapPinIcon className="h-3.5 w-3.5" />
-              <span className="text-right">{location}</span>
+              <span className="text-right">{country}</span>
             </div>
           )}
           {phone && (

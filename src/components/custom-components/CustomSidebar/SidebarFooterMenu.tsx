@@ -34,11 +34,12 @@ const SidebarFooterMenu = () => {
           >
             <div className={cn('min-h-8 min-w-8 rounded-full bg-white')}>
               <Image
-                src={
-                  authData?.data?.user?.image
-                    ? authData?.data?.user?.image
-                    : '/profile-placeholder.jpeg'
-                }
+                // src={
+                //   authData?.data?.user?.image
+                //     ? authData?.data?.user?.image
+                //     : '/profile-placeholder.jpeg'
+                // }
+                src={''}
                 alt="User"
                 width={32}
                 height={32}
