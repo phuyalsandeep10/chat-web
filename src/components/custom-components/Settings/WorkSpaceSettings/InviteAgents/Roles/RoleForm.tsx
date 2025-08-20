@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { InputField } from '@/components/common/hook-form/InputField';
-import Label from '@/components/common/hook-form/Label';
-import { SelectField } from '@/components/common/hook-form/SelectField';
 import { Form } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,13 +16,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
-import { DialogClose } from '@/components/ui/dialog'; // to close dialog on cancel
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useCreateRole } from '@/hooks/staffmanagment/roles/useCreateRoles';
-import { useGetAllPermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllPermissionGroup';
-import { useUpdateRoles } from '@/hooks/staffmanagment/roles/useUpdateRoles';
+import { DialogClose } from '@/components/ui/dialog';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RoleSchema } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Roles/RoleSchema';
+import { useGetAllPermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllPermissionGroup';
 
 type PermissionState = {
   permission_id: number;
@@ -33,23 +28,17 @@ type PermissionState = {
   is_deletable: boolean;
 };
 
-type GroupPermissions = Record<string, { id: number; name: string }[]>;
-
 type FormValues = {
   name: string;
   id?: number;
   role_id?: number;
   permissions?: PermissionState[];
-  groups?: GroupPermissions;
 };
 
 interface RoleFormProps {
   defaultValues?: Partial<FormValues>;
   onSubmit: (data: FormValues) => void;
   roleHead: string;
-  is_changeable?: boolean;
-  is_viewable?: boolean;
-  is_deletable?: boolean;
   setOpenCreateRole?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -67,41 +56,27 @@ type Column<T> = {
   render?: (row: T) => React.ReactNode;
 };
 
-interface DataType {
-  [key: string]: any;
-}
-
 const RoleForm: React.FC<RoleFormProps> = ({
   defaultValues,
   onSubmit,
   roleHead,
   setOpenCreateRole,
 }) => {
+  const isEdit = !!defaultValues?.id;
+
   const form = useForm<FormValues>({
     resolver: zodResolver(RoleSchema),
-    defaultValues: defaultValues || {
-      name: '',
-    },
+    defaultValues: defaultValues || { name: '' },
   });
 
-  // create role
-  const { mutate: createRole, isPending, isSuccess } = useCreateRole();
+  const { data } = useGetAllPermissionGroup();
 
-  //get all permissions
-  const { data, error, isLoading } = useGetAllPermissionGroup();
-
-  //Edit Role
-  const {
-    mutate: updateRole,
-    isPending: updateRolePending,
-    isSuccess: updateRoleSuccess,
-  } = useUpdateRoles();
-
+  const [changeableIds, setChangeableIds] = React.useState<Set<number>>(
+    new Set(),
+  );
   const [selectedTab, setSelectedTab] = useState('setting');
 
   const orders: OrderRow[] = React.useMemo(() => {
-    // const tabData =
-    //   data?.[selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)] || [];
     const tabData =
       (data as any)?.[
         selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)
@@ -109,22 +84,23 @@ const RoleForm: React.FC<RoleFormProps> = ({
     return tabData.map((perm: any) => ({
       permissions: perm.name,
       id: perm.id,
+      is_changeable: perm.is_changeable,
+      is_viewable: perm.is_viewable,
+      is_deletable: perm.is_deletable,
     }));
   }, [data, selectedTab]);
 
   const [permissionsState, setPermissionsState] = React.useState<
-    {
-      permission_id: number;
-      is_changeable: boolean;
-      is_viewable: boolean;
-      is_deletable: boolean;
-    }[]
+    PermissionState[]
   >([]);
+
+  const pushPermissionId = (permission_id: number) => {
+    setChangeableIds((prev) => new Set(prev).add(permission_id));
+  };
 
   React.useEffect(() => {
     if (orders.length === 0) return;
 
-    // Step 1: Start from current orders (only one per permission_id)
     let mergedPermissions = orders.map((order) => ({
       permission_id: order.id || 0,
       is_changeable: order.is_changeable || false,
@@ -132,7 +108,6 @@ const RoleForm: React.FC<RoleFormProps> = ({
       is_deletable: order.is_deletable || false,
     }));
 
-    // Step 2: If editing, merge in saved values
     if (defaultValues?.permissions?.length) {
       mergedPermissions = mergedPermissions.map((perm) => {
         const match = defaultValues.permissions!.find(
@@ -142,28 +117,24 @@ const RoleForm: React.FC<RoleFormProps> = ({
       });
     }
 
-    // Step 3: Set state (ensuring unique permission IDs)
     setPermissionsState((prev) => {
-      const all = [
-        ...prev.filter(
-          (p) =>
-            !mergedPermissions.some(
-              (mp) => mp.permission_id === p.permission_id,
-            ),
-        ),
-        ...mergedPermissions,
-      ];
-
-      // Ensure uniqueness
-      return all.filter(
-        (p, idx, arr) =>
-          arr.findIndex((x) => x.permission_id === p.permission_id) === idx,
-      );
+      const mergedMap = new Map<number, (typeof prev)[0]>();
+      prev.forEach((p) => mergedMap.set(p.permission_id, p));
+      mergedPermissions.forEach((p) => mergedMap.set(p.permission_id, p));
+      return Array.from(mergedMap.values());
     });
   }, [orders, defaultValues]);
 
   const handleSubmit = (formData: FormValues) => {
-    // Check if every permission has at least one permission selected
+    const permissions = permissionsState.filter((p) =>
+      changeableIds.has(p.permission_id),
+    );
+
+    if (permissions.length === 0) {
+      console.log('Please select at least one permission.');
+      return;
+    }
+
     const isAllPermissionsValid = permissionsState.some(
       ({ is_changeable, is_viewable, is_deletable }) =>
         is_changeable || is_viewable || is_deletable,
@@ -173,24 +144,14 @@ const RoleForm: React.FC<RoleFormProps> = ({
       console.log(
         'Please select at least one permission (view/edit/delete) for each permission.',
       );
-      return; // Stop submission
+      return;
     }
 
     const payload = {
       name: formData.name,
       description: '',
-      permission_group: '1',
-      permissions: permissionsState
-        .filter(
-          ({ is_changeable, is_viewable, is_deletable }) =>
-            is_changeable || is_viewable || is_deletable, // keep only if at least one is true
-        )
-        .map(({ permission_id, is_changeable, is_viewable, is_deletable }) => ({
-          permission_id,
-          is_changeable: is_changeable ? 'true' : 'false',
-          is_viewable: is_viewable ? 'true' : 'false',
-          is_deletable: is_deletable ? 'true' : 'false',
-        })),
+      permission_group: 1,
+      permissions: permissions,
     };
 
     onSubmit(payload);
@@ -204,116 +165,72 @@ const RoleForm: React.FC<RoleFormProps> = ({
     {
       key: 'edit',
       label: 'Able to edit',
-      render: (row) => {
-        const rowIndex = orders.findIndex((o) => o.id === row.id);
-        return (
-          // <Checkbox
-          //   checked={permissionsState[rowIndex]?.is_changeable}
-          //   onCheckedChange={(checked) => {
-          //     const updated = [...permissionsState];
-          //     updated[rowIndex].is_changeable = checked === true;
-          //     setPermissionsState(updated);
-          //   }}
-          //   aria-label={`Edit ${row.permissions}`}
-          //   className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
-          // />
-          <Checkbox
-            checked={
-              permissionsState.find((p) => p.permission_id === row.id)
-                ?.is_changeable || false
-            }
-            onCheckedChange={(checked) => {
-              setPermissionsState((prev) =>
-                prev.map((p) =>
-                  p.permission_id === row.id
-                    ? { ...p, is_changeable: checked === true }
-                    : p,
-                ),
-              );
-            }}
-            aria-label={`Edit ${row.permissions}`}
-            className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
-          />
-        );
-      },
+      render: (row) => (
+        <Checkbox
+          checked={
+            permissionsState.find((p) => p.permission_id === row.id)
+              ?.is_changeable || false
+          }
+          onCheckedChange={(checked) => {
+            pushPermissionId(row.id!);
+            setPermissionsState((prev) =>
+              prev.map((p) =>
+                p.permission_id === row.id
+                  ? { ...p, is_changeable: checked === true }
+                  : p,
+              ),
+            );
+          }}
+          aria-label={`Edit ${row.permissions}`}
+          className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
+        />
+      ),
     },
     {
       key: 'view',
       label: 'Able to view',
-      render: (row) => {
-        const rowIndex = orders.findIndex(
-          (o) => o.permissions === row.permissions,
-        );
-
-        return (
-          // <Checkbox
-          //   checked={permissionsState[rowIndex]?.is_viewable}
-          //   onCheckedChange={(checked) => {
-          //     const updated = [...permissionsState];
-          //     updated[rowIndex].is_viewable = checked === true;
-          //     setPermissionsState(updated);
-          //   }}
-          //   aria-label={`View ${row.permissions}`}
-          //   className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
-          // />
-          <Checkbox
-            checked={
-              permissionsState.find((p) => p.permission_id === row.id)
-                ?.is_viewable || false
-            }
-            onCheckedChange={(checked) => {
-              setPermissionsState((prev) =>
-                prev.map((p) =>
-                  p.permission_id === row.id
-                    ? { ...p, is_viewable: checked === true }
-                    : p,
-                ),
-              );
-            }}
-            aria-label={`Edit ${row.permissions}`}
-            className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
-          />
-        );
-      },
+      render: (row) => (
+        <Checkbox
+          checked={
+            permissionsState.find((p) => p.permission_id === row.id)
+              ?.is_viewable || false
+          }
+          onCheckedChange={(checked) => {
+            setPermissionsState((prev) =>
+              prev.map((p) =>
+                p.permission_id === row.id
+                  ? { ...p, is_viewable: checked === true }
+                  : p,
+              ),
+            );
+          }}
+          aria-label={`View ${row.permissions}`}
+          className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
+        />
+      ),
     },
     {
       key: 'delete',
       label: 'Able to delete',
-      render: (row) => {
-        const rowIndex = orders.findIndex(
-          (o) => o.permissions === row.permissions,
-        );
-
-        return (
-          // <Checkbox
-          //   checked={permissionsState[rowIndex]?.is_deletable}
-          //   onCheckedChange={(checked) => {
-          //     const updated = [...permissionsState];
-          //     updated[rowIndex].is_deletable = checked === true;
-          //     setPermissionsState(updated);
-          //   }}
-          //   aria-label={`Delete ${row.permissions}`}
-          //   className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
-          // />
-          <Checkbox
-            checked={
-              permissionsState.find((p) => p.permission_id === row.id)
-                ?.is_deletable || false
-            }
-            onCheckedChange={(checked) => {
-              setPermissionsState((prev) =>
-                prev.map((p) =>
-                  p.permission_id === row.id
-                    ? { ...p, is_deletable: checked === true }
-                    : p,
-                ),
-              );
-            }}
-            aria-label={`Edit ${row.permissions}`}
-            className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
-          />
-        );
-      },
+      render: (row) => (
+        <Checkbox
+          checked={
+            permissionsState.find((p) => p.permission_id === row.id)
+              ?.is_deletable || false
+          }
+          onCheckedChange={(checked) => {
+            setPermissionsState((prev) =>
+              prev.map((p) =>
+                p.permission_id === row.id
+                  ? { ...p, is_deletable: checked === true }
+                  : p,
+              ),
+            );
+          }}
+          aria-label={`Delete ${row.permissions}`}
+          className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
+        />
+      ),
     },
   ];
 
@@ -332,7 +249,6 @@ const RoleForm: React.FC<RoleFormProps> = ({
       <CardContent className="p-0">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
-            {/* Role Input */}
             <div className="pb-[49px]">
               <InputField
                 name="name"
@@ -344,9 +260,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
               />
             </div>
 
-            {/* Permissions Section */}
             <div className="flex h-full w-full gap-5">
-              {/* Tabs */}
               <div className="h-auto w-auto">
                 <Tabs
                   defaultValue="setting"
@@ -359,23 +273,23 @@ const RoleForm: React.FC<RoleFormProps> = ({
                       Set Permission
                     </p>
                     {data &&
-                      Object.entries(data).map(([groupName, permissions]) => (
-                        <>
-                          <TabsList className="flex h-[201px] flex-col items-start bg-transparent">
-                            <TabsTrigger
-                              value={groupName}
-                              className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
-                            >
-                              {groupName}
-                            </TabsTrigger>
-                          </TabsList>
-                        </>
+                      Object.entries(data).map(([groupName]) => (
+                        <TabsList
+                          key={groupName}
+                          className="flex h-[201px] flex-col items-start bg-transparent"
+                        >
+                          <TabsTrigger
+                            value={groupName}
+                            className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
+                          >
+                            {groupName}
+                          </TabsTrigger>
+                        </TabsList>
                       ))}
                   </div>
                 </Tabs>
               </div>
 
-              {/* Permissions Table */}
               <ReuseableTable
                 columns={columns}
                 data={orders}
@@ -384,7 +298,6 @@ const RoleForm: React.FC<RoleFormProps> = ({
               />
             </div>
 
-            {/* Footer Buttons */}
             <CardFooter className="flex justify-end gap-4 px-0 pt-6">
               <DialogClose asChild>
                 <Button
@@ -399,7 +312,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
                 className="bg-brand-primary h-[36px] w-full max-w-[130px] rounded-lg px-4 py-3 text-xs leading-4 font-semibold text-white"
                 type="submit"
               >
-                {isPending ? 'Saving...' : 'Save'}
+                Save
               </Button>
             </CardFooter>
           </form>

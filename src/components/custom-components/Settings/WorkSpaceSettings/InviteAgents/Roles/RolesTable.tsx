@@ -3,9 +3,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
-// import AddAgentDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgentDialog';
 import RoleForm from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Roles/RoleForm';
-// import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
 import DeleteModal from '@/components/modal/DeleteModal';
 import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
@@ -65,12 +63,13 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
   const [openRole, setOpenRole] = useState(false);
   const [openCreateRole, setOpenCreateRole] = useState(false);
   const [selectedRole, setSelectedRole] = useState<any>(null);
-
-  // React.useEffect(() => {
-  //   if (roleTableData) {
-  //     console.log('Role Table Data:', roleTableData?.permission_summary?);
-  //   }
-  // }, [roleTableData]);
+  const [changeableIds, setChangeableIds] = React.useState<Set<number>>(
+    new Set(),
+  );
+  const [viewableIds, setViewableIds] = React.useState<Set<number>>(new Set());
+  const [deletableIds, setDeletableIds] = React.useState<Set<number>>(
+    new Set(),
+  );
 
   // New function to handle delete confirmation
   const handleDeleteConfirm = () => {
@@ -89,12 +88,67 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
   };
 
   // handle edit click
+  // const handleEditClick = (row: any) => {
+  //   setOpenRole(true);
+  //   //convert changebaleIds to sets
+
+  //   // for (const permission of changebaleIds ) {
+  //   //   if (permission.is_changeable) {
+  //   //     setChangeableIds((prev) => [...prev, permission.permission_id]);
+  //   //   }
+  //   // }
+  //   GetAllRolesPermissionsForEdit(
+  //     { role_id: row.id },
+  //     {
+  //       onSuccess: (res) => {
+  //         const mappedPermissions = (res.role_permissions || []).map(
+  //           (perm: any) => ({
+  //             permission_id: perm.permission_id,
+  //             is_changeable: perm.is_changeable ?? false,
+  //             is_viewable: perm.is_viewable ?? false,
+  //             is_deletable: perm.is_deletable ?? false,
+  //           }),
+  //         );
+
+  //         setSelectedRole({
+  //           id: row.id,
+  //           RoleName: row.RoleName,
+  //           permissions: mappedPermissions,
+  //           groups: {
+  //             Setting: res.Setting || [],
+  //             Channels: res.Channels || [],
+  //             'Inbox & Contact': res['Inbox & Contact'] || [],
+  //             Analystics: res.Analystics || [],
+  //             'Section Access': res['Section Access'] || [],
+  //           },
+  //         });
+  //       },
+  //     },
+  //   );
+  // };
   const handleEditClick = (row: any) => {
     setOpenRole(true);
+
     GetAllRolesPermissionsForEdit(
       { role_id: row.id },
       {
         onSuccess: (res) => {
+          const changeableSet = new Set<number>();
+          const viewableSet = new Set<number>();
+          const deletableSet = new Set<number>();
+
+          for (const perm of res.role_permissions || []) {
+            if (perm.is_changeable) changeableSet.add(perm.permission_id);
+            if (perm.is_viewable) viewableSet.add(perm.permission_id);
+            if (perm.is_deletable) deletableSet.add(perm.permission_id);
+          }
+
+          // Update your Set states
+          setChangeableIds(changeableSet);
+          setViewableIds(viewableSet);
+          setDeletableIds(deletableSet);
+
+          // Optional: If your UI still expects a flat list of permission objects:
           const mappedPermissions = (res.role_permissions || []).map(
             (perm: any) => ({
               permission_id: perm.permission_id,
@@ -107,7 +161,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
           setSelectedRole({
             id: row.id,
             RoleName: row.RoleName,
-            permissions: mappedPermissions,
+            permissions: mappedPermissions, // You can also use the sets if your UI is adjusted
             groups: {
               Setting: res.Setting || [],
               Channels: res.Channels || [],
@@ -157,6 +211,23 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
     },
   ];
 
+  // const orders: OrderRow[] = [
+  //   {
+  //     RoleName: 'Agent',
+  //     agents: 12,
+  //     permission: 'Permission 1, Permission 2, Permission 3',
+  //     date: '23, June, 2025',
+  //     Actions: '',
+  //   },
+  //   {
+  //     RoleName: 'Admin',
+  //     agents: 7,
+  //     permission: 'Permission 1, Permission 2, Permission 3',
+  //     date: '06, August, 2025',
+  //     Actions: '',
+  //   },
+  // ];
+
   const orders: OrderRow[] = React.useMemo(() => {
     return (
       roleTableData?.data?.map((roleTableDataItems: any) => ({
@@ -164,17 +235,6 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
         id: roleTableDataItems.role_id,
         RoleName: roleTableDataItems.role_name,
         agents: roleTableDataItems.no_of_agents,
-        Permission_Summary: roleTableDataItems.permission_summary.map(
-          (summaryItems) => {
-            return (
-              <>
-                <span className="text-xs leading-4 font-normal text-gray-500">
-                  {summaryItems.permission_name}
-                </span>
-              </>
-            );
-          },
-        ),
         permission: '',
         date: roleTableDataItems.created_at
           ? format(new Date(roleTableDataItems.created_at), 'dd MMMM yyyy')
@@ -215,10 +275,10 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
             <RoleForm
               onSubmit={(data) => {
                 createRole(data);
-                setOpenCreateRole(false);
+                // setOpenCreateRole(false);
               }}
               roleHead="Create Role"
-              // setOpenCreateRole={setOpenCreateRole}
+              setOpenCreateRole={setOpenCreateRole}
             />
           </AgentInviteModal>
         </div>
@@ -234,7 +294,6 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
       >
         {selectedRole && (
           <RoleForm
-            key={selectedRole?.id}
             defaultValues={{
               role_id: selectedRole.id,
               name: selectedRole.RoleName,
@@ -242,17 +301,9 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
               groups: selectedRole.groups,
             }}
             onSubmit={(data) => {
-              if (selectedRole) {
-                updateRole(
-                  { role_id: selectedRole.id, payload: data },
-                  {
-                    onSuccess: () => {
-                      setOpenRole(false);
-                      setSelectedRole(null);
-                    },
-                  },
-                );
-              }
+              updateRole({ role_id: selectedRole.id, payload: data });
+              setOpenRole(false);
+              setSelectedRole(null);
             }}
             roleHead="Edit Role"
           />

@@ -8,6 +8,9 @@ import { AgenChatHistoryCard } from '@/components/custom-components/Settings/Wor
 import DeleteModal from '@/components/modal/DeleteModal';
 import AddOrEditAgentForm from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddOrEditAgentForm';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
+import { useGetOperator } from '@/hooks/staffmanagment/operators/useGetOperator';
+import { useDeleteMember } from '@/hooks/staffmanagment/operators/useDeleteMembers';
+import { format } from 'date-fns';
 
 export interface OrderRow {
   FullName: string;
@@ -42,24 +45,28 @@ export default function OperatorsTable({
   const [openTeamView, setOpenTeamView] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
-  const orders: OrderRow[] = [
-    {
-      FullName: 'Yubesh Koirala',
-      Roles: 'Admin',
-      Shift: 'morning',
-      OperatingHours: '9:00 - 17:00',
-      Invitedon: '08/07/2025',
-      Actions: '',
-    },
-    {
-      FullName: 'Yubesh Koirala',
-      Roles: 'Agent',
-      Shift: 'Day',
-      OperatingHours: '9:00 - 17:00',
-      Invitedon: '08/07/2025',
-      Actions: '',
-    },
-  ];
+  const [membersToDeleteID, setMembersToDeleteID] = useState<string | null>(
+    null,
+  );
+
+  // const orders: OrderRow[] = [
+  //   {
+  //     FullName: 'Yubesh Koirala',
+  //     Roles: 'Admin',
+  //     Shift: 'morning',
+  //     OperatingHours: '9:00 - 17:00',
+  //     Invitedon: '08/07/2025',
+  //     Actions: '',
+  //   },
+  //   {
+  //     FullName: 'Yubesh Koirala',
+  //     Roles: 'Agent',
+  //     Shift: 'Day',
+  //     OperatingHours: '9:00 - 17:00',
+  //     Invitedon: '08/07/2025',
+  //     Actions: '',
+  //   },
+  // ];
 
   const columns: Column<OrderRow>[] = [
     { key: 'FullName', label: 'Full Name' },
@@ -68,11 +75,11 @@ export default function OperatorsTable({
       label: 'Roles',
       render: (row) => (
         <div className="flex items-center gap-2">
-          {row.Roles.toLowerCase().includes('admin') ? (
+          {/* {row.Roles.toLowerCase().includes('admin') ? (
             <Icons.ri_user_settings_fill />
           ) : (
             <Icons.ri_user_fill />
-          )}
+          )} */}
           <span>{row.Roles}</span>
         </div>
       ),
@@ -81,19 +88,19 @@ export default function OperatorsTable({
     {
       key: 'OperatingHours',
       label: 'Operating Hours',
-      render: (row) => {
-        const isOperating = row.OperatingHours.trim() !== '';
-        return (
-          <div className="flex items-center gap-2">
-            <span>{row.OperatingHours}</span>
-            <span
-              className={`h-2 w-2 rounded-full ${
-                isOperating ? 'bg-[#009959]' : 'bg-[#F61818]'
-              }`}
-            />
-          </div>
-        );
-      },
+      // render: (row) => {
+      //   const isOperating = row.OperatingHours.trim() !== '';
+      //   return (
+      //     <div className="flex items-center gap-2">
+      //       <span>{row.OperatingHours}</span>
+      //       <span
+      //         className={`h-2 w-2 rounded-full ${
+      //           isOperating ? 'bg-[#009959]' : 'bg-[#F61818]'
+      //         }`}
+      //       />
+      //     </div>
+      //   );
+      // },
     },
     { key: 'Invitedon', label: 'Invited on' },
     {
@@ -143,7 +150,10 @@ export default function OperatorsTable({
           <div className="flex items-center gap-2">
             <Icons.ri_delete_bin_5_line
               className="text-red-500"
-              onClick={() => setOpenDeleteModal(true)}
+              onClick={() => {
+                setMembersToDeleteID(row.id);
+                setOpenDeleteModal(true);
+              }}
             />
           </div>
           <DeleteModal
@@ -159,6 +169,50 @@ export default function OperatorsTable({
       ),
     },
   ];
+
+  // get all members
+  const { data: allOperators, isPending, isError } = useGetOperator();
+
+  //delete operators/members
+  const {
+    mutate: deleteMembers,
+    isPending: deletePending,
+    isSuccess: deleteSuccess,
+  } = useDeleteMember();
+
+  const orders: OrderRow[] = React.useMemo(() => {
+    return (
+      allOperators?.data?.map((allOperators: any) => ({
+        id: allOperators.id,
+        FullName: allOperators.user_name,
+        Roles: allOperators.role_name,
+        // invite: inviteMemberItems.email,
+        Invitedon: allOperators.created_at
+          ? format(new Date(allOperators.created_at), 'dd MMMM, yyyy')
+          : 'N/A',
+        // status: inviteMemberItems.status,
+        // Roles: inviteMemberItems.name,
+        // OperatingHours: '',
+        Actions: '',
+      })) || []
+    );
+  }, [allOperators]);
+
+  // New function to handle delete confirmation
+  const handleDeleteConfirm = () => {
+    if (!membersToDeleteID) return;
+    deleteMembers(membersToDeleteID, {
+      onSuccess: () => {
+        setOpenDeleteModal(false);
+        setMembersToDeleteID(null);
+        // refetch roles here or trigger update UI logic
+      },
+      onError: (error) => {
+        console.error('Failed to delete role:', error);
+        // Optionally show error message/toast
+      },
+    });
+  };
 
   return <ReuseableTable columns={columns} data={orders} />;
 }
