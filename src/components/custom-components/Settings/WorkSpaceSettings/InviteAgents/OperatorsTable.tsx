@@ -13,6 +13,7 @@ import { useDeleteMember } from '@/hooks/staffmanagment/operators/useDeleteMembe
 import { format } from 'date-fns';
 
 export interface OrderRow {
+  id: string;
   FullName: string;
   Roles: string;
   Shift: string;
@@ -186,13 +187,14 @@ export default function OperatorsTable({
         id: allOperators.id,
         FullName: allOperators.user_name,
         Roles: allOperators.role_name,
+        Shift: allOperators.shift,
         // invite: inviteMemberItems.email,
         Invitedon: allOperators.created_at
           ? format(new Date(allOperators.created_at), 'dd MMMM, yyyy')
           : 'N/A',
         // status: inviteMemberItems.status,
         // Roles: inviteMemberItems.name,
-        // OperatingHours: '',
+        OperatingHours: allOperators.operating_hour,
         Actions: '',
       })) || []
     );

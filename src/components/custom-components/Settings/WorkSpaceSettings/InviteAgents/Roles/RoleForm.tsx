@@ -33,6 +33,7 @@ type FormValues = {
   id?: number;
   role_id?: number;
   permissions?: PermissionState[];
+  groups?: string[];
 };
 
 interface RoleFormProps {

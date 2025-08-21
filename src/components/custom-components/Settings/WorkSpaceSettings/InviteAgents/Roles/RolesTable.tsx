@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
 import RoleForm from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Roles/RoleForm';
@@ -211,22 +211,11 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
     },
   ];
 
-  // const orders: OrderRow[] = [
-  //   {
-  //     RoleName: 'Agent',
-  //     agents: 12,
-  //     permission: 'Permission 1, Permission 2, Permission 3',
-  //     date: '23, June, 2025',
-  //     Actions: '',
-  //   },
-  //   {
-  //     RoleName: 'Admin',
-  //     agents: 7,
-  //     permission: 'Permission 1, Permission 2, Permission 3',
-  //     date: '06, August, 2025',
-  //     Actions: '',
-  //   },
-  // ];
+  useEffect(() => {
+    if (roleTableData) {
+      console.log('roleTableData', roleTableData);
+    }
+  }, [roleTableData]);
 
   const orders: OrderRow[] = React.useMemo(() => {
     return (
@@ -235,7 +224,9 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
         id: roleTableDataItems.role_id,
         RoleName: roleTableDataItems.role_name,
         agents: roleTableDataItems.no_of_agents,
-        permission: '',
+        permission: roleTableDataItems.permission_summary
+          .map((item: any) => item.permission_name)
+          .join(','),
         date: roleTableDataItems.created_at
           ? format(new Date(roleTableDataItems.created_at), 'dd MMMM yyyy')
           : 'N/A',

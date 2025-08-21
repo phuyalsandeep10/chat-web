@@ -72,7 +72,11 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
           ? format(new Date(inviteMemberItems.created_at), 'dd/MM/yyyy')
           : 'N/A',
         status: inviteMemberItems.status,
-        // Roles: inviteMemberItems.name,
+        Roles: inviteMemberItems.role_names.map((role, index) => {
+          console.log('role', role);
+          return <span key={index}>{role.role_name}</span>;
+        }),
+
         OperatingHours: '',
         Actions: '',
       })) || []
