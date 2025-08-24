@@ -9,7 +9,7 @@ export interface ProfileSectionProps {
 
 export type UpdateProfileFormValues = {
   name: string;
-  image: string;
+  image?: string;
   mobile: string;
   address: string;
   country: string;

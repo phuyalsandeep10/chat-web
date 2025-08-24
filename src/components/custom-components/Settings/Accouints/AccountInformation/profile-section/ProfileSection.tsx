@@ -6,7 +6,6 @@ import { ProfileSectionProps } from '../types';
 export default function ProfileSection({
   name,
   email,
-  country,
   address,
   phone,
   profileImage,
@@ -41,10 +40,10 @@ export default function ProfileSection({
         </div>
 
         <div className="flex flex-col gap-0.5">
-          {location && (
+          {address && (
             <div className="flex items-center justify-end gap-2">
               <MapPinIcon className="h-3.5 w-3.5" />
-              <span className="text-right">{country}</span>
+              <span className="text-right">{address}</span>
             </div>
           )}
           {phone && (

@@ -227,7 +227,7 @@ export class AuthService {
       console.log(payload.address);
       console.log('internal here');
       console.log(payload.name);
-      console.log(payload.country);
+      console.log(payload.mobile);
       return response.data;
     } catch (error) {
       console.error('Error updating Personal Information');

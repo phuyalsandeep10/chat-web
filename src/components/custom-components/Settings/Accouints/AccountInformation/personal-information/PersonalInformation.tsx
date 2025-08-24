@@ -44,14 +44,21 @@ export default function PersonalInformation() {
   });
 
   const onSubmit: SubmitHandler<UpdateProfileFormValues> = (data) => {
-    console.log('Submitting with data:', data);
-    mutation.mutate(data);
+    const updateProfileData: UpdateProfileFormValues = {
+      name: data.name,
+      mobile: data.mobile,
+      address: data.address,
+      country: data.country,
+      language: data.language,
+    };
+    console.log(updateProfileData);
+    mutation.mutate(updateProfileData);
   };
 
   const debouncedSubmit = useCallback(
     debounce((data: UpdateProfileFormValues) => {
       handleSubmit(onSubmit)();
-    }, 3000),
+    }, 2000),
     [handleSubmit],
   );
 
