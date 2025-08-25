@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,7 +40,11 @@ export default function WorkspaceInformation() {
     isLoading: isLoadingCountries,
     error: countriesError,
   } = useGetCountries();
-  const countries = countriesResponse?.data?.countries || [];
+
+  const countries = useMemo(
+    () => countriesResponse?.data?.countries || [],
+    [countriesResponse?.data?.countries],
+  );
 
   const organization = organizationDetails?.organization;
   const owner = organizationDetails?.owner;
@@ -85,12 +89,17 @@ export default function WorkspaceInformation() {
     [croppedAreaPixels],
   );
 
-  // Correct logo handling
   const logoSrc =
     imageUrl ||
-    (organization?.logo?.startsWith('http')
-      ? organization.logo
-      : '/profile-image.png');
+    (owner?.image?.startsWith('https') ? owner.image : '/profile.jpg');
+
+  useEffect(() => {
+    if (owner && countries.length > 0) {
+      const ownerCountry =
+        countries.find((c) => c.name === owner.country) || null;
+      setSelectedCountry(ownerCountry);
+    }
+  }, [owner, countries]);
 
   return (
     <>

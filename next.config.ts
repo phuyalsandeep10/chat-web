@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
       'flagcdn.com',
       'lh3.googleusercontent.com',
       'res.cloudinary.com',
-      'ibb.co',
+      'i.ibb.co',
     ],
   },
   reactStrictMode: false,
