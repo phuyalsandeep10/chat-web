@@ -21,11 +21,14 @@ import { useGetorganizationDetails } from '@/hooks/organizations/useGetorganizat
 import { useGetCountries } from '@/hooks/organizations/useGetCountries';
 import ErrorText from '@/components/common/hook-form/ErrorText';
 import { Country } from '@/services/organizations/types';
+import { useWorkspaceStore } from '@/store/WorkspaceStore/useWorkspaceStore';
 export default function WorkspaceInformation() {
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChangePhotoModal, setShowChangePhotoModal] = useState(false);
+
+  const { setData } = useWorkspaceStore();
 
   const { data: organizationDetails, isPending } = useGetorganizationDetails();
 
@@ -141,6 +144,7 @@ export default function WorkspaceInformation() {
                 id="name"
                 defaultValue="Bramhabyfields"
                 className="h-9 w-full"
+                onChange={(e) => setData({ name: e.target.value })}
               />
             </div>
 
@@ -163,6 +167,7 @@ export default function WorkspaceInformation() {
                   id="domain"
                   placeholder="Enter your url"
                   className="h-9 rounded-l-none border-l-0"
+                  onChange={(e) => setData({ domain: e.target.value })}
                 />
               </div>
               <p
@@ -195,7 +200,10 @@ export default function WorkspaceInformation() {
               {!isLoadingCountries && !countriesError && (
                 <CountrySelect
                   value={selectedCountry}
-                  onChange={(country) => setSelectedCountry(country)}
+                  onChange={(country) => {
+                    setSelectedCountry(country);
+                    setData({ timeZone: country });
+                  }}
                   buttonClassName={cn('w-full  text-black py-2')}
                   contentClassName={cn('cursor-pointer hover:bg-white')}
                   itemClassName={cn('hover:bg-gray-100 px-2 py-1')}

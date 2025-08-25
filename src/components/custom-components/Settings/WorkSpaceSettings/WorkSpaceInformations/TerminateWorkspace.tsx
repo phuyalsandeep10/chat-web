@@ -9,6 +9,7 @@ import React, { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { InputField } from '@/components/common/hook-form/InputField';
 import { showToast } from '@/shared/toast';
+import axiosInstance from '@/apiConfigs/axiosInstance';
 
 type FormData = {
   workspaceId: string;
@@ -23,8 +24,19 @@ const TerminateWorkspace = () => {
     },
   });
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = async (data: string) => {
     dialogRef.current?.open();
+    try {
+      const response = await axiosInstance.post(
+        '/organizations/delete-workspace',
+        {
+          identifier: data,
+        },
+      );
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // This function runs when user clicks "Yes, Delete" in modal
@@ -90,7 +102,7 @@ const TerminateWorkspace = () => {
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={handleDeleteClick}
+                  onClick={() => handleDeleteClick(getValues('workspaceId'))}
                   className={cn(
                     'font-outfit mb-5 cursor-pointer text-xs leading-[16px] font-semibold',
                   )}

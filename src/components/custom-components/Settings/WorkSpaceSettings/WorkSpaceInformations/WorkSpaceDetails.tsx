@@ -1,3 +1,4 @@
+import axiosInstance from '@/apiConfigs/axiosInstance';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
 import { cn } from '@/lib/utils';
@@ -6,6 +7,7 @@ import React, { useState } from 'react';
 
 const WorkSpaceDetails = () => {
   const [copied, setCopied] = useState(false);
+  const [identifier, setIdentifier] = useState(null);
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -16,6 +18,19 @@ const WorkSpaceDetails = () => {
   const handleOpenLink = () => {
     window.open(workspaceURL, '_blank');
   };
+
+  const updateWorspace = async () => {
+    try {
+      const response = await axiosInstance.get('/organizations/current');
+      const identifier = response.data.data.identifier;
+      console.log(identifier);
+      setIdentifier(identifier);
+    } catch (error) {
+      console.log('');
+    }
+  };
+  updateWorspace();
+
   return (
     <div>
       <div className="w-full">
@@ -44,7 +59,7 @@ const WorkSpaceDetails = () => {
                     'border-gray-light font-outfit text-gray-light h-9 w-full border pt-2 pr-52 pl-5 text-sm',
                   )}
                 >
-                  wksp_01234567
+                  {identifier}
                 </p>
               </div>
             </div>
