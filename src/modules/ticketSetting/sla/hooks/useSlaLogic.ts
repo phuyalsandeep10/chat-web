@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useSlaStore, useSla } from './useSla';
+import { useSlaStore, useSla, useDeleteSla } from './useSla';
+import { usePriorities } from '@/modules/ticket/hooks/usePriorities';
+import { useAddSla } from './useAddSla';
 import type { SLAFormData } from './useSlaAutoSave';
 
 export const timeUnitOptions = [
@@ -19,22 +21,34 @@ export function secondsToHuman(seconds: number) {
   return { value: Math.round(seconds / 86400), unit: 'Days' };
 }
 
-// Custom hook to encapsulate SLA form logic
+export function capitalizeFirstLetter(text: string) {
+  if (!text) return '';
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+// ✅ Custom hook that encapsulates SLA logic
 export function useSlaLogic() {
-  const { data: slaData, isLoading } = useSla(); // if you need it for fetching
+  const { data: slaData, isLoading } = useSla();
   const slaList = useSlaStore((state) => state.slaList);
 
   const { control, reset } = useForm<SLAFormData>({ defaultValues: {} });
+  const { control: newSlaControl } = useAddSla(() => setShowNewRow(false));
 
-  const [alertBeforeBreach, setAlertBeforeBreach] = useState(true);
-  const [alertAfterBreach, setAlertAfterBreach] = useState(true);
+  // States
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [showNewRow, setShowNewRow] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
+  const deleteMutation = useDeleteSla();
+  const { data: priorities, isLoading: priorityLoading } = usePriorities();
+
+  // Pre-fill form with SLA values
   useEffect(() => {
     if (!slaList?.length) return;
 
     const mappedDefaults: Record<string, any> = {};
     slaList.forEach((sla: any) => {
-      const key = sla.priority?.name || 'low';
+      const key = sla.priority?.name || `sla-${sla.id}`;
       const response = secondsToHuman(Number(sla.response_time ?? 0));
       const resolution = secondsToHuman(Number(sla.resolution_time ?? 0));
 
@@ -47,14 +61,50 @@ export function useSlaLogic() {
     reset(mappedDefaults);
   }, [slaList, reset]);
 
+  // Selection logic
+  const toggleRowSelection = (id: number) => {
+    const newSelection = new Set(selectedRows);
+    if (newSelection.has(id)) newSelection.delete(id);
+    else newSelection.add(id);
+    setSelectedRows(newSelection);
+  };
+
+  const handleCancel = () => setSelectedRows(new Set());
+
+  const handleAddNewRow = () => setShowNewRow(true);
+
+  const handleConfirmDelete = () => {
+    selectedRows.forEach((id) => deleteMutation.mutate(id));
+    setSelectedRows(new Set());
+    setIsDeleteOpen(false);
+  };
+
+  const isAnySelected = selectedRows.size > 0;
+
+  // Priority options (exclude already used ones)
+  const usedPriorityIds = new Set(slaList.map((sla) => sla.priority?.id));
+  const priorityOptions =
+    priorities
+      ?.filter((p: any) => !usedPriorityIds.has(p.id))
+      .map((p: any) => ({ value: p.id, label: p.name })) || [];
+
   return {
     slaList,
     isLoading,
     control,
-    alertBeforeBreach,
-    setAlertBeforeBreach,
-    alertAfterBreach,
-    setAlertAfterBreach,
+    newSlaControl,
+    selectedRows,
+    showNewRow,
+    setShowNewRow,
+    isDeleteOpen,
+    setIsDeleteOpen,
+    toggleRowSelection,
+    handleCancel,
+    handleAddNewRow,
+    handleConfirmDelete,
+    isAnySelected,
+    priorityOptions,
     timeUnitOptions,
+    capitalizeFirstLetter,
   };
 }

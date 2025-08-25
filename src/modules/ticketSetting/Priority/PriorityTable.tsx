@@ -27,7 +27,7 @@ export default function TicketPriorityPage() {
     isError,
     error,
     deletePriorities,
-    isDeleting,
+    capitalizeFirstLetter,
   } = usePrioritiesTicket();
 
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -80,32 +80,36 @@ export default function TicketPriorityPage() {
             {priorities.map((priority) => (
               <div key={priority.id} className="rounded-lg border p-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex gap-2">
-                    <AdvancedColorPicker
-                      color={priority.darkColor}
-                      onChange={(color) =>
-                        updatePriorityColor(priority.id, 'dark', color)
-                      }
-                      tooltip={
-                        <div className="text-sm font-medium">
-                          Background Color
-                        </div>
-                      }
-                    />
-                    <AdvancedColorPicker
-                      color={priority.lightColor}
-                      onChange={(color) =>
-                        updatePriorityColor(priority.id, 'light', color)
-                      }
-                      tooltip={
-                        <div className="text-sm font-medium">Text Color</div>
-                      }
-                    />
+                  <div className="flex">
+                    <div className="border px-1 py-1">
+                      <AdvancedColorPicker
+                        color={priority.bg_color}
+                        onChange={(color) =>
+                          updatePriorityColor(priority.id, 'bg', color)
+                        }
+                        tooltip={
+                          <div className="text-sm font-medium">
+                            Background Color
+                          </div>
+                        }
+                      />
+                    </div>
+                    <div className="border-t border-r border-b px-1 py-1">
+                      <AdvancedColorPicker
+                        color={priority.fg_color}
+                        onChange={(color) =>
+                          updatePriorityColor(priority.id, 'fg', color)
+                        }
+                        tooltip={
+                          <div className="text-sm font-medium">Text Color</div>
+                        }
+                      />
+                    </div>
                   </div>
                   <div className="flex-1">
                     <input
                       type="text"
-                      value={priority.name}
+                      value={capitalizeFirstLetter(priority.name)}
                       onChange={(e) =>
                         updatePriorityName(priority.id, e.target.value)
                       }
@@ -116,7 +120,7 @@ export default function TicketPriorityPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => openDeleteModal(Number(priority.id))}
-                    className="text-alert-prominent hover:text-alert-prominent cursor-pointer"
+                    className="text-alert-prominent hover:text-alert-prominent cursor-pointer hover:bg-white"
                   >
                     <Icons.ri_delete_bin_5_line className="h-4 w-4" />
                   </Button>
@@ -129,16 +133,16 @@ export default function TicketPriorityPage() {
           <div className="border-t pt-6">
             <form
               onSubmit={handleSubmit(onAddPriority)}
-              className="flex items-end gap-4"
+              className="flex items-center gap-4"
             >
-              <div className="flex-1">
+              <div className="font-outfit text-disabled-foreground h-9 flex-1 text-sm font-medium">
                 <InputField
                   control={control}
                   name="newPriorityName"
                   placeholder="New Priority Name"
                 />
               </div>
-              <div className="w-32">
+              <div className="font-outfit text-disabled-foreground h-9 w-48 text-sm font-medium">
                 <SelectField
                   control={control}
                   name="level"
@@ -146,25 +150,31 @@ export default function TicketPriorityPage() {
                   placeholder="Level"
                 />
               </div>
-              <div className="flex gap-2">
-                <AdvancedColorPicker
-                  color={newPriorityBgColor}
-                  onChange={setNewPriorityBgColor}
-                  tooltip={
-                    <div className="text-sm font-medium">Background Color</div>
-                  }
-                />
-                <AdvancedColorPicker
-                  color={newPriorityTextColor}
-                  onChange={setNewPriorityTextColor}
-                  tooltip={
-                    <div className="text-sm font-medium">Text Color</div>
-                  }
-                />
+              <div className="flex">
+                <div className="border px-1 py-1">
+                  <AdvancedColorPicker
+                    color={newPriorityBgColor}
+                    onChange={setNewPriorityBgColor}
+                    tooltip={
+                      <div className="text-sm font-medium">
+                        Background Color
+                      </div>
+                    }
+                  />
+                </div>
+                <div className="border-t border-r border-b px-1 py-1">
+                  <AdvancedColorPicker
+                    color={newPriorityTextColor}
+                    onChange={setNewPriorityTextColor}
+                    tooltip={
+                      <div className="text-sm font-medium">Text Color</div>
+                    }
+                  />
+                </div>
               </div>
               <Button
                 type="submit"
-                className="bg-brand-primary hover:bg-brand-primary/90 px-6 py-3 text-white"
+                className="hover:bg-brand-primary/90 cursor-pointer px-6 py-3 text-white"
               >
                 <Icons.plus className="mr-2 h-4 w-4" />
                 Add Status

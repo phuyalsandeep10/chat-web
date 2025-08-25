@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useForm, useWatch, Controller } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   createTicketSchema,
@@ -101,15 +101,17 @@ export const useCreateTicketForm = () => {
 
   // Submit handler
   const onSubmit = (data: TicketFormData) => {
+    console.log('Form data:', data); // Debug: Log form data
     const selectedCustomer = customerOptions.find(
       (opt: any) => opt.value === selectedEmail,
     );
     const priorityId = parseInt(selectedPriority);
-    const memberIds = teamMembers
-      .filter((member: any) =>
-        selectedMembers?.includes(member.user?.name?.toLowerCase()),
-      )
-      .map((member: any) => member.user?.id || 0);
+    // Use assignees directly as memberIds (they are already user IDs)
+    const memberIds: number[] = data.assignees
+      ? data.assignees.map((id) => parseInt(id))
+      : []; // Convert to numbers if API expects numbers
+
+    console.log('memberIds:', memberIds); // Debug: Log memberIds
 
     createTicket(
       {

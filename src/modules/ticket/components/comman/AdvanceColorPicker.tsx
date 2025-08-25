@@ -12,11 +12,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { TooltipArrow } from '@radix-ui/react-tooltip';
 
 interface AdvancedColorPickerProps {
   color: string;
   onChange: (color: string) => void;
-  tooltip: React.ReactNode; // required prop
+  tooltip: React.ReactNode;
 }
 
 export default function AdvancedColorPicker({
@@ -170,7 +171,7 @@ export default function AdvancedColorPicker({
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <div
-                className="h-12 w-12 cursor-pointer rounded border border-gray-200"
+                className="border-grey-light h-8 w-8 cursor-pointer rounded border"
                 style={{ backgroundColor: color }}
               />
             </DialogTrigger>
@@ -187,7 +188,7 @@ export default function AdvancedColorPicker({
                 onClick={handleGradientClick}
               >
                 <div
-                  className="absolute h-4 w-4 -translate-x-2 -translate-y-2 rounded-full border-2 border-white shadow-lg"
+                  className="border-grey-light absolute h-4 w-4 -translate-x-2 -translate-y-2 rounded-full border shadow-lg"
                   style={{
                     left: `${saturation}%`,
                     top: `${100 - lightness}%`,
@@ -207,7 +208,7 @@ export default function AdvancedColorPicker({
                 onClick={handleSpectrumClick}
               >
                 <div
-                  className="absolute h-4 w-4 -translate-x-2 rounded-full border-2 border-white shadow-lg"
+                  className="rounded-ful border-grey-light absolute h-4 w-4 -translate-x-2 shadow-lg"
                   style={{
                     left: `${(hue / 360) * 100}%`,
                     backgroundColor: `hsl(${hue}, 100%, 50%)`,
@@ -216,18 +217,17 @@ export default function AdvancedColorPicker({
               </div>
 
               {/* Input Fields */}
-              <div className="grid grid-cols-4 gap-2 text-sm">
-                <div>
-                  <label className="text-xs text-gray-500">Hex</label>
+              <div className="flex items-center justify-between gap-2 text-sm">
+                <div className="mt-5">
                   <input
                     value={hexValue}
                     onChange={(e) => handleHexChange(e.target.value)}
-                    className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
+                    className="border-grey-light w-full rounded border px-2 py-1 text-xs"
                   />
                 </div>
                 {(['r', 'g', 'b'] as const).map((c) => (
                   <div key={c}>
-                    <label className="text-xs text-gray-500">
+                    <label className="font-outfit text-sm font-medium text-white">
                       {c.toUpperCase()}
                     </label>
                     <input
@@ -236,7 +236,7 @@ export default function AdvancedColorPicker({
                       max={255}
                       value={rgbValues[c]}
                       onChange={(e) => handleRgbChange(c, e.target.value)}
-                      className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
+                      className="font-outfit border-#D4D4D4 w-full rounded border px-2 py-1 text-xs font-medium text-white"
                     />
                   </div>
                 ))}
@@ -245,7 +245,10 @@ export default function AdvancedColorPicker({
           </Dialog>
         </div>
       </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      {/* CUSTOM TOOLTIP STYLING */}
+      <TooltipContent className="text-brand-dark rounded-md border bg-white p-2 shadow-lg before:bg-white">
+        {tooltip}
+      </TooltipContent>
     </Tooltip>
   );
 }

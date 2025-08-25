@@ -6,7 +6,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-6 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-[var(--color-ring)] focus-visible:ring-[var(--color-ring)]/50 focus-visible:ring-[3px] aria-invalid:ring-[var(--color-destructive)]/20 dark:aria-invalid:ring-[var(--color-destructive)]/40 aria-invalid:border-[var(--color-destructive)]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-6 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-[var(--color-ring)] focus-visible:ring-[var(--color-ring)]/50 focus-visible:ring-[3px] aria-invalid:ring-[var(--color-destructive)]/20 dark:aria-invalid:ring-[var(--color-destructive)]/40 aria-invalid:border-[var(--color-destructive)] w-fit px-[12px] py-[6px]",
   {
     variants: {
       variant: {
@@ -45,8 +45,10 @@ const buttonVariants = cva(
           text-gray-primary
           offset-0
           font-semibold
-          text-[12px]
+          text-xs
         `,
+        outline_black: `border border-black bg-transparent text-black w-fit text-xs`,
+        black: `border border-theme-text-light bg-black text-white w-fit`,
         secondary: `
           border-2 border-brand-primary
           bg-transparent
@@ -59,6 +61,7 @@ const buttonVariants = cva(
           font-semibold
           text-[15px]
         `,
+        disabled: `bg-brand-disable text-theme-text-primary`,
         success: `bg-success text-white focus:outline-none focus:ring-0 focus:ring-offset-0 font-semibold
           text-[16px]`,
         ghost:
@@ -66,9 +69,9 @@ const buttonVariants = cva(
         link: 'text-brand-primary underline-offset-4 hover:underline',
       },
       size: {
-        sm: 'h-8 rounded-[8px] w-[130px] h-[36px] gap-1.5 px-[16px] has-[>svg]:px-2.5 text-[12px]',
-        md: 'h-[48px] w-[207px] rounded-[8px] px-[16px] has-[>svg]:px-2.5',
-        lg: 'h-[60px] rounded-[8px] w-[324px] px-[16px] has-[>svg]:px-2.5',
+        sm: 'h-8 rounded-[8px] gap-1.5 has-[>svg]:px-2.5',
+        md: 'h-[48px] rounded-[8px] has-[>svg]:px-2.5',
+        lg: 'h-[60px] rounded-[8px] has-[>svg]:px-2.5',
         icon: 'size-9',
       },
     },

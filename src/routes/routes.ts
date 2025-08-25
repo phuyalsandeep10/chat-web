@@ -31,7 +31,7 @@ export const ROUTES = {
   TOOLS_FEATURES: {
     DASHBOARD: '/tools_features/dashboard',
     TICKET: '/ticket',
-    VISITORS: '/tools_features/visitors',
+    VISITORS: '/visitors',
     AI_ASSISTANT: '/tools_features/ai_assistant',
     TRIGGER: '/tools_features/trigger',
     CLIENT: '/tools_features/client',

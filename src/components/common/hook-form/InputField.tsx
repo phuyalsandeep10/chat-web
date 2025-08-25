@@ -56,11 +56,12 @@ export function InputField<T extends FieldValues>({
       <Controller
         control={control}
         name={name}
+        defaultValue={undefined as any} // match type
         rules={{
           required: required ? 'This field is required' : false,
           min:
             type === 'number'
-              ? { value: 1, message: 'Value must be ≥ 1' }
+              ? { value: 0, message: 'Value must be ≥ 0' }
               : undefined,
         }}
         render={({ field, fieldState }) => (
@@ -77,22 +78,27 @@ export function InputField<T extends FieldValues>({
                   inputClassName,
                   'border-grey-light h-[36px] border-[1px] px-3 placeholder:text-[14px] focus:outline-none',
                 )}
-                {...field}
-                min={type === 'number' ? 1 : undefined}
+                value={
+                  type === 'number'
+                    ? (field.value ?? '')
+                    : ((field.value as string | undefined) ?? '')
+                }
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (type === 'number') {
+                    if (/^\d*$/.test(val)) {
+                      field.onChange(val === '' ? '' : Number(val));
+                    }
+                  } else {
+                    field.onChange(val);
+                  }
+                }}
                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                   if (type === 'number') {
                     if (['-', 'e', 'E', '+'].includes(e.key)) {
-                      e.preventDefault(); // prevent invalid characters
+                      e.preventDefault();
                     }
                   }
-                }}
-                onChange={(e) => {
-                  let value = e.target.value;
-                  if (type === 'number') {
-                    // prevent 0 or negatives
-                    if (Number(value) < 1) value = '1';
-                  }
-                  field.onChange(value); // pass the corrected value to RHF
                 }}
               />
 

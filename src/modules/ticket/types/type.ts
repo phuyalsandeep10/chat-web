@@ -1,5 +1,11 @@
 type Status = string & {}; // Accept any other string,
 
+export interface Assignee {
+  id: number;
+  name: string;
+  image: string | null;
+}
+
 export type TicketCardProps = {
   id: number;
   email: string;
@@ -15,6 +21,7 @@ export type TicketCardProps = {
   created_by?: string;
   checked?: boolean;
   onCheckChange?: (checked: boolean) => void;
+  assignees?: Assignee[];
 };
 
 import { z } from 'zod';

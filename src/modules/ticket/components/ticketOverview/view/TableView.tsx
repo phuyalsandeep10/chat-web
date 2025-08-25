@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/tooltip';
 import DeleteModal from '@/components/modal/DeleteModal';
 import { useCardView } from './hooks/useCardView';
+import { cn } from '@/lib/utils';
 
 export default function TableView() {
   const {
@@ -137,7 +138,12 @@ export default function TableView() {
             <TableRow>
               <TableHead>
                 <Checkbox
-                  className="bg-gray-primary ml-4"
+                  // className="bg-gray-primary ml-4"
+                  className={cn(
+                    'bg-gray-primary mt-2 h-5 w-5 rounded border',
+                    'data-[state=checked]:bg-brand-primary',
+                    'data-[state=checked]:border-brand-primary',
+                  )}
                   checked={
                     currentTickets.length > 0 &&
                     currentTickets.every((ticket) => checkedTickets[ticket.id])
@@ -161,7 +167,11 @@ export default function TableView() {
               <TableRow key={ticket.id}>
                 <TableCell>
                   <Checkbox
-                    className="bg-gray-primary ml-4"
+                    className={cn(
+                      'bg-gray-primary mt-2 h-5 w-5 rounded border',
+                      'data-[state=checked]:bg-brand-primary',
+                      'data-[state=checked]:border-brand-primary',
+                    )}
                     checked={checkedTickets[ticket.id] || false}
                     onCheckedChange={(checked) =>
                       handleCheckChange(ticket.id, Boolean(checked))
@@ -197,12 +207,25 @@ export default function TableView() {
                   {formatTimeAgo(ticket?.created_at)}
                 </TableCell>
                 <TableCell>
-                  <Avatar className="h-10.5 w-10.5">
-                    <AvatarImage src={''} alt={ticket?.created_by?.name} />
-                    <AvatarFallback>
-                      {ticket?.created_by?.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="flex flex-wrap gap-1">
+                    {ticket?.assignees?.map((assignee: any) => (
+                      <Avatar
+                        key={assignee.id}
+                        className="h-10 w-10 border-2 border-white"
+                      >
+                        {assignee.image ? (
+                          <AvatarImage
+                            src={assignee.image}
+                            alt={assignee.name}
+                          />
+                        ) : (
+                          <AvatarFallback>
+                            {assignee.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                    ))}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <span

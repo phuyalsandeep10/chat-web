@@ -136,10 +136,13 @@ const CreateTicketForm = () => {
               placeholder={
                 f.membersLoading ? 'Loading members...' : 'Select Members'
               }
-              options={f.teamMembers.map((member: any) => ({
-                label: member.user?.name || 'Unknown',
-                value: member.user?.name?.toLowerCase() || '',
-              }))}
+              options={f.teamMembers.map((member: any) => {
+                const id = member.user?.id || member.user_id || member.id || ''; // Adjust based on your API
+                return {
+                  label: member.user?.name || 'Unknown',
+                  value: id.toString(),
+                };
+              })}
             />
             {/* Description */}
             <TextAreaField

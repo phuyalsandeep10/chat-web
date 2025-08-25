@@ -13,6 +13,7 @@ import { useLogout } from '@/hooks/auth/useLogout';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { ROUTES } from '@/routes/routes';
 import { useRouter } from 'next/navigation';
+import { AuthService } from '@/services/auth/auth';
 
 const SidebarFooterMenu = () => {
   const router = useRouter();
@@ -85,8 +86,9 @@ const SidebarFooterMenu = () => {
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
+            AuthService.clearAuthTokens();
+            router.replace(ROUTES.LOGIN);
             logout();
-            // clearAuthData();
           }}
           className={cn('hover:bg-muted w-full cursor-pointer text-sm')}
         >

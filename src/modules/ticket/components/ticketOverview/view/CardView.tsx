@@ -130,7 +130,7 @@ export default function CardView() {
         {tickets.length === 0 ? (
           <p>No Ticket Found.</p>
         ) : (
-          tickets.map((ticket) => (
+          currentTickets.map((ticket) => (
             <TicketCard
               key={ticket?.id}
               id={ticket?.id}
@@ -144,7 +144,7 @@ export default function CardView() {
               status_bg_color={ticket?.status?.bg_color}
               status={ticket?.status?.name}
               created_by={ticket?.created_by?.name}
-              avatarUrl=""
+              assignees={ticket?.assignees || []}
               checked={checkedTickets[ticket?.id] || false}
               onCheckChange={(isChecked) =>
                 handleCheckChange(ticket?.id, isChecked)
@@ -153,6 +153,7 @@ export default function CardView() {
           ))
         )}
       </div>
+
       {/* Pagination */}
       <Pagination
         currentPage={currentPage}

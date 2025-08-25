@@ -21,7 +21,7 @@ export default function TicketTabs({
   onSelect,
 }: TicketTabsProps) {
   return (
-    <div className="mt-2 flex cursor-pointer flex-wrap gap-20 border-b sm:gap-28">
+    <div className="mt-2 flex cursor-pointer gap-20 border-b sm:gap-28">
       {tabs.map(({ label, status }) => (
         <button
           key={label}

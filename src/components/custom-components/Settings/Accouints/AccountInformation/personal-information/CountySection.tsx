@@ -1,5 +1,6 @@
 import Label from '@/components/common/hook-form/Label';
-import CountrySelect, { Country } from '@/shared/CountrySelect';
+import { Country } from '@/services/organizations/types';
+import CountrySelect from '@/shared/CountrySelect';
 
 type CountrySelectProps = {
   value: Country | null;

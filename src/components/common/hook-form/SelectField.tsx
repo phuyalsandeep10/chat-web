@@ -11,7 +11,6 @@ import Label from './Label';
 import { Controller, Control, FieldValues, Path } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { Select } from '@radix-ui/react-select';
-import clsx from 'clsx';
 
 type SelectFieldProps<T extends FieldValues> = {
   control: Control<T>;
@@ -96,7 +95,7 @@ export function SelectField<T extends FieldValues>({
                     ))
                   ) : (
                     <div className="px-3 py-2 text-sm text-gray-500">
-                      Priorities Not Available
+                      Data Not Available
                     </div>
                   )}
                 </SelectContent>

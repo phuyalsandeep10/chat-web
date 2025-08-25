@@ -5,6 +5,7 @@ import { Icons } from '@/components/ui/Icons';
 import Priority from './Priority/Priority';
 import SLA from './sla/Sla';
 import { useSlaLogic } from './sla/hooks/useSlaLogic';
+import TicketStatus from './ticketStatus/TicketStatus';
 
 const TicketSystem = () => {
   const { slaList, isLoading } = useSlaLogic();
@@ -27,6 +28,9 @@ const TicketSystem = () => {
 
       <div className="mt-10">
         <Priority />
+      </div>
+      <div className="mt-10">
+        <TicketStatus />
       </div>
     </>
   );

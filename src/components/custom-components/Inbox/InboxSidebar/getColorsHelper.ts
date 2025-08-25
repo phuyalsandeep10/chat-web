@@ -6,7 +6,5 @@ export const getStatusColor = (status: string) => {
       return 'bg-warning text-white';
     case 'Resolved':
       return 'bg-success text-white';
-    default:
-      return 'bg-warning text-white';
   }
 };

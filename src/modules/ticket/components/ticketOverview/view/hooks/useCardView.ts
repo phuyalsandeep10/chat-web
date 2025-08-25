@@ -6,8 +6,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/apiConfigs/axiosInstance';
 import { showToast } from '@/shared/toast';
 
+//delete ticket
 const deleteTicket = async (id: number) => {
-  const response = await axiosInstance.delete(`/tickets/${id}`);
+  const response = await axiosInstance.delete(`/tickets/${id}`, {
+    data: { id },
+  });
   return response.data;
 };
 
@@ -113,7 +116,7 @@ export function useCardView() {
         variant: 'success',
       });
 
-      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['tickets'], exact: false });
       setCheckedTickets({});
       closeDeleteModal();
     },

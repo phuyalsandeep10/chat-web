@@ -28,9 +28,14 @@ const axiosInstance = axios.create({ baseURL });
 
 axiosInstance.interceptors.request.use(
   (config) => {
+    const XOrgId = localStorage.getItem('X-Org-Id');
     const tokens = AuthService.getAuthTokens();
     if (tokens?.accessToken) {
       config.headers.Authorization = `Bearer ${tokens.accessToken}`;
+    }
+    // console.log(`x org id in header: ${XOrgId}`);
+    if (XOrgId) {
+      config.headers['X-Org-Id'] = XOrgId;
     }
     return config;
   },

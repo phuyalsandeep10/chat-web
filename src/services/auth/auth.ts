@@ -111,7 +111,7 @@ export class AuthService {
   // Forgot Password Verify
   static async resendOtp(payload: resendOtpPayloads) {
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `${baseURL}/auth/resend-verification-token`,
         payload,
       );

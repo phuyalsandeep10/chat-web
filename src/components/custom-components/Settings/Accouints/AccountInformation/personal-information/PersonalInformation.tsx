@@ -11,7 +11,7 @@ import LanguageSection from './LanguageSection';
 import { UpdateProfileFormValues } from '../types';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { AuthService } from '@/services/auth/auth';
-import { Country } from '@/shared/CountrySelect';
+import { Country } from '@/services/organizations/types';
 
 export default function PersonalInformation() {
   const authData = useAuthStore((state) => state.authData);
