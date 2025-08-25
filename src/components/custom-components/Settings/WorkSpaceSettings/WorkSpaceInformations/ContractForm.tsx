@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import PhoneInput from '@/shared/PhoneInput';
 import { cn } from '@/lib/utils';
 import { useWorkspaceStore } from '@/store/WorkspaceStore/useWorkspaceStore';
-import { values } from 'lodash';
 
 interface ContactFormProps {
   contactEmail?: string | null;
@@ -122,9 +121,9 @@ const ContactForm: React.FC<ContactFormProps> = ({
               render={({ field }) => (
                 <PhoneInput
                   value={field.value}
-                  onChange={() => {
-                    field.onChange(field.value);
-                    setData({ phone: field.value });
+                  onChange={(value) => {
+                    field.onChange(value);
+                    setData({ phone: value });
                   }}
                 />
               )}
