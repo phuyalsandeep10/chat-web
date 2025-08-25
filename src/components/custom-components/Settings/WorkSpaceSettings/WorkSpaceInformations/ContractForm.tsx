@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -10,6 +10,9 @@ import { Input } from '@/components/ui/input';
 import PhoneInput from '@/shared/PhoneInput';
 import { cn } from '@/lib/utils';
 import { useWorkspaceStore } from '@/store/WorkspaceStore/useWorkspaceStore';
+import { debounce } from 'lodash';
+import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganization';
+import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 
 interface ContactFormProps {
   contactEmail?: string | null;
@@ -69,10 +72,34 @@ const ContactForm: React.FC<ContactFormProps> = ({
   const { updatedData, setData } = useWorkspaceStore();
 
   console.log(updatedData);
+  const { mutate: updateOrganization } = useUpdateOrganization();
 
   const onSubmit = (data: ContactFormSchema) => {
     console.log('Form Data:', data);
   };
+
+  const { authData } = useAuthStore();
+  const orgId = authData?.data.user.attributes.organization_id;
+
+  // ✅ Debounced submit function
+  const debouncedSubmit = useMemo(
+    () =>
+      debounce((formData) => {
+        if (!orgId) return;
+        updateOrganization({ ...formData });
+      }, 1000),
+    [orgId, updateOrganization],
+  );
+
+  // Watch for changes in Zustand store → trigger debounced submit
+  useEffect(() => {
+    if (updatedData && orgId) {
+      debouncedSubmit(updatedData);
+    }
+    return () => {
+      debouncedSubmit.cancel();
+    };
+  }, [updatedData, orgId, debouncedSubmit]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -123,7 +150,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
                   value={field.value}
                   onChange={(value) => {
                     field.onChange(value);
-                    setData({ phone: value });
+                    setData({ contact_phone: value });
                   }}
                 />
               )}
@@ -149,7 +176,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               placeholder="Messenger username"
               className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('messenger')}
-              onChange={(e) => setData({ messenger: e.target.value })}
+              onChange={(e) => setData({ facebook: e.target.value })}
             />
             {errors.messenger && (
               <p className={cn('text-alert-prominent text-xs')}>
@@ -192,7 +219,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               placeholder="X username"
               className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('twitter')}
-              onChange={(e) => setData({ xUsername: e.target.value })}
+              onChange={(e) => setData({ twitter: e.target.value })}
             />
             {errors.twitter && (
               <p className={cn('text-alert-prominent text-xs')}>
@@ -212,7 +239,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               className={cn('font-outfit h-9 text-sm font-medium')}
               placeholder="+977 9824830624"
               {...register('whatsapp')}
-              onChange={(e) => setData({ whatsApp: e.target.value })}
+              onChange={(e) => setData({ whatsapp: e.target.value })}
             />
             {errors.whatsapp && (
               <p className={cn('text-alert-prominent text-xs')}>

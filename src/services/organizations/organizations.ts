@@ -1,6 +1,7 @@
 import axiosInstance, { baseURL } from '@/apiConfigs/axiosInstance';
 import { createOrganizationPayload } from './types';
 import { Country, CountriesApiResponse } from './types';
+import WorkspaceData from '@/store/WorkspaceStore/useWorkspaceStore';
 
 export class OrganizationsService {
   // Create Organizations
@@ -14,12 +15,9 @@ export class OrganizationsService {
   }
 
   // Update Organization
-  static async updateOrganization(
-    organization_id: string,
-    payload: Partial<createOrganizationPayload>,
-  ) {
+  static async updateOrganization(payload: Partial<WorkspaceData>) {
     try {
-      const res = await axiosInstance.put(
+      const res = await axiosInstance.post(
         `${baseURL}/organizations/update-workspace`,
         payload,
       );

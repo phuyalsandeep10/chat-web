@@ -1,17 +1,17 @@
-import { Country } from '@/services/organizations/types';
 import { create } from 'zustand';
 
-interface WorkspaceData {
-  image: string;
+export default interface WorkspaceData {
+  profile_picture: string;
+  workspace_owner: string;
   name: string;
   domain: string;
-  timeZone: string;
+  phone_code: string;
   email: string;
-  phone: string;
-  messenger: string;
+  contact_phone: string;
+  facebook: string;
   telegram: string;
-  xUsername: string;
-  whatsApp: string;
+  twitter: string;
+  whatsapp: string;
 }
 
 interface WorkspaceStore {
