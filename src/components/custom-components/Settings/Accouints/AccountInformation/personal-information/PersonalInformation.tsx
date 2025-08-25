@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { debounce } from 'lodash';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
 import { InputField } from '@/components/common/hook-form/InputField';
 import { ContactNumberSection } from './ContactNumberSection';
@@ -19,7 +19,6 @@ export default function PersonalInformation() {
   const { control, handleSubmit, watch } = useForm<UpdateProfileFormValues>({
     defaultValues: {
       name: authData?.data?.user?.name,
-      image: authData?.data?.user?.image,
       mobile: authData?.data?.user?.mobile,
       address: authData?.data?.user?.address,
       country: authData?.data?.user?.country,

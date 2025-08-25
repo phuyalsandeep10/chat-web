@@ -2,14 +2,68 @@ import { Icons } from '@/components/ui/Icons';
 import { MapPinIcon, PhoneIcon } from 'lucide-react';
 import Image from 'next/image';
 import { ProfileSectionProps } from '../types';
+import { useCallback, useState } from 'react';
+import { getCroppedImg } from '@/lib/cropImage';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import ProfileImageModal from '@/components/modal/ChangeImage';
+import ZoomImageModal from '@/components/modal/ZoomImageModal';
 
 export default function ProfileSection({
   name,
   email,
   address,
-  phone,
+  mobile,
   profileImage,
 }: ProfileSectionProps) {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [showProfileModel, setShowProfileModal] = useState(false);
+  const [showChangePhotoModal, setShowChangePhotoModal] = useState(false);
+
+  const handleRemovePhoto = () => {
+    setImageUrl(null);
+    setShowProfileModal(false);
+  };
+
+  const onCropComplete = useCallback(
+    (
+      _croppedArea: any,
+      croppedAreaPixels: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      },
+    ) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    [],
+  );
+
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+
+  const handleCroppedSave = useCallback(
+    async (imageSrc: string) => {
+      if (!croppedAreaPixels) return;
+      try {
+        const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
+        setImageUrl(croppedImage);
+        localStorage.setItem('imageURL', croppedImage);
+
+        // logging data
+        console.log('image set to localstorage');
+      } catch (error) {
+        console.error('Cropping error:', error);
+      }
+    },
+    [croppedAreaPixels],
+  );
+
   return (
     <>
       {/* Page title */}
@@ -22,14 +76,30 @@ export default function ProfileSection({
       <div className="mt-11 flex items-center gap-[126px]">
         <div className="flex items-center gap-6">
           <div className="relative h-[167px] w-[167px] overflow-hidden rounded-[175px]">
-            {/* <Image
-              src={profileImage ? profileImage : '/profile-placeholder.jpeg'}
+            <Image
+              src={
+                profileImage
+                  ? profileImage
+                  : imageUrl
+                    ? imageUrl
+                    : '/profile-placeholder.  jpeg'
+              }
               alt="Profile Image"
               fill
               className="object-cover"
-            /> */}
+            />
             <div className="bg-gray-bg-light absolute bottom-0 flex h-12 w-full items-center justify-center">
-              <Icons.pencil className="text-brand-dark h-6 w-6" />
+              <Button
+                onClick={() => setShowProfileModal(true)}
+                className={cn(
+                  'h-9 w-9 cursor-pointer rounded-full border-none bg-transparent p-0 hover:bg-[#f6ebff]',
+                )}
+              >
+                <Icons.pencil
+                  className="text-[#a43cfc]"
+                  style={{ width: '36px', height: '36px' }}
+                />
+              </Button>
             </div>
           </div>
 
@@ -46,13 +116,36 @@ export default function ProfileSection({
               <span className="text-right">{address}</span>
             </div>
           )}
-          {phone && (
+          {mobile && (
             <div className="flex items-center gap-2">
               <PhoneIcon className="h-3.5 w-3.5" />
-              <span className="text-right">{phone}</span>
+              <span className="text-right">{mobile}</span>
             </div>
           )}
         </div>
+
+        <ProfileImageModal
+          open={showProfileModel}
+          onClose={() => setShowProfileModal(false)}
+          onRemovePhoto={handleRemovePhoto}
+          onOpenChangePhoto={() => {
+            setShowProfileModal(false);
+            setShowChangePhotoModal(true);
+          }}
+        />
+
+        <ZoomImageModal
+          heading="Change Profile Picture"
+          subHeading="Crop"
+          cancelText="Cancel"
+          actionText="Save"
+          cancelButtonProps={{ variant: 'secondary', size: 'sm' }}
+          actionButtonProps={{ variant: 'default', size: 'sm' }}
+          onCropComplete={onCropComplete}
+          onSave={handleCroppedSave}
+          onClose={() => setShowChangePhotoModal(false)}
+          open={showChangePhotoModal}
+        />
       </div>
     </>
   );

@@ -22,7 +22,6 @@ export interface User {
       is_2fa_verified: boolean;
       country?: string;
       address?: string;
-      phone?: string;
       created_at: string;
       updated_at: string;
     };

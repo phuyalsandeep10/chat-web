@@ -16,7 +16,7 @@ const AccountInformation = () => {
         email={authData?.data?.user?.email ?? ''}
         address={authData?.data?.user.address ?? ''}
         country={authData?.data?.user.country ?? ''}
-        phone={authData?.data?.user?.phone ?? ''}
+        mobile={authData?.data?.user?.mobile ?? ''}
         profileImage={authData?.data?.user?.image ?? ''}
       />
 
