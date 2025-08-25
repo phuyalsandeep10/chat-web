@@ -1,9 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/apiConfigs/axiosInstance';
-import { OrganizationResponse } from './types';
+import {
+  Organization,
+  OrganizationAPIResponse,
+  OrganizationListResponse,
+} from './types';
 
 export const useGetorganizationDetails = () => {
-  return useQuery<OrganizationResponse>({
+  return useQuery<OrganizationListResponse>({
     queryKey: ['getOrganizationDetails'],
     queryFn: async () => {
       const res = await axiosInstance.get('/organizations');
@@ -17,14 +21,16 @@ export const useGetorganizationDetails = () => {
   });
 };
 
-export const useGetOrganizationById = (orgId: number) => {
-  return useQuery<OrganizationResponse>({
+export const useGetOrganizationById = (orgId: number, options?: any) => {
+  return useQuery<OrganizationAPIResponse>({
     queryKey: ['getOrganizationById', orgId],
     queryFn: async () => {
-      const res = await axiosInstance.get(`/organizations/${orgId}`);
+      const res = await axiosInstance.get(`/organizations/current`);
       return res.data.data;
     },
+    enabled: !!orgId,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
+    ...options,
   });
 };
