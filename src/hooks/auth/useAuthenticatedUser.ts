@@ -12,10 +12,12 @@ export interface User {
       mobile: string | null;
       email_verified_at: string | null;
       is_staff: boolean;
+      attributes: {
+        organization_id: number;
+      };
       is_superuser: boolean;
       is_active: boolean;
       image: string | null;
-      attributes: any | null;
       two_fa_secret: string;
       two_fa_auth_url: string;
       two_fa_enabled: boolean;

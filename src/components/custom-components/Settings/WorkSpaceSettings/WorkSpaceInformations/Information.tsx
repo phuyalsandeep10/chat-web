@@ -5,8 +5,21 @@ import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
 import TransferOwnershipModal from '@/components/modal/TransferOwnership';
 
-const Information = () => {
+interface InformationProps {
+  workspace_owner?: string | null;
+  creation_date?: string | null;
+}
+
+const Information: React.FC<InformationProps> = ({
+  workspace_owner,
+  creation_date,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const formattedDate = creation_date
+    ? new Date(creation_date).toLocaleDateString('en-US')
+    : '';
+
   return (
     <div>
       <div>
@@ -24,12 +37,13 @@ const Information = () => {
           to directly contact you.
         </p>
       </div>
+
       <div className={cn('space-y-4')}>
         <div className={cn('flex gap-10')}>
           <div className={cn('flex items-center')}>
             <Label
               className={cn(
-                'font-outfit text-brand-dark fontfont-medium mb-2 text-base',
+                'font-outfit text-brand-dark mb-2 text-base font-medium',
               )}
             >
               Workspace Owner
@@ -40,7 +54,7 @@ const Information = () => {
                   'font-outfit text-disabled-foreground h-9 w-[330px] items-center border py-2 pl-2 text-sm',
                 )}
               >
-                Yuvish Desor
+                {workspace_owner || ''}
               </p>
               <Button
                 variant={'link'}
@@ -57,6 +71,7 @@ const Information = () => {
               </Button>
             </div>
           </div>
+
           <div className="">
             <p
               className={cn('font-outfit text-brand-dark text-sm font-medium')}
@@ -69,7 +84,9 @@ const Information = () => {
               )}
             >
               acceptance by &ldquo;
-              <span className={cn('text-alert-prominent')}>Yuvish Desor</span>
+              <span className={cn('text-alert-prominent')}>
+                {workspace_owner || 'N/A'}
+              </span>
               &rdquo;
             </p>
           </div>
@@ -86,7 +103,7 @@ const Information = () => {
             </Label>
             <p
               className={cn(
-                'font-outfit text-disabled-foreground font-norma text-sm',
+                'font-outfit text-disabled-foreground text-sm font-normal',
               )}
             >
               Organizational Plan
@@ -102,14 +119,15 @@ const Information = () => {
             </Label>
             <p
               className={cn(
-                'font-outfit text-disabled-foreground font-norma text-sm',
+                'font-outfit text-disabled-foreground text-sm font-normal',
               )}
             >
-              7/15/2025
+              {formattedDate || ''}
             </p>
           </div>
         </div>
       </div>
+
       {/* Modal */}
       <TransferOwnershipModal
         open={isModalOpen}

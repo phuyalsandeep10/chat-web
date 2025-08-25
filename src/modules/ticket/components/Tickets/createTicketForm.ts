@@ -24,8 +24,9 @@ export const useCreateTicketForm = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // API hooks
-  const { data: customers = [], isLoading: customersLoading } =
-    useCustomers(organizationId);
+  const { data: customers = [], isLoading: customersLoading } = useCustomers(
+    organizationId as number,
+  );
   const {
     data: priorities,
     isLoading: prioritiesLoading,

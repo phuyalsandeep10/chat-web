@@ -13,10 +13,36 @@ export type Organization = {
   whatsapp_number?: string | null;
   telegram_username?: string | null;
   owner_id?: number;
+  identifier?: string;
+  created_at?: string;
 };
 
-export type OrganizationResponse = {
-  data: Organization;
-  message?: string;
+export type Owner = {
+  id: number;
+  name: string;
+  email: string;
+  country: string;
+  is_superuser: boolean;
+  is_staff: boolean;
+  is_active: boolean;
+  mobile?: string;
+  address?: string;
+  image?: string;
+  language?: string;
+  two_fa_enabled?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  email_verified_at?: string;
+  [key: string]: any;
+};
+
+export type OrganizationAPIResponse = {
+  organization: Organization;
+  owner: Owner;
+};
+
+export type OrganizationListResponse = {
+  data: Organization[];
   success: boolean;
+  message?: string;
 };

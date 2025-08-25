@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
 import CountrySelect from '@/shared/CountrySelect';
 import { cn } from '@/lib/utils';
 import { Icons } from '@/components/ui/Icons';
@@ -17,33 +16,46 @@ import TerminateWorkspace from './TerminateWorkspace';
 import Information from './Information';
 import WorkSpaceDetails from './WorkSpaceDetails';
 import WorkSpaceHeader from './WorkSpaceHeader';
-import { useGetorganizationDetails } from '@/hooks/organizations/useGetorganizations';
 import { useGetCountries } from '@/hooks/organizations/useGetCountries';
 import ErrorText from '@/components/common/hook-form/ErrorText';
 import { Country } from '@/services/organizations/types';
+import { useAuthStore } from '@/store/AuthStore/useAuthStore';
+import { useGetOrganizationById } from '@/hooks/organizations/useGetorganizations';
+
 export default function WorkspaceInformation() {
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChangePhotoModal, setShowChangePhotoModal] = useState(false);
 
-  const { data: organizationDetails, isPending } = useGetorganizationDetails();
+  const { authData } = useAuthStore();
+  const orgId = authData?.data.user.attributes.organization_id;
+
+  const { data: organizationDetails } = useGetOrganizationById(orgId ?? 0, {
+    enabled: !!orgId,
+  });
 
   const {
     data: countriesResponse,
     isLoading: isLoadingCountries,
     error: countriesError,
   } = useGetCountries();
-
   const countries = countriesResponse?.data?.countries || [];
 
-  console.log(organizationDetails);
-  console.log('Countries:', countries);
+  const organization = organizationDetails?.organization;
+  const owner = organizationDetails?.owner;
 
   const handleRemovePhoto = () => {
     setImageUrl(null);
     setShowProfileModal(false);
   };
+
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
 
   const onCropComplete = useCallback(
     (
@@ -60,25 +72,25 @@ export default function WorkspaceInformation() {
     [],
   );
 
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-
   const handleCroppedSave = useCallback(
     async (imageSrc: string) => {
       if (!croppedAreaPixels) return;
       try {
         const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-        setImageUrl(croppedImage); // save new image
+        setImageUrl(croppedImage);
       } catch (error) {
         console.error('Cropping error:', error);
       }
     },
     [croppedAreaPixels],
   );
+
+  // Correct logo handling
+  const logoSrc =
+    imageUrl ||
+    (organization?.logo?.startsWith('http')
+      ? organization.logo
+      : '/profile-image.png');
 
   return (
     <>
@@ -95,7 +107,7 @@ export default function WorkspaceInformation() {
               )}
             >
               <Image
-                src={imageUrl || '/profile-image.png'}
+                src={logoSrc}
                 alt="Profile"
                 width={250}
                 height={250}
@@ -107,7 +119,6 @@ export default function WorkspaceInformation() {
                 )}
               />
             </div>
-            {/* Edit button and red underline */}
             <div
               className={cn(
                 'absolute bottom-7 left-28 flex h-auto w-auto flex-col items-center',
@@ -121,15 +132,13 @@ export default function WorkspaceInformation() {
                   'h-9 w-9 cursor-pointer rounded-full border-none p-0',
                 )}
               >
-                <Icons.pencil
-                  className=""
-                  style={{ width: '36px', height: '36px' }}
-                />
+                <Icons.pencil style={{ width: '36px', height: '36px' }} />
               </Button>
             </div>
           </div>
 
           <div className={cn('flex-1 space-y-5')}>
+            {/* Organization Name */}
             <div className={cn('space-y-3')}>
               <Label
                 htmlFor="name"
@@ -139,11 +148,12 @@ export default function WorkspaceInformation() {
               </Label>
               <Input
                 id="name"
-                defaultValue="Bramhabyfields"
+                defaultValue={organization?.name || ''}
                 className="h-9 w-full"
               />
             </div>
 
+            {/* Domain */}
             <div className="space-y-3">
               <Label
                 htmlFor="domain"
@@ -161,7 +171,10 @@ export default function WorkspaceInformation() {
                 </div>
                 <Input
                   id="domain"
-                  placeholder="Enter your url"
+                  placeholder="Enter your URL"
+                  defaultValue={
+                    organization?.domain?.replace(/^https?:\/\//, '') || ''
+                  }
                   className="h-9 rounded-l-none border-l-0"
                 />
               </div>
@@ -170,10 +183,11 @@ export default function WorkspaceInformation() {
                   'font-outfit text-gray-primary text-xs font-normal',
                 )}
               >
-                This will be your workspaces public URL.
+                This will be your workspace’s public URL.
               </p>
             </div>
 
+            {/* Country / Timezone */}
             <div className={cn('w-full space-y-3')}>
               <Label
                 htmlFor="timezone"
@@ -187,16 +201,14 @@ export default function WorkspaceInformation() {
                   Loading countries...
                 </div>
               )}
-
               {countriesError && (
                 <ErrorText error="The data couldn't be fetched" />
               )}
-
               {!isLoadingCountries && !countriesError && (
                 <CountrySelect
                   value={selectedCountry}
-                  onChange={(country) => setSelectedCountry(country)}
-                  buttonClassName={cn('w-full  text-black py-2')}
+                  onChange={setSelectedCountry}
+                  buttonClassName={cn('w-full text-black py-2')}
                   contentClassName={cn('cursor-pointer hover:bg-white')}
                   itemClassName={cn('hover:bg-gray-100 px-2 py-1')}
                   wrapperClassName={cn('w-full')}
@@ -208,26 +220,32 @@ export default function WorkspaceInformation() {
         </div>
 
         {/* Workspace Details */}
-        <WorkSpaceDetails />
+        <WorkSpaceDetails workspace_identifier={organization?.identifier} />
 
         {/* Workspace Information */}
         <div className={cn('mt-10 mb-9')}>
-          <Information />
+          <Information
+            workspace_owner={owner?.name}
+            creation_date={organization?.created_at}
+          />
         </div>
 
         {/* Contact Information */}
-
-        <div>
-          <ContactForm />
-        </div>
+        <ContactForm
+          contactEmail={organization?.contact_email}
+          contactPhone={organization?.contact_phone}
+          twitterUsername={organization?.twitter_username}
+          facebookUsername={organization?.facebook_username}
+          whatsappNumber={organization?.whatsapp_number}
+          telegramUsername={organization?.telegram_username}
+        />
 
         {/* Terminate Workspace */}
         <TerminateWorkspace />
       </div>
+
+      {/* Modals */}
       <ProfileImageModal
-        // title="helolo"
-        // changePhotoText="Change Photo1"
-        // removePhotoText="Remove Photo2"
         open={showProfileModal}
         onClose={() => setShowProfileModal(false)}
         onRemovePhoto={handleRemovePhoto}
