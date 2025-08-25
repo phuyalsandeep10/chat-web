@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import PhoneInput from '@/shared/PhoneInput';
 import { cn } from '@/lib/utils';
+import { useWorkspaceStore } from '@/store/WorkspaceStore/useWorkspaceStore';
+import { values } from 'lodash';
 
 interface ContactFormProps {
   contactEmail?: string | null;
@@ -65,6 +67,10 @@ const ContactForm: React.FC<ContactFormProps> = ({
     reset,
   ]);
 
+  const { updatedData, setData } = useWorkspaceStore();
+
+  console.log(updatedData);
+
   const onSubmit = (data: ContactFormSchema) => {
     console.log('Form Data:', data);
   };
@@ -94,6 +100,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               {...register('email')}
               placeholder="anything@gmail.com"
               className="h-9 text-sm font-medium"
+              onChange={(e) => setData({ email: e.target.value })}
             />
             {errors.email && (
               <p className="text-alert-prominent text-xs">
@@ -113,7 +120,13 @@ const ContactForm: React.FC<ContactFormProps> = ({
               name="phoneNumber"
               control={control}
               render={({ field }) => (
-                <PhoneInput value={field.value} onChange={field.onChange} />
+                <PhoneInput
+                  value={field.value}
+                  onChange={() => {
+                    field.onChange(field.value);
+                    setData({ phone: field.value });
+                  }}
+                />
               )}
             />
             {errors.phoneNumber && (
@@ -137,6 +150,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               placeholder="Messenger username"
               className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('messenger')}
+              onChange={(e) => setData({ messenger: e.target.value })}
             />
             {errors.messenger && (
               <p className={cn('text-alert-prominent text-xs')}>
@@ -156,6 +170,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               placeholder="Telegram username"
               className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('telegram')}
+              onChange={(e) => setData({ telegram: e.target.value })}
             />
             {errors.telegram && (
               <p className={cn('text-alert-prominent text-xs')}>
@@ -178,6 +193,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               placeholder="X username"
               className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('twitter')}
+              onChange={(e) => setData({ xUsername: e.target.value })}
             />
             {errors.twitter && (
               <p className={cn('text-alert-prominent text-xs')}>
@@ -197,6 +213,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               className={cn('font-outfit h-9 text-sm font-medium')}
               placeholder="+977 9824830624"
               {...register('whatsapp')}
+              onChange={(e) => setData({ whatsApp: e.target.value })}
             />
             {errors.whatsapp && (
               <p className={cn('text-alert-prominent text-xs')}>

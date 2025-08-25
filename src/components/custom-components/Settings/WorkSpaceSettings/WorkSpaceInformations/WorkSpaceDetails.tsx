@@ -24,18 +24,6 @@ const WorkSpaceDetails: React.FC<WorkspaceDetailsProps> = ({
     window.open(workspaceURL, '_blank');
   };
 
-  const updateWorspace = async () => {
-    try {
-      const response = await axiosInstance.get('/organizations/current');
-      const identifier = response.data.data.identifier;
-      console.log(identifier);
-      setIdentifier(identifier);
-    } catch (error) {
-      console.log('');
-    }
-  };
-  updateWorspace();
-
   return (
     <div>
       <div className="w-full">

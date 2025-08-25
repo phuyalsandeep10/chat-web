@@ -5,7 +5,7 @@ interface WorkspaceData {
   image: string;
   name: string;
   domain: string;
-  timeZone: Country;
+  timeZone: string;
   email: string;
   phone: string;
   messenger: string;

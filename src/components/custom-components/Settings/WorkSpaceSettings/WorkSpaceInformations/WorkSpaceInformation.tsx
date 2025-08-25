@@ -88,19 +88,15 @@ export default function WorkspaceInformation() {
     [croppedAreaPixels],
   );
 
-  // Correct logo handling
   const logoSrc =
     imageUrl ||
-    (organization?.logo?.startsWith('http')
-      ? organization.logo
-      : '/profile-image.png');
+    (owner?.image?.startsWith('https') ? owner.image : '/chatboq-logo.png');
 
   return (
     <>
       <div className={cn('mx-auto w-full')}>
         {/* Header */}
-        <WorkSpaceHeader />
-
+        <WorkSpaceHeader /> a parent component or hook)
         {/* Profile Section */}
         <div className={cn('mt-11 mb-15 ml-16 flex items-start space-x-24')}>
           <div className="relative">
@@ -214,7 +210,7 @@ export default function WorkspaceInformation() {
                   value={selectedCountry}
                   onChange={(country) => {
                     setSelectedCountry(country);
-                    setData({ timeZone: country });
+                    setData({ timeZone: country.phone_code });
                   }}
                   buttonClassName={cn('w-full  text-black py-2')}
                   contentClassName={cn('cursor-pointer hover:bg-white')}
@@ -226,10 +222,8 @@ export default function WorkspaceInformation() {
             </div>
           </div>
         </div>
-
         {/* Workspace Details */}
         <WorkSpaceDetails workspace_identifier={organization?.identifier} />
-
         {/* Workspace Information */}
         <div className={cn('mt-10 mb-9')}>
           <Information
@@ -237,7 +231,6 @@ export default function WorkspaceInformation() {
             creation_date={organization?.created_at}
           />
         </div>
-
         {/* Contact Information */}
         <ContactForm
           contactEmail={organization?.contact_email}
@@ -247,7 +240,6 @@ export default function WorkspaceInformation() {
           whatsappNumber={organization?.whatsapp_number}
           telegramUsername={organization?.telegram_username}
         />
-
         {/* Terminate Workspace */}
         <TerminateWorkspace />
       </div>

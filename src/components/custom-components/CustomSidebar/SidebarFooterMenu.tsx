@@ -18,6 +18,7 @@ const SidebarFooterMenu = () => {
   const router = useRouter();
   const { mutate: logout, isPending } = useLogout();
   const { authData, clearAuthData } = useAuthStore((state) => state);
+  console.log(authData?.data.user.image);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="w-full">
@@ -35,7 +36,7 @@ const SidebarFooterMenu = () => {
             <div className={cn('min-h-8 min-w-8 rounded-full bg-white')}>
               <Image
                 src={
-                  authData?.data?.user?.image
+                  authData?.data?.user?.image?.startsWith('https')
                     ? authData?.data?.user?.image
                     : '/profile-placeholder.jpeg'
                 }

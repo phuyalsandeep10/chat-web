@@ -20,7 +20,7 @@ export class OrganizationsService {
   ) {
     try {
       const res = await axiosInstance.put(
-        `${baseURL}/organizations/${organization_id}`,
+        `${baseURL}/organizations/update-workspace`,
         payload,
       );
       return res.data;
