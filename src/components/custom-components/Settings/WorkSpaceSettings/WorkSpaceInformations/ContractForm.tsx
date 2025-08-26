@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import PhoneInput from '@/shared/PhoneInput';
 import { cn } from '@/lib/utils';
 import { useWorkspaceStore } from '@/store/WorkspaceStore/useWorkspaceStore';
-import { debounce } from 'lodash';
 import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganization';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 
@@ -81,25 +80,16 @@ const ContactForm: React.FC<ContactFormProps> = ({
   const { authData } = useAuthStore();
   const orgId = authData?.data.user.attributes.organization_id;
 
-  // ✅ Debounced submit function
-  const debouncedSubmit = useMemo(
-    () =>
-      debounce((formData) => {
-        if (!orgId) return;
-        updateOrganization({ ...formData });
-      }, 1000),
-    [orgId, updateOrganization],
-  );
-
-  // Watch for changes in Zustand store → trigger debounced submit
-  useEffect(() => {
-    if (updatedData && orgId) {
-      debouncedSubmit(updatedData);
-    }
-    return () => {
-      debouncedSubmit.cancel();
-    };
-  }, [updatedData, orgId, debouncedSubmit]);
+  // useDebouncedEffect(() => {
+  //   if (
+  //     updatedData &&
+  //     Object.keys(updatedData).length > 0 &&
+  //     JSON.stringify(updatedData) !== JSON.stringify(prevUpdatedData.current)
+  //   ) {
+  //     updateOrganization(updatedData);
+  //     prevUpdatedData.current = updatedData;
+  //   }
+  // }, [updatedData], 1000);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

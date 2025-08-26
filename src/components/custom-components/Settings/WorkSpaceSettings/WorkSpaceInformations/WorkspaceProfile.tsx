@@ -4,17 +4,20 @@ import CountrySelect from '@/shared/CountrySelect';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useGetOrganizationById } from '@/hooks/organizations/useGetorganizations';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGetCountries } from '@/hooks/organizations/useGetCountries';
 import ErrorText from '@/components/common/hook-form/ErrorText';
 import { Country } from '@/services/organizations/types';
-import { useWorkspaceStore } from '@/store/WorkspaceStore/useWorkspaceStore';
-import debounce from 'lodash/debounce';
+import WorkspaceData, {
+  useWorkspaceStore,
+} from '@/store/WorkspaceStore/useWorkspaceStore';
 import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganization';
+import useDebouncedEffect from '@/hooks/useDebounceEffect';
 
 const WorkspaceProfile = () => {
   const { updatedData, setData } = useWorkspaceStore();
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const prevUpdatedData = useRef<Partial<WorkspaceData>>(updatedData);
 
   const { authData } = useAuthStore();
   const orgId = authData?.data.user.attributes.organization_id;
@@ -39,25 +42,20 @@ const WorkspaceProfile = () => {
     [countriesResponse?.data?.countries],
   );
 
-  // ✅ Debounced submit function
-  const debouncedSubmit = useMemo(
-    () =>
-      debounce((formData) => {
-        if (!orgId) return;
-        updateOrganization({ ...formData });
-      }, 1000),
-    [orgId, updateOrganization],
+  useDebouncedEffect(
+    () => {
+      if (
+        updatedData &&
+        Object.keys(updatedData).length > 0 &&
+        JSON.stringify(updatedData) !== JSON.stringify(prevUpdatedData.current)
+      ) {
+        updateOrganization(updatedData);
+        prevUpdatedData.current = updatedData;
+      }
+    },
+    [updatedData],
+    1000,
   );
-
-  // Watch for changes in Zustand store → trigger debounced submit
-  useEffect(() => {
-    if (updatedData && orgId) {
-      debouncedSubmit(updatedData);
-    }
-    return () => {
-      debouncedSubmit.cancel();
-    };
-  }, [updatedData, orgId, debouncedSubmit]);
 
   useEffect(() => {
     if (owner && countries.length > 0) {

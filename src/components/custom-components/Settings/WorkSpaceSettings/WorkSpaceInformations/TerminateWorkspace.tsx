@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form';
 import { InputField } from '@/components/common/hook-form/InputField';
 import { showToast } from '@/shared/toast';
 import axiosInstance from '@/apiConfigs/axiosInstance';
+import useDeleteOrganization from '@/hooks/organizations/useDeleteOrganization';
 
 type FormData = {
   workspaceId: string;
@@ -24,32 +25,16 @@ const TerminateWorkspace = () => {
     },
   });
 
-  const handleDeleteClick = async (data: string) => {
+  const { mutate: deleteOrganization } = useDeleteOrganization();
+
+  const handleDeleteClick = () => {
     dialogRef.current?.open();
-    try {
-      const response = await axiosInstance.post(
-        '/organizations/delete-workspace',
-        {
-          identifier: data,
-        },
-      );
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   // This function runs when user clicks "Yes, Delete" in modal
-  const handleConfirmDelete = handleSubmit((data) => {
+  const handleConfirmDelete = handleSubmit(async (data) => {
     console.log('Typed confirmation:', data.workspaceId);
-
-    // Show toast success message
-    showToast({
-      title: 'Deleted Successfully',
-      description: 'Workspace has been deleted',
-      variant: 'success',
-      position: 'top-right',
-    });
+    deleteOrganization(data.workspaceId);
 
     dialogRef.current?.close();
   });
@@ -96,13 +81,14 @@ const TerminateWorkspace = () => {
                     className={cn(
                       'mt-2.5 h-9 w-1/2 rounded border border-gray-300 px-2',
                     )}
+                    {...control.register('workspaceId')}
                   />
                 </div>
 
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => handleDeleteClick(getValues('workspaceId'))}
+                  onClick={() => handleDeleteClick()}
                   className={cn(
                     'font-outfit mb-5 cursor-pointer text-xs leading-[16px] font-semibold',
                   )}

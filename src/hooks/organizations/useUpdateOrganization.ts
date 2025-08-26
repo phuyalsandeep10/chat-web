@@ -1,5 +1,4 @@
 import { OrganizationsService } from '@/services/organizations/organizations';
-import { createOrganizationPayload } from '@/services/organizations/types';
 import { showToast } from '@/shared/toast';
 import WorkspaceData from '@/store/WorkspaceStore/useWorkspaceStore';
 import { useMutation } from '@tanstack/react-query';
@@ -11,6 +10,9 @@ export const useUpdateOrganization = () => {
     mutationFn: (data: Partial<WorkspaceData>) =>
       OrganizationsService.updateOrganization(data),
     onSuccess: (data) => {
+      showToast({ title: data.message });
+    },
+    onError: (data) => {
       showToast({ title: data.message });
     },
   });
