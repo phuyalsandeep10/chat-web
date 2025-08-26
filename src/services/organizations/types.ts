@@ -13,6 +13,11 @@ export type Country = {
   phone_code: string;
 };
 
+export type Langauge = {
+  id: number;
+  name: string;
+};
+
 export type CountriesApiResponse = {
   success: boolean;
   message: string;

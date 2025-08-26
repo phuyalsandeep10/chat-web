@@ -1,18 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { debounce } from 'lodash';
 import { useMutation } from '@tanstack/react-query';
 
 import { InputField } from '@/components/common/hook-form/InputField';
 import { ContactNumberSection } from './ContactNumberSection';
-import { CountySection } from './CountySection';
-import LanguageSection from './LanguageSection';
 
 import { UpdateProfileFormValues } from '../types';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { AuthService } from '@/services/auth/auth';
-import { Country } from '@/services/organizations/types';
 import { toast } from 'sonner';
+import { CountrySection } from './CountySection';
+import { LanguageSection } from './LanguageSection';
 
 export default function PersonalInformation() {
   const authData = useAuthStore((state) => state.authData);
@@ -24,12 +23,10 @@ export default function PersonalInformation() {
       address: authData?.data?.user?.address,
       image: authData?.data?.user?.image,
       country: authData?.data?.user?.country,
-      language: 'English',
+      language: authData?.data?.user?.language,
       email: authData?.data?.user?.email,
     },
   });
-
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const { setAuthData } = useAuthStore();
 
   const mutation = useMutation({
@@ -41,6 +38,7 @@ export default function PersonalInformation() {
       toast.success('Profile Updated Successfully!');
     },
     onError: (error) => {
+      toast.error('Profile Not Updated!');
       console.error('Error updating profile:', error);
     },
   });
@@ -91,7 +89,7 @@ export default function PersonalInformation() {
           inputClassName="w-[80%]"
           labelClassName="mt-6 text-[16px] font-medium"
         />
-        <p className="mt-2 text-xs leading-[17px] font-normal">
+        <p className="text-brand-hover mt-2 text-xs leading-[17px] font-normal italic">
           Your Display Name is visible to the user.
         </p>
 
@@ -118,16 +116,8 @@ export default function PersonalInformation() {
           labelClassName="mt-6 text-[16px] font-medium"
         />
 
-        <CountySection value={selectedCountry} onChange={setSelectedCountry} />
-        <LanguageSection />
-
-        {/* Optional loading/error display */}
-        {mutation.isPending && (
-          <p className="mt-2 text-sm text-gray-500">Updating...</p>
-        )}
-        {mutation.isError && (
-          <p className="mt-2 text-sm text-red-500">Error updating profile.</p>
-        )}
+        <CountrySection control={control} name="country" />
+        <LanguageSection control={control} name="language" />
       </form>
     </div>
   );

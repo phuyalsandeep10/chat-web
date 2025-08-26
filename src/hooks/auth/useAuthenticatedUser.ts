@@ -10,6 +10,7 @@ export interface User {
       name: string;
       email: string;
       mobile: string | undefined;
+      language: string;
       email_verified_at: string | null;
       is_staff: boolean;
       is_superuser: boolean;

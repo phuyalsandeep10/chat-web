@@ -13,8 +13,9 @@ import { getCroppedImg } from '@/lib/cropImage';
 import { AuthService } from '@/services/auth/auth';
 import { cn } from '@/lib/utils';
 
-import type { ProfileSectionProps, UpdateProfileFormValues } from '../types';
+import type { UpdateProfileFormValues } from '../types';
 import { toast } from 'sonner';
+import { v4 } from 'uuid';
 
 // Convert base64 to File object
 function dataURLtoFile(dataurl: string, filename: string): File {
@@ -73,9 +74,14 @@ export default function ProfileSection({
       try {
         const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
 
-        const file = dataURLtoFile(croppedImage, 'profile-image.png');
+        // random uid plus timestamp to make the filename unique
+        let myuid = v4();
+        myuid = `${myuid}-${Date.now()}.png`;
+
+        const file = dataURLtoFile(croppedImage, myuid);
 
         const cloudinaryRes = await AuthService.uploadPersonalProfile(file);
+        console.log(cloudinaryRes);
 
         const uploadedUrl = cloudinaryRes?.data?.files?.[0]?.url;
         if (uploadedUrl) {
@@ -91,21 +97,42 @@ export default function ProfileSection({
           email: email,
           address: address,
         };
+
         const backendRes =
           await AuthService.updatePersonalInformation(photoUpdate);
+
+        // toast here
         if (backendRes) toast.success('Photo uploaded successfully!');
+        else toast.error('Profile Not Updated!');
 
         setShowChangePhotoModal(false);
       } catch (error) {
         console.error('Error cropping or uploading image:', error);
       }
     },
-    [croppedAreaPixels],
+    [croppedAreaPixels, name, country, language, mobile, email, address],
   );
 
   const handleRemovePhoto = () => {
+    // for ui update
     setImageUrl(null);
     setShowProfileModal(false);
+    const handleRemoveProfilePicture = async () => {
+      const userData: UpdateProfileFormValues = {
+        name: name,
+        mobile: mobile,
+        address: address,
+        image: '',
+        country: country,
+        language: language,
+        email: email,
+      };
+      const res = await AuthService.updatePersonalInformation(userData);
+      if (res) toast.success('Profile removed!');
+      else toast.error('Error');
+    };
+
+    handleRemoveProfilePicture();
   };
 
   return (

@@ -191,7 +191,7 @@ export default function WorkspaceInformation() {
               {countriesError && (
                 <ErrorText error="The data couldn't be fetched" />
               )}
-
+              {/* 
               {!isLoadingCountries && !countriesError && (
                 <CountrySelect
                   value={selectedCountry}
@@ -202,7 +202,7 @@ export default function WorkspaceInformation() {
                   wrapperClassName={cn('w-full')}
                   countries={countries}
                 />
-              )}
+              )} */}
             </div>
           </div>
         </div>

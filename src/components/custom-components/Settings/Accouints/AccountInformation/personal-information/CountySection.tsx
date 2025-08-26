@@ -1,16 +1,11 @@
 import Label from '@/components/common/hook-form/Label';
-import { Country } from '@/services/organizations/types';
 import CountrySelect from '@/shared/CountrySelect';
+import { Control } from 'react-hook-form';
 
-type CountrySelectProps = {
-  value: Country | null;
-  onChange: (value: Country | null) => void;
-};
-
-export const CountySection: React.FC<CountrySelectProps> = ({
-  value,
-  onChange,
-}) => {
+export const CountrySection: React.FC<{
+  name: string;
+  control: Control<any>;
+}> = ({ name, control }) => {
   return (
     <div className="mt-[18px]">
       <Label
@@ -22,8 +17,8 @@ export const CountySection: React.FC<CountrySelectProps> = ({
       </Label>
 
       <CountrySelect
-        value={value}
-        onChange={onChange}
+        control={control}
+        name={name}
         buttonClassName="w-[80%] h-9 text-pure-black font-normal"
       />
     </div>

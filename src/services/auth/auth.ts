@@ -220,7 +220,6 @@ export class AuthService {
   // update account information
   static async updatePersonalInformation(payload: UpdateProfileFormValues) {
     try {
-      console.log('internal service update:', payload);
       const response = await axiosInstance.patch('/auth/profile', payload);
       return response.data;
     } catch (error) {
