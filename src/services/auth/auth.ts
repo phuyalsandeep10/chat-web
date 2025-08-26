@@ -11,9 +11,6 @@ import {
   verify2FaPayload,
   VerifyEmailpayload,
 } from './types';
-import LanguageDropdown from '@/components/custom-components/Auth/common/LanguageDropdown';
-import { Calligraffitti } from 'next/font/google';
-import { resolve } from 'path';
 import { UpdateProfileFormValues } from '@/components/custom-components/Settings/Accouints/AccountInformation/types';
 
 export class AuthService {
@@ -223,14 +220,30 @@ export class AuthService {
   // update account information
   static async updatePersonalInformation(payload: UpdateProfileFormValues) {
     try {
+      console.log('internal service update:', payload);
       const response = await axiosInstance.patch('/auth/profile', payload);
-      console.log(payload.address);
-      console.log('internal here');
-      console.log(payload.name);
-      console.log(payload.mobile);
       return response.data;
     } catch (error) {
       console.error('Error updating Personal Information');
+    }
+  }
+
+  static async uploadPersonalProfile(file: File) {
+    try {
+      const formData = new FormData();
+      formData.append('files', file); // 'files' matches your FastAPI param
+
+      const response = await axiosInstance.post('/upload/files', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log(response);
+      return response.data;
+    } catch (error) {
+      console.error('Error uploading Personal Profile', error);
+      throw error;
     }
   }
 }

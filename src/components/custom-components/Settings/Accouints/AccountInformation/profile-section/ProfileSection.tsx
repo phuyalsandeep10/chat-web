@@ -1,45 +1,49 @@
-import { Icons } from '@/components/ui/Icons';
-import { MapPinIcon, PhoneIcon } from 'lucide-react';
+'use client';
+
+import React, { useCallback, useState } from 'react';
 import Image from 'next/image';
-import { ProfileSectionProps } from '../types';
-import { useCallback, useState } from 'react';
-import { getCroppedImg } from '@/lib/cropImage';
+import { MapPinIcon, PhoneIcon } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Icons } from '@/components/ui/Icons';
 import ProfileImageModal from '@/components/modal/ChangeImage';
 import ZoomImageModal from '@/components/modal/ZoomImageModal';
+
+import { getCroppedImg } from '@/lib/cropImage';
+import { AuthService } from '@/services/auth/auth';
+import { cn } from '@/lib/utils';
+
+import type { ProfileSectionProps, UpdateProfileFormValues } from '../types';
+import { toast } from 'sonner';
+
+// Convert base64 to File object
+function dataURLtoFile(dataurl: string, filename: string): File {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1] || '';
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  return new File([u8arr], filename, { type: mime });
+}
 
 export default function ProfileSection({
   name,
   email,
   address,
   mobile,
-  profileImage,
-}: ProfileSectionProps) {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [showProfileModel, setShowProfileModal] = useState(false);
+  country,
+  language,
+  image,
+}: UpdateProfileFormValues) {
+  const [imageUrl, setImageUrl] = useState<string | null>(image);
+
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChangePhotoModal, setShowChangePhotoModal] = useState(false);
-
-  const handleRemovePhoto = () => {
-    setImageUrl(null);
-    setShowProfileModal(false);
-  };
-
-  const onCropComplete = useCallback(
-    (
-      _croppedArea: any,
-      croppedAreaPixels: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      },
-    ) => {
-      setCroppedAreaPixels(croppedAreaPixels);
-    },
-    [],
-  );
-
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
     x: number;
     y: number;
@@ -47,43 +51,77 @@ export default function ProfileSection({
     height: number;
   } | null>(null);
 
+  const onCropComplete = useCallback(
+    (
+      _croppedArea: any,
+      croppedAreaPixelsArg: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      },
+    ) => {
+      setCroppedAreaPixels(croppedAreaPixelsArg);
+    },
+    [],
+  );
+
   const handleCroppedSave = useCallback(
     async (imageSrc: string) => {
       if (!croppedAreaPixels) return;
+
       try {
         const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-        setImageUrl(croppedImage);
-        localStorage.setItem('imageURL', croppedImage);
 
-        // logging data
-        console.log('image set to localstorage');
+        const file = dataURLtoFile(croppedImage, 'profile-image.png');
+
+        const cloudinaryRes = await AuthService.uploadPersonalProfile(file);
+
+        const uploadedUrl = cloudinaryRes?.data?.files?.[0]?.url;
+        if (uploadedUrl) {
+          setImageUrl(uploadedUrl);
+        }
+
+        const photoUpdate: UpdateProfileFormValues = {
+          name: name,
+          country: country,
+          image: uploadedUrl,
+          language: language,
+          mobile: mobile,
+          email: email,
+          address: address,
+        };
+        const backendRes =
+          await AuthService.updatePersonalInformation(photoUpdate);
+        if (backendRes) toast.success('Photo uploaded successfully!');
+
+        setShowChangePhotoModal(false);
       } catch (error) {
-        console.error('Cropping error:', error);
+        console.error('Error cropping or uploading image:', error);
       }
     },
     [croppedAreaPixels],
   );
 
+  const handleRemovePhoto = () => {
+    setImageUrl(null);
+    setShowProfileModal(false);
+  };
+
   return (
     <>
-      {/* Page title */}
       <div className="text-brand-dark flex items-center">
         <h1 className="text-[32px] leading-[40px] font-semibold">
           Account Information
         </h1>
         <Icons.help className="mt-0.5 ml-2 h-5 w-5" />
       </div>
+
       <div className="mt-11 flex items-center gap-[126px]">
         <div className="flex items-center gap-6">
           <div className="relative h-[167px] w-[167px] overflow-hidden rounded-[175px]">
             <Image
-              src={
-                profileImage
-                  ? profileImage
-                  : imageUrl
-                    ? imageUrl
-                    : '/profile-placeholder.  jpeg'
-              }
+              src={imageUrl ?? '/profile-placeholder.jpeg'}
               alt="Profile Image"
               fill
               className="object-cover"
@@ -125,7 +163,7 @@ export default function ProfileSection({
         </div>
 
         <ProfileImageModal
-          open={showProfileModel}
+          open={showProfileModal}
           onClose={() => setShowProfileModal(false)}
           onRemovePhoto={handleRemovePhoto}
           onOpenChangePhoto={() => {

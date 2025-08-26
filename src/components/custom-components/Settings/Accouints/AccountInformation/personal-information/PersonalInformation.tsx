@@ -12,6 +12,7 @@ import { UpdateProfileFormValues } from '../types';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { AuthService } from '@/services/auth/auth';
 import { Country } from '@/services/organizations/types';
+import { toast } from 'sonner';
 
 export default function PersonalInformation() {
   const authData = useAuthStore((state) => state.authData);
@@ -21,6 +22,7 @@ export default function PersonalInformation() {
       name: authData?.data?.user?.name,
       mobile: authData?.data?.user?.mobile,
       address: authData?.data?.user?.address,
+      image: authData?.data?.user?.image,
       country: authData?.data?.user?.country,
       language: 'English',
       email: authData?.data?.user?.email,
@@ -28,14 +30,15 @@ export default function PersonalInformation() {
   });
 
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const { setAuthData } = useAuthStore();
 
   const mutation = useMutation({
     mutationFn: async (data: UpdateProfileFormValues) => {
       return await AuthService.updatePersonalInformation(data);
     },
-    onSuccess: () => {
-      console.log('Profile updated successfully');
-      // refetchUserData();
+    onSuccess: (data) => {
+      setAuthData(data);
+      toast.success('Profile Updated Successfully!');
     },
     onError: (error) => {
       console.error('Error updating profile:', error);
@@ -48,9 +51,9 @@ export default function PersonalInformation() {
       mobile: data.mobile,
       address: data.address,
       country: data.country,
+      image: data.image,
       language: data.language,
     };
-    console.log(updateProfileData);
     mutation.mutate(updateProfileData);
   };
 
@@ -124,9 +127,6 @@ export default function PersonalInformation() {
         )}
         {mutation.isError && (
           <p className="mt-2 text-sm text-red-500">Error updating profile.</p>
-        )}
-        {mutation.isSuccess && (
-          <p className="mt-2 text-sm text-green-600">Profile updated!</p>
         )}
       </form>
     </div>

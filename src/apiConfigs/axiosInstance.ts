@@ -1,7 +1,7 @@
 import { AuthService } from '@/services/auth/auth';
 import axios from 'axios';
 
-// export const baseURL = 'http://192.168.1.7:8000';
+// export const baseURL = 'http://192.168.1.200:8000';
 export const baseURL = 'https://api.chatboq.com';
 // export const baseURL = 'https://df3bkw8f-8000.inc1.devtunnels.ms';
 

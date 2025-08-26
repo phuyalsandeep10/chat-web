@@ -14,7 +14,7 @@ export interface User {
       is_staff: boolean;
       is_superuser: boolean;
       is_active: boolean;
-      image: string | undefined;
+      image: string | undefined | null;
       attributes: any | null;
       two_fa_secret: string;
       two_fa_auth_url: string;
