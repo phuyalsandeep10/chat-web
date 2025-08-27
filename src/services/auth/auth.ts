@@ -11,7 +11,7 @@ import {
   verify2FaPayload,
   VerifyEmailpayload,
 } from './types';
-import { UpdateProfileFormValues } from '@/components/custom-components/Settings/Accouints/AccountInformation/types';
+import { UpdateProfileFormValues } from '@/components/custom-components/Settings/Accounts/AccountInformation/types';
 
 export class AuthService {
   // Login User
