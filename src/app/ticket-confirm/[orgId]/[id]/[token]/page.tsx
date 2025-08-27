@@ -10,11 +10,12 @@ export default function TicketConfirm() {
   const params = useParams();
   const id = params.id as string | undefined;
   const token = params.token as string | undefined;
+  const orgId = params.orgId as string;
 
   const { mutate, status, data, error } = useMutation({
     mutationFn: () => {
       if (!id || !token) throw new Error('Missing ticket ID or token');
-      return confirmTicket(id, token);
+      return confirmTicket(orgId, id, token);
     },
     onSuccess: (data) => {
       showToast({

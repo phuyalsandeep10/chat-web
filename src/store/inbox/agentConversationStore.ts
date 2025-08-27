@@ -22,6 +22,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
     fetch_conversation: false,
     resolve_conversation: false,
     fetch_all_conversations: false,
+    edit_message: false,
   },
   req_success: {
     fetch_messages: false,
@@ -29,6 +30,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
     fetch_conversation: false,
     resolve_conversation: false,
     fetch_all_conversations: false,
+    edit_message: false,
   },
   setConversationData: (data: ConversationResponse) =>
     set({
@@ -64,7 +66,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
             }
           : conv,
       );
-      console.log(updatedConversations);
+      // console.log(updatedConversations);
       return {
         messages: [...state.messages, message],
         all_conversations: updatedConversations,
@@ -129,6 +131,86 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
       });
     }
   },
+  editMessage: async (messageId: number, content: string) => {
+    set({
+      req_loading: {
+        fetch_messages: false,
+        add_message: false,
+        fetch_conversation: false,
+        fetch_all_conversations: false,
+        resolve_conversation: false,
+        edit_message: true,
+      },
+    });
+    try {
+      const response = await ConversationService.editMessage(messageId, {
+        content,
+      });
+      console.log(response);
+      set((state) => {
+        const updatedMessages = state.messages.map((msg) =>
+          msg.id === messageId
+            ? { ...msg, content: response.data.content }
+            : msg,
+        );
+
+        console.log(updatedMessages);
+
+        // Update the all_conversations array if the edited message is the last message
+        const updatedConversations = state.all_conversations.map((conv) =>
+          conv.attributes.last_message?.id === messageId
+            ? {
+                ...conv,
+                attributes: {
+                  ...conv.attributes,
+                  last_message: {
+                    ...conv.attributes.last_message,
+                    content: response.data.content,
+                    updated_at: response.data.updated_at,
+                  },
+                },
+              }
+            : conv,
+        );
+
+        return {
+          messages: updatedMessages,
+          all_conversations: updatedConversations,
+          req_success: {
+            fetch_messages: false,
+            add_message: false,
+            fetch_conversation: false,
+            fetch_all_conversations: false,
+            resolve_conversation: false,
+            edit_message: true,
+          },
+        };
+      });
+    } catch (error) {
+      console.error('Error editing message:', error);
+      set({
+        req_success: {
+          fetch_messages: false,
+          add_message: false,
+          fetch_conversation: false,
+          fetch_all_conversations: false,
+          resolve_conversation: false,
+          edit_message: false,
+        },
+      });
+    } finally {
+      set({
+        req_loading: {
+          fetch_messages: false,
+          add_message: false,
+          fetch_conversation: false,
+          fetch_all_conversations: false,
+          resolve_conversation: false,
+          edit_message: false,
+        },
+      });
+    }
+  },
   sendMessageToDB: async (
     chatId: number,
     content: string,
@@ -141,6 +223,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
         fetch_conversation: false,
         fetch_all_conversations: false,
         resolve_conversation: false,
+        edit_message: false,
       },
     });
     try {

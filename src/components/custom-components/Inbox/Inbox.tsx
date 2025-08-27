@@ -22,6 +22,7 @@ const Inbox = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const [replyingTo, setReplyingTo] = useState<any>(null);
+  const [editedMessage, setEditedMessage] = useState<any>({});
   const [isTyping, setIsTyping] = useState(false);
   const [showTyping, setShowTyping] = useState(false);
   const [typingmessage, setTypingMessage] = useState<string>('');
@@ -42,6 +43,7 @@ const Inbox = () => {
     addMessageToStore,
     updateMessageSeen,
     fetchMessages,
+    editMessage,
     joinConversation,
   } = useAgentConversationStore();
 
@@ -98,7 +100,6 @@ const Inbox = () => {
     joinConversation(Number(chatId));
     getAgentChatConversationDetails();
 
-    // Join conversation room
     socket.emit('join_conversation', {
       conversation_id: chatId,
       user_id: userId,
@@ -133,19 +134,27 @@ const Inbox = () => {
 
     emitStopTyping();
 
-    await sendMessageToDB(
-      Number(chatId),
-      message.trim(),
-      replyingTo ? replyingTo?.id : null,
-    );
-
+    if (editedMessage && editedMessage.id) {
+      await editMessage(editedMessage.id, text);
+      setEditedMessage(null);
+    } else {
+      await sendMessageToDB(Number(chatId), text, replyingTo?.id || null);
+    }
     setMessage('');
     if (inputRef.current) inputRef.current.value = '';
     setReplyingTo(null);
   };
 
   // ---- REPLY HELPERS ----
-  const handleReply = (replyToMessage: string) => setReplyingTo(replyToMessage);
+  const handleReply = (replyToMessage: string) => {
+    setReplyingTo(replyToMessage);
+    setEditedMessage({});
+  };
+  const handleEditMessage = (messageToEdit: any) => {
+    setEditedMessage(messageToEdit);
+    setMessage(messageToEdit?.content);
+    setReplyingTo(null);
+  };
   const clearReply = () => setReplyingTo(null);
 
   // ---- TYPING HELPERS ----
@@ -164,12 +173,6 @@ const Inbox = () => {
     socket.emit('stop-typing', { conversation_id: Number(chatId) });
   };
 
-  const editMessage = async () => {
-    const res = ConversationService.editMessage(5, {
-      content: 'nice edtited',
-    });
-  };
-
   return (
     <div className="flex">
       <SubSidebarContentWrapper className="w-[306px]">
@@ -181,7 +184,11 @@ const Inbox = () => {
       {chatId ? (
         <>
           <div className="flex-1">
-            <InboxChatSection messages={messages} onReply={handleReply} />
+            <InboxChatSection
+              messages={messages}
+              onReply={handleReply}
+              handleEditMessage={handleEditMessage}
+            />
 
             <div className="relative m-4">
               <div>
