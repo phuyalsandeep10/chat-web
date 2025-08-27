@@ -50,3 +50,20 @@ export type OrganizationListResponse = {
   success: boolean;
   message?: string;
 };
+
+export interface OrganizationMember {
+  id: number;
+  name: string;
+  image: string;
+}
+
+export interface OrganizationMemberResponse {
+  success: boolean;
+  message: string;
+  data: OrganizationMember[];
+}
+
+export interface OwnershipInvitationPayload {
+  organization_id?: number;
+  owner_id: number;
+}

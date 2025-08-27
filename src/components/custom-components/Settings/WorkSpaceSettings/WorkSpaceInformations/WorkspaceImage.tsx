@@ -1,3 +1,4 @@
+'use client';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
@@ -8,25 +9,33 @@ import ProfileImageModal from '@/components/modal/ChangeImage';
 import ZoomImageModal from '@/components/modal/ZoomImageModal';
 import { getCroppedImg } from '@/lib/cropImage';
 import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
+import { v4 } from 'uuid';
+import { AuthService } from '@/services/auth/auth';
+import WorkspaceData, {
+  useWorkspaceStore,
+} from '@/store/WorkspaceStore/useWorkspaceStore';
 
-const WorkspaceImage = () => {
+function dataURLtoFile(dataurl: string, filename: string): File {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1] || '';
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
+
+const WorkspaceImage = ({ organization }: any) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChangePhotoModal, setShowChangePhotoModal] = useState(false);
 
-  const { authData } = useAuthStore();
-  const orgId = authData?.data.user.attributes.organization_id;
+  const { setData } = useWorkspaceStore();
 
-  const { data: organizationDetails } = useGetOrganizationById(orgId ?? 0, {
-    enabled: !!orgId,
-  });
-
-  const organization = organizationDetails?.organization;
-
-  const handleRemovePhoto = () => {
-    setImageUrl(null);
-    setShowProfileModal(false);
-  };
+  const token = AuthService.getAuthTokens();
 
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
     x: number;
@@ -37,31 +46,53 @@ const WorkspaceImage = () => {
 
   const onCropComplete = useCallback(
     (
-      _croppedArea: any,
-      croppedAreaPixels: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      },
+      _: any,
+      croppedPixels: { x: number; y: number; width: number; height: number },
     ) => {
-      setCroppedAreaPixels(croppedAreaPixels);
+      setCroppedAreaPixels(croppedPixels);
     },
     [],
   );
 
+  // --- Upload logic
   const handleCroppedSave = useCallback(
     async (imageSrc: string) => {
       if (!croppedAreaPixels) return;
       try {
         const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-        setImageUrl(croppedImage);
+
+        // generate unique filename
+        let myuid = v4();
+        myuid = `${myuid}-${Date.now()}.png`;
+
+        const file = dataURLtoFile(croppedImage, myuid);
+
+        // Upload to backend / cloud
+        const cloudinaryRes = await AuthService.uploadPersonalProfile(
+          file,
+          token?.accessToken,
+        );
+        const uploadedUrl = cloudinaryRes?.data?.files?.[0]?.url;
+
+        if (uploadedUrl) {
+          setImageUrl(uploadedUrl);
+          setData({ profile_picture: uploadedUrl });
+        }
+        setShowChangePhotoModal(false);
       } catch (error) {
-        console.error('Cropping error:', error);
+        console.error('Error cropping or uploading image:', error);
+        toast.error('Error uploading image!');
       }
     },
     [croppedAreaPixels],
   );
+
+  // --- Remove logo
+  const handleRemovePhoto = () => {
+    setImageUrl(null);
+    setShowProfileModal(false);
+    setData({ profile_picture: null });
+  };
 
   const logoSrc =
     imageUrl ||
@@ -119,7 +150,7 @@ const WorkspaceImage = () => {
       />
 
       <ZoomImageModal
-        heading="Change Profile Picture"
+        heading="Change Organization Logo"
         subHeading="Crop"
         cancelText="Cancel"
         actionText="Save"

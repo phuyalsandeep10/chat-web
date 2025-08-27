@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export default interface WorkspaceData {
-  profile_picture: string;
+  profile_picture: string | null;
   workspace_owner: string;
   name: string;
   domain: string;

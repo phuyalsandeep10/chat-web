@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { isValidPhoneNumber } from 'react-phone-number-input';
 import {
   ContactFormSchema,
   contactFormSchema,
@@ -11,8 +10,6 @@ import { Input } from '@/components/ui/input';
 import PhoneInput from '@/shared/PhoneInput';
 import { cn } from '@/lib/utils';
 import { useWorkspaceStore } from '@/store/WorkspaceStore/useWorkspaceStore';
-import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganization';
-import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import parsePhoneNumber from 'libphonenumber-js';
 
 interface ContactFormProps {
@@ -72,28 +69,11 @@ const ContactForm: React.FC<ContactFormProps> = ({
     reset,
   ]);
 
-  const { updatedData, setData } = useWorkspaceStore();
-
-  console.log(updatedData);
-  const { mutate: updateOrganization } = useUpdateOrganization();
+  const { setData } = useWorkspaceStore();
 
   const onSubmit = (data: ContactFormSchema) => {
     console.log('Form Data:', data);
   };
-
-  const { authData } = useAuthStore();
-  const orgId = authData?.data.user.attributes.organization_id;
-
-  // useDebouncedEffect(() => {
-  //   if (
-  //     updatedData &&
-  //     Object.keys(updatedData).length > 0 &&
-  //     JSON.stringify(updatedData) !== JSON.stringify(prevUpdatedData.current)
-  //   ) {
-  //     updateOrganization(updatedData);
-  //     prevUpdatedData.current = updatedData;
-  //   }
-  // }, [updatedData], 1000);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

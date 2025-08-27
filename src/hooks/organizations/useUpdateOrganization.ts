@@ -10,7 +10,10 @@ export const useUpdateOrganization = () => {
     mutationFn: (data: Partial<WorkspaceData>) =>
       OrganizationsService.updateOrganization(data),
     onSuccess: (data) => {
-      showToast({ title: data.message, variant: 'success' });
+      showToast({
+        title: 'Workspace Updated Successfully',
+        variant: 'success',
+      });
     },
     onError: (data) => {
       showToast({ title: 'Failed to update workspace', variant: 'error' });

@@ -72,7 +72,7 @@ const Information: React.FC<InformationProps> = ({
             </div>
           </div>
 
-          <div className="">
+          {/* <div className="">
             <p
               className={cn('font-outfit text-brand-dark text-sm font-medium')}
             >
@@ -85,11 +85,11 @@ const Information: React.FC<InformationProps> = ({
             >
               acceptance by &ldquo;
               <span className={cn('text-alert-prominent')}>
-                {workspace_owner || 'N/A'}
+                {invitedMember || 'N/A'}
               </span>
               &rdquo;
             </p>
-          </div>
+          </div> */}
         </div>
 
         <div className={cn('mt-7 flex items-center justify-between')}>

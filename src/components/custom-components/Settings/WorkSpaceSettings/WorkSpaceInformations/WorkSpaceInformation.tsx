@@ -1,5 +1,4 @@
 'use client';
-
 import { cn } from '@/lib/utils';
 import ContactForm from './ContractForm';
 import TerminateWorkspace from './TerminateWorkspace';
@@ -10,16 +9,15 @@ import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useGetOrganizationById } from '@/hooks/organizations/useGetorganizations';
 import WorkspaceImage from './WorkspaceImage';
 import WorkspaceProfile from './WorkspaceProfile';
+
 export default function WorkspaceInformation() {
   const { authData } = useAuthStore();
   const orgId = authData?.data.user.attributes.organization_id;
-
   const { data: organizationDetails } = useGetOrganizationById(orgId ?? 0, {
     enabled: !!orgId,
   });
 
   const organization = organizationDetails?.organization;
-  console.log(organization);
 
   return (
     <>
@@ -28,9 +26,9 @@ export default function WorkspaceInformation() {
         <WorkSpaceHeader />
         {/* Profile Section */}
         <div className={cn('mt-11 mb-15 ml-16 flex items-start space-x-24')}>
-          <WorkspaceImage />
+          <WorkspaceImage organization={organization} />
 
-          <WorkspaceProfile />
+          <WorkspaceProfile organization={organization} />
         </div>
         {/* Workspace Details */}
         <WorkSpaceDetails workspace_identifier={organization?.identifier} />

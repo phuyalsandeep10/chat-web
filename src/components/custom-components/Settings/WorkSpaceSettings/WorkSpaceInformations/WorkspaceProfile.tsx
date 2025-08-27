@@ -1,9 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import CountrySelect from '@/shared/CountrySelect';
 import { cn } from '@/lib/utils';
-import { useAuthStore } from '@/store/AuthStore/useAuthStore';
-import { useGetOrganizationById } from '@/hooks/organizations/useGetorganizations';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGetCountries } from '@/hooks/organizations/useGetCountries';
 import ErrorText from '@/components/common/hook-form/ErrorText';
@@ -16,7 +13,7 @@ import useDebouncedEffect from '@/hooks/useDebounceEffect';
 import { useGetTimeZones } from '@/hooks/organizations/useGetTimeZones';
 import WorkspaceCountrySelect from './WorkspaceCountrySelect';
 
-const WorkspaceProfile = () => {
+const WorkspaceProfile = ({ organization }: any) => {
   const { updatedData, setData } = useWorkspaceStore();
   const [selectedTimeZone, setSelectedTimeZone] = useState<TimeZone | null>(
     null,
@@ -24,18 +21,8 @@ const WorkspaceProfile = () => {
   const prevUpdatedData = useRef<Partial<WorkspaceData>>(updatedData);
 
   const { data: TimeZones, isLoading, isError } = useGetTimeZones();
-  console.log(TimeZones?.data?.timezones);
-
-  const { authData } = useAuthStore();
-  const orgId = authData?.data.user.attributes.organization_id;
-
-  const { data: organizationDetails } = useGetOrganizationById(orgId ?? 0, {
-    enabled: !!orgId,
-  });
 
   const { mutate: updateOrganization } = useUpdateOrganization();
-
-  const organization = organizationDetails?.organization;
 
   const timezones = useMemo(
     () => TimeZones?.data?.timezones || [],
