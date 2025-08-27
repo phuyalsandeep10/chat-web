@@ -14,10 +14,13 @@ const useDeleteOrganization = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      showToast({ title: 'Workspace deleted successfully!' });
+      showToast({
+        title: 'Workspace deleted successfully!',
+        variant: 'success',
+      });
     },
     onError: (error) => {
-      showToast({ title: 'Error deleting workspace' });
+      showToast({ title: 'Error deleting workspace', variant: 'error' });
     },
   });
 };

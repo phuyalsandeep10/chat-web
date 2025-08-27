@@ -13,10 +13,27 @@ export type Country = {
   phone_code: string;
 };
 
+export type TimeZone = {
+  id: number;
+  name: string;
+  display_name: string;
+  country_id: number;
+  country_name: string;
+  country_code: string;
+};
+
 export type CountriesApiResponse = {
   success: boolean;
   message: string;
   data: {
     countries: Country[];
+  };
+};
+
+export type TimeZonesApiResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    timezones: TimeZone[];
   };
 };

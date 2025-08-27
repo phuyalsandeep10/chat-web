@@ -19,7 +19,7 @@ export default function WorkspaceInformation() {
   });
 
   const organization = organizationDetails?.organization;
-  const owner = organizationDetails?.owner;
+  console.log(organization);
 
   return (
     <>
@@ -37,7 +37,7 @@ export default function WorkspaceInformation() {
         {/* Workspace Information */}
         <div className={cn('mt-10 mb-9')}>
           <Information
-            workspace_owner={owner?.name}
+            workspace_owner={organization?.owner_name}
             creation_date={organization?.created_at}
           />
         </div>
@@ -45,6 +45,7 @@ export default function WorkspaceInformation() {
         <ContactForm
           contactEmail={organization?.contact_email}
           contactPhone={organization?.contact_phone}
+          contactDialCode={organization?.contact_dial_code}
           twitterUsername={organization?.twitter_username}
           facebookUsername={organization?.facebook_username}
           whatsappNumber={organization?.whatsapp_number}

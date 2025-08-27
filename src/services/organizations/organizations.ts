@@ -1,5 +1,5 @@
 import axiosInstance, { baseURL } from '@/apiConfigs/axiosInstance';
-import { createOrganizationPayload } from './types';
+import { createOrganizationPayload, TimeZonesApiResponse } from './types';
 import { Country, CountriesApiResponse } from './types';
 import WorkspaceData from '@/store/WorkspaceStore/useWorkspaceStore';
 
@@ -32,6 +32,18 @@ export class OrganizationsService {
     try {
       const res = await axiosInstance.get<CountriesApiResponse>(
         `${baseURL}/organizations/countries`,
+      );
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //Get Time Zones
+  static async getTimeZones(): Promise<TimeZonesApiResponse> {
+    try {
+      const res = await axiosInstance.get<TimeZonesApiResponse>(
+        `${baseURL}/organizations/timezones`,
       );
       return res.data;
     } catch (error) {

@@ -8,8 +8,6 @@ import { cn } from '@/lib/utils';
 import React, { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { InputField } from '@/components/common/hook-form/InputField';
-import { showToast } from '@/shared/toast';
-import axiosInstance from '@/apiConfigs/axiosInstance';
 import useDeleteOrganization from '@/hooks/organizations/useDeleteOrganization';
 
 type FormData = {

@@ -25,19 +25,22 @@ interface Country {
   dialCode: string;
   flagUrl: string;
 }
-
 interface PhoneInputProps {
   value?: string;
+  phoneCode?: string; // <-- new prop
   onChange?: (value: string) => void;
   error?: string;
+  onBlur?: () => void;
 }
 
 const PhoneInput: React.FC<PhoneInputProps> = ({
   value = '',
+  phoneCode,
   onChange,
   error,
+  onBlur,
 }) => {
-  const { data, isLoading, error: fetchError } = useGetCountries();
+  const { data } = useGetCountries();
   const countries: Country[] = useMemo(() => {
     if (data?.data?.countries?.length) {
       return data.data.countries.map((c: any) => ({
@@ -60,35 +63,46 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     }
   }, [data]);
 
-  const [selectedCountry, setSelectedCountry] = useState<Country | undefined>();
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [selectedCountry, setSelectedCountry] = useState<Country>();
+  const [phoneNumber, setPhoneNumber] = useState('');
+
+  // Initialize selected country from value OR phoneCode
   useEffect(() => {
-    if (value && countries.length) {
-      const matchedCountry = countries.find((country) =>
-        value.startsWith(country.dialCode),
-      );
-      if (matchedCountry) {
-        setSelectedCountry(matchedCountry);
-        setPhoneNumber(value.replace(matchedCountry.dialCode, ''));
-      } else {
-        setSelectedCountry(countries[0]);
-        setPhoneNumber(value);
-      }
-    } else if (!selectedCountry && countries.length) {
-      setSelectedCountry(countries[0]);
+    if (!countries.length) return;
+
+    let matchedCountry: Country | undefined;
+
+    // prioritize value if it includes dial code
+    if (value) {
+      matchedCountry = countries.find((c) => value.startsWith(c.dialCode));
     }
-  }, [value, countries, selectedCountry]);
+
+    // if value doesn't match, fall back to phoneCode
+    if (!matchedCountry && phoneCode) {
+      matchedCountry = countries.find((c) => c.dialCode === phoneCode);
+    }
+
+    if (!matchedCountry) matchedCountry = countries[0];
+
+    setSelectedCountry(matchedCountry);
+
+    // set phone number only (without dial code)
+    if (value && matchedCountry && value.startsWith(matchedCountry.dialCode)) {
+      setPhoneNumber(value.replace(matchedCountry.dialCode, ''));
+    } else {
+      setPhoneNumber(value); // if value is just number
+    }
+  }, [countries, phoneCode, value]);
 
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleCountrySelect = (countryCode: string) => {
     const country = countries.find((c) => c.code === countryCode);
-    if (country) {
-      setSelectedCountry(country);
-      setShowDropdown(false);
-      if (onChange && phoneNumber) {
-        onChange(`${country.dialCode}${phoneNumber}`);
-      }
+    if (!country) return;
+    setSelectedCountry(country);
+    setShowDropdown(false);
+    if (onChange) {
+      onChange(`${country.dialCode}${phoneNumber}`);
     }
   };
 
@@ -125,6 +139,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
 
         {/* Phone input */}
         <input
+          onBlur={onBlur}
           type="text"
           inputMode="numeric"
           placeholder="Enter phone number"
@@ -169,5 +184,4 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     </div>
   );
 };
-
 export default PhoneInput;

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 import {
   ContactFormSchema,
   contactFormSchema,
@@ -12,10 +13,12 @@ import { cn } from '@/lib/utils';
 import { useWorkspaceStore } from '@/store/WorkspaceStore/useWorkspaceStore';
 import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganization';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
+import parsePhoneNumber from 'libphonenumber-js';
 
 interface ContactFormProps {
   contactEmail?: string | null;
   contactPhone?: string | null;
+  contactDialCode?: string | '';
   twitterUsername?: string | null;
   facebookUsername?: string | null;
   whatsappNumber?: string | null;
@@ -26,6 +29,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
   contactEmail,
   contactPhone,
   twitterUsername,
+  contactDialCode,
   facebookUsername,
   whatsappNumber,
   telegramUsername,
@@ -137,19 +141,26 @@ const ContactForm: React.FC<ContactFormProps> = ({
               control={control}
               render={({ field }) => (
                 <PhoneInput
+                  phoneCode={contactDialCode}
                   value={field.value}
                   onChange={(value) => {
                     field.onChange(value);
-                    setData({ contact_phone: value });
+                    try {
+                      const phone = value ? parsePhoneNumber(value) : null;
+
+                      if (phone) {
+                        setData({
+                          phone_code: `+${phone.countryCallingCode}`,
+                          phone: phone.nationalNumber,
+                        });
+                      }
+                    } catch {
+                      console.log('error');
+                    }
                   }}
                 />
               )}
             />
-            {errors.phoneNumber && (
-              <p className="text-alert-prominent text-xs">
-                {errors.phoneNumber.message}
-              </p>
-            )}
           </div>
         </div>
 

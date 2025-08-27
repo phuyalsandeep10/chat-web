@@ -7,12 +7,29 @@ export default interface WorkspaceData {
   domain: string;
   phone_code: string;
   email: string;
-  contact_phone: string;
+  phone?: string;
   facebook: string;
   telegram: string;
   twitter: string;
   whatsapp: string;
+  timezone_id?: number;
+  contact_phone: string;
 }
+const defaultValues: Partial<WorkspaceData> = {
+  profile_picture: '',
+  workspace_owner: '',
+  name: '',
+  domain: '',
+  phone_code: '',
+  email: '',
+  phone: '',
+  facebook: '',
+  telegram: '',
+  twitter: '',
+  whatsapp: '',
+  timezone_id: 0,
+  contact_phone: '',
+};
 
 interface WorkspaceStore {
   updatedData: Partial<WorkspaceData>;

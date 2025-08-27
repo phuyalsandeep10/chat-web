@@ -22,7 +22,6 @@ const WorkspaceImage = () => {
   });
 
   const organization = organizationDetails?.organization;
-  const owner = organizationDetails?.owner;
 
   const handleRemovePhoto = () => {
     setImageUrl(null);
@@ -66,7 +65,9 @@ const WorkspaceImage = () => {
 
   const logoSrc =
     imageUrl ||
-    (owner?.image?.startsWith('https') ? owner.image : '/profile.jpg');
+    (organization?.owner_image?.startsWith('https')
+      ? organization.owner_image
+      : '/profile.jpg');
 
   return (
     <>

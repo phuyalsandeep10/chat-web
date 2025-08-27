@@ -7,7 +7,7 @@ export type Organization = {
   purpose?: string;
   active?: boolean;
   contact_email?: string | null;
-  contact_phone?: string | null;
+  contact_phone?: string | '';
   twitter_username?: string | null;
   facebook_username?: string | null;
   whatsapp_number?: string | null;
@@ -15,6 +15,10 @@ export type Organization = {
   owner_id?: number;
   identifier?: string;
   created_at?: string;
+  contact_dial_code?: string;
+  owner_image?: string;
+  owner_name?: string;
+  timezone_id?: number;
 };
 
 export type Owner = {

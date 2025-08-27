@@ -7,17 +7,24 @@ import { useGetOrganizationById } from '@/hooks/organizations/useGetorganization
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGetCountries } from '@/hooks/organizations/useGetCountries';
 import ErrorText from '@/components/common/hook-form/ErrorText';
-import { Country } from '@/services/organizations/types';
+import { Country, TimeZone } from '@/services/organizations/types';
 import WorkspaceData, {
   useWorkspaceStore,
 } from '@/store/WorkspaceStore/useWorkspaceStore';
 import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganization';
 import useDebouncedEffect from '@/hooks/useDebounceEffect';
+import { useGetTimeZones } from '@/hooks/organizations/useGetTimeZones';
+import WorkspaceCountrySelect from './WorkspaceCountrySelect';
 
 const WorkspaceProfile = () => {
   const { updatedData, setData } = useWorkspaceStore();
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [selectedTimeZone, setSelectedTimeZone] = useState<TimeZone | null>(
+    null,
+  );
   const prevUpdatedData = useRef<Partial<WorkspaceData>>(updatedData);
+
+  const { data: TimeZones, isLoading, isError } = useGetTimeZones();
+  console.log(TimeZones?.data?.timezones);
 
   const { authData } = useAuthStore();
   const orgId = authData?.data.user.attributes.organization_id;
@@ -29,17 +36,10 @@ const WorkspaceProfile = () => {
   const { mutate: updateOrganization } = useUpdateOrganization();
 
   const organization = organizationDetails?.organization;
-  const owner = organizationDetails?.owner;
 
-  const {
-    data: countriesResponse,
-    isLoading: isLoadingCountries,
-    error: countriesError,
-  } = useGetCountries();
-
-  const countries = useMemo(
-    () => countriesResponse?.data?.countries || [],
-    [countriesResponse?.data?.countries],
+  const timezones = useMemo(
+    () => TimeZones?.data?.timezones || [],
+    [TimeZones?.data?.timezones],
   );
 
   useDebouncedEffect(
@@ -58,12 +58,12 @@ const WorkspaceProfile = () => {
   );
 
   useEffect(() => {
-    if (owner && countries.length > 0) {
+    if (organization && timezones.length > 0) {
       const ownerCountry =
-        countries.find((c) => c.name === owner.country) || null;
-      setSelectedCountry(ownerCountry);
+        timezones.find((c) => c.id === organization?.timezone_id) || null;
+      setSelectedTimeZone(ownerCountry);
     }
-  }, [owner, countries]);
+  }, [organization, timezones]);
 
   return (
     <div className={cn('flex-1 space-y-5')}>
@@ -119,24 +119,24 @@ const WorkspaceProfile = () => {
           Time zone
         </Label>
 
-        {isLoadingCountries && (
+        {isLoading && (
           <div className="text-theme-text-primary text-sm">
-            Loading countries...
+            Loading timezones...
           </div>
         )}
-        {countriesError && <ErrorText error="The data couldn't be fetched" />}
-        {!isLoadingCountries && !countriesError && (
-          <CountrySelect
-            value={selectedCountry}
-            onChange={(country) => {
-              setSelectedCountry(country);
-              setData({ phone_code: country.phone_code });
+        {isError && <ErrorText error="The data couldn't be fetched" />}
+        {!isLoading && !isError && (
+          <WorkspaceCountrySelect
+            value={selectedTimeZone}
+            onChange={(timezone) => {
+              setSelectedTimeZone(timezone);
+              setData({ timezone_id: timezone.id });
             }}
             buttonClassName="w-full text-black py-2"
             contentClassName="cursor-pointer hover:bg-white"
             itemClassName="hover:bg-gray-100 px-2 py-1"
             wrapperClassName="w-full"
-            countries={countries}
+            timezones={timezones}
           />
         )}
       </div>
