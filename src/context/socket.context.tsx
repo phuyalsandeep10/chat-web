@@ -99,14 +99,20 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       newSocket.on('customer_land', (data: Message) => {
         console.log('Customer land:', data);
         playSound();
-        incrementVisitorCount();
-        fetchAllConversations();
+        // incrementVisitorCount();
+        // fetchAllConversations();
+      });
+      newSocket.on('resolved-conversation', (data: Message) => {
+        console.log('unresolved conversation:', data);
+        // playSound();
+        // incrementMessageNotificationCount();
       });
 
       newSocket.on('message-notification', (data: Message) => {
         console.log('Message notification:', data);
         playSound();
-        incrementMessageNotificationCount();
+        // incrementMessageNotificationCount();
+        fetchAllConversations();
       });
 
       newSocket.on('disconnect', () => {
@@ -122,6 +128,16 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [playSound, socket, socketUrl]);
 
+  const handleCleanup = () => {
+    console.log('cleanup message notification ');
+  };
+
+  const cleanupSocketListeners = () => {
+    if (!socket) return;
+    socket.off('message-notification', handleCleanup);
+    socket.off('customer_land', handleCleanup);
+  };
+
   const disconnectSocket = useCallback(() => {
     if (socket) {
       socket.disconnect();
@@ -130,15 +146,19 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setSocketId('');
       setMessages([]);
       setOtherTyping(false); // typing: clear typing state
+      cleanupSocketListeners();
     }
   }, [socket]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     // if (!authTokens) return;
+    cleanupSocketListeners();
     connectSocket();
+
     return () => {
       disconnectSocket();
+      cleanupSocketListeners();
     };
   }, []);
 

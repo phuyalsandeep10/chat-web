@@ -20,7 +20,7 @@
     iframe.style.width = '100%';
     iframe.style.height = '100%';
     iframe.style.border = '0';
-    iframe.src = `http://portal.chatboq.com/chat?orgId=${orgId}`;
+    iframe.src = `https://portal.chatboq.com/chat?orgId=${orgId}`;
     widget.appendChild(iframe);
 
     const toggleBtn = document.createElement('button');

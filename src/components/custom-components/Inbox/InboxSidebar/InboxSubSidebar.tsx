@@ -16,7 +16,7 @@ const InboxSubSidebar = () => {
         </span>
       </div>
 
-      <SearchBox />
+      {/* <SearchBox /> */}
       <ConversationsList />
     </div>
   );

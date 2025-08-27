@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Icons } from '@/components/ui/Icons';
 import { useSocket } from '@/context/socket.context';
+import { formatTime } from '@/lib/timeFormatUtils';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import { MoreVertical } from 'lucide-react';
 import { useEffect } from 'react';
@@ -33,31 +34,19 @@ const MessageItem = ({ message, onReply }: MessageItemProps) => {
     }
   }, [message]);
 
-  // console.log(message?.user_id && message?.seen ,message)
-
   return (
-    <div>
-      {/* {message?.updated_at && (
-        <div className="mb-4 flex items-center">
-          <div className="bg-gray-light h-[0.5px] w-full"></div>
-          <div className="text-gray-light text-center text-xs">
-            {ShowTime(message?.updated_at)}
-          </div>
-          <div className="bg-gray-light h-[0.5px] w-full"></div>
+    <div
+      className={`flex ${message?.user_id ? 'justify-end' : 'justify-start'} mb-4`}
+    >
+      {!message?.user_id && (
+        <div className="bg-gray-light mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
+          <span className="text-theme-text-dark text-xs font-medium">
+            {customer?.name?.substring(0, 2)?.toLocaleUpperCase()}
+          </span>
         </div>
-      )} */}
+      )}
 
-      <div
-        className={`flex ${message?.user_id ? 'justify-end' : 'justify-start'} mb-4`}
-      >
-        {!message?.user_id && (
-          <div className="bg-gray-light mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
-            <span className="text-theme-text-dark text-xs font-medium">
-              {customer?.name?.substring(0, 2)?.toLocaleUpperCase()}
-            </span>
-          </div>
-        )}
-
+      <div className={`flex ${message?.user_id ? 'flex-col' : ''}`}>
         <div className="flex items-center">
           <div
             className={`max-w-xs rounded-lg px-4 py-2 lg:max-w-sm ${
@@ -83,12 +72,10 @@ const MessageItem = ({ message, onReply }: MessageItemProps) => {
             <p
               className={`${
                 message?.user_id ? 'text-sm font-normal break-all' : 'text-sm'
-              }`}
+              } ${message?.reply_to && message?.reply_to_id && 'mt-1'}`}
             >
               {message?.content}
             </p>
-            {/* <p>{ShowTime(message?.updated_at)}</p> */}
-
             <div
               className={`mt-1 flex items-center ${message?.user_id ? 'justify-end' : ''}`}
             >
@@ -96,7 +83,9 @@ const MessageItem = ({ message, onReply }: MessageItemProps) => {
                 className={`text-xs ${
                   message?.user_id ? 'text-white' : 'text-gray-dark'
                 }`}
-              ></span>
+              >
+                {formatTime(message?.updated_at)}
+              </span>
             </div>
           </div>
 
@@ -117,6 +106,12 @@ const MessageItem = ({ message, onReply }: MessageItemProps) => {
               </Avatar>
             )}
           </div>
+
+          {message?.user_id && message?.seen && (
+            <div className="-mt-2 mr-10 flex justify-end">
+              <Icons.double_check className="text-brand-primary" />
+            </div>
+          )}
         </div>
 
         {!message?.user_id && (
@@ -143,12 +138,6 @@ const MessageItem = ({ message, onReply }: MessageItemProps) => {
           </div>
         )}
       </div>
-
-      {message?.user_id && message?.seen && (
-        <div className="-mt-2 mr-10 flex justify-end">
-          <Icons.double_check className="text-brand-primary" />
-        </div>
-      )}
     </div>
   );
 };
