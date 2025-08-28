@@ -1,4 +1,5 @@
 'use client';
+import GeneralInfo from '@/components/custom-components/Inbox/InboxChatInfo/Informations/GeneralInfo';
 import TicketDetails from '@/modules/ticket/pages/TicketDetails';
 import { getTicketDetails } from '@/services/ticket/services';
 import { useParams } from 'next/navigation';

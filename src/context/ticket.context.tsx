@@ -37,7 +37,7 @@ interface socketOptions {
 export const TicketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [socketUrl, setSocketUrl] = useState(`${baseURL}/tickets`);
+  const [socketUrl, setSocketUrl] = useState(`${baseURL}/tickets_socket`);
   const [socketId, setSocketId] = useState<string | undefined>('');
   const { authData } = useAuthStore();
 
@@ -57,7 +57,7 @@ export const TicketProvider = ({ children }: { children: React.ReactNode }) => {
     const socketOptions: socketOptions = {
       transports: ['websocket', 'polling'],
       path: '/ws/sockets/socket.io',
-      namespace: '/tickets',
+      namespace: '/tickets_socket',
       auth: {
         ticket_id: 1,
         token: accessToken,
@@ -67,6 +67,7 @@ export const TicketProvider = ({ children }: { children: React.ReactNode }) => {
     if (accessToken.trim()) {
       socketOptions.auth = {
         token: accessToken.trim(),
+        ticket_id: 1,
       };
     }
 
