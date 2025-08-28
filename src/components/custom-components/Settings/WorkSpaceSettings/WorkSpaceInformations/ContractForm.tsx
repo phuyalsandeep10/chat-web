@@ -1,6 +1,5 @@
-'use client';
-
-import { useForm } from 'react-hook-form';
+import { useEffect, useMemo, useRef } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ContactFormSchema,
@@ -9,22 +8,71 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import PhoneInput from '@/shared/PhoneInput';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useWorkspaceStore } from '@/store/WorkspaceStore/useWorkspaceStore';
+import parsePhoneNumber from 'libphonenumber-js';
 
-const ContactForm: React.FC = () => {
-  const [phoneNumber, setPhoneNumber] = useState('');
+interface ContactFormProps {
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  contactDialCode?: string | '';
+  twitterUsername?: string | null;
+  facebookUsername?: string | null;
+  whatsappNumber?: string | null;
+  telegramUsername?: string | null;
+}
+
+const ContactForm: React.FC<ContactFormProps> = ({
+  contactEmail,
+  contactPhone,
+  twitterUsername,
+  contactDialCode,
+  facebookUsername,
+  whatsappNumber,
+  telegramUsername,
+}) => {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
+    reset,
   } = useForm<ContactFormSchema>({
     resolver: zodResolver(contactFormSchema),
+    defaultValues: {
+      email: '',
+      phoneNumber: '',
+      twitter: '',
+      messenger: '',
+      whatsapp: '',
+      telegram: '',
+    },
   });
 
+  // Reset form when props change
+  useEffect(() => {
+    reset({
+      email: contactEmail || '',
+      phoneNumber: contactPhone || '',
+      twitter: twitterUsername || '',
+      messenger: facebookUsername || '',
+      whatsapp: whatsappNumber || '',
+      telegram: telegramUsername || '',
+    });
+  }, [
+    contactEmail,
+    contactPhone,
+    twitterUsername,
+    facebookUsername,
+    whatsappNumber,
+    telegramUsername,
+    reset,
+  ]);
+
+  const { setData } = useWorkspaceStore();
+
   const onSubmit = (data: ContactFormSchema) => {
-    const fullData = { ...data, phoneNumber }; // Append phone number from state
-    console.log(fullData);
+    console.log('Form Data:', data);
   };
 
   return (
@@ -36,6 +84,7 @@ const ContactForm: React.FC = () => {
       >
         Contact Information
       </h2>
+
       <div className={cn('space-y-4.5')}>
         <div className={cn('grid grid-cols-2 gap-5')}>
           <div className={cn('space-y-2.5')}>
@@ -47,13 +96,14 @@ const ContactForm: React.FC = () => {
             </Label>
             <Input
               id="email"
-              placeholder="anything@gmail.com"
               type="email"
-              className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('email')}
+              placeholder="anything@gmail.com"
+              className="h-9 text-sm font-medium"
+              onChange={(e) => setData({ email: e.target.value })}
             />
             {errors.email && (
-              <p className={cn('text-alert-prominent text-xs')}>
+              <p className="text-alert-prominent text-xs">
                 {errors.email.message}
               </p>
             )}
@@ -62,16 +112,35 @@ const ContactForm: React.FC = () => {
           <div className={cn('space-y-2.5')}>
             <Label
               htmlFor="phone"
-              className={cn('font-outfit text-base font-medium text-black')}
+              className="font-outfit text-base font-medium text-black"
             >
               Phone
             </Label>
-            <PhoneInput />
-            {errors.phoneNumber && (
-              <p className={cn('text-alert-prominent text-xs')}>
-                {errors.phoneNumber.message}
-              </p>
-            )}
+            <Controller
+              name="phoneNumber"
+              control={control}
+              render={({ field }) => (
+                <PhoneInput
+                  phoneCode={contactDialCode}
+                  value={field.value}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    try {
+                      const phone = value ? parsePhoneNumber(value) : null;
+
+                      if (phone) {
+                        setData({
+                          phone_code: `+${phone.countryCallingCode}`,
+                          phone: phone.nationalNumber,
+                        });
+                      }
+                    } catch {
+                      console.log('error');
+                    }
+                  }}
+                />
+              )}
+            />
           </div>
         </div>
 
@@ -88,6 +157,7 @@ const ContactForm: React.FC = () => {
               placeholder="Messenger username"
               className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('messenger')}
+              onChange={(e) => setData({ facebook: e.target.value })}
             />
             {errors.messenger && (
               <p className={cn('text-alert-prominent text-xs')}>
@@ -107,6 +177,7 @@ const ContactForm: React.FC = () => {
               placeholder="Telegram username"
               className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('telegram')}
+              onChange={(e) => setData({ telegram: e.target.value })}
             />
             {errors.telegram && (
               <p className={cn('text-alert-prominent text-xs')}>
@@ -129,6 +200,7 @@ const ContactForm: React.FC = () => {
               placeholder="X username"
               className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('twitter')}
+              onChange={(e) => setData({ twitter: e.target.value })}
             />
             {errors.twitter && (
               <p className={cn('text-alert-prominent text-xs')}>
@@ -148,6 +220,7 @@ const ContactForm: React.FC = () => {
               className={cn('font-outfit h-9 text-sm font-medium')}
               placeholder="+977 9824830624"
               {...register('whatsapp')}
+              onChange={(e) => setData({ whatsapp: e.target.value })}
             />
             {errors.whatsapp && (
               <p className={cn('text-alert-prominent text-xs')}>

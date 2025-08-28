@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import Flag from 'react-world-flags';
 import { Icons } from '@/components/ui/Icons';
 import { cn } from '@/lib/utils';
-import { Country } from '@/services/organizations/types';
+import { Country, TimeZone } from '@/services/organizations/types';
 
 type CountrySelectProps = {
   value: Country | null;

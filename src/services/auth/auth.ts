@@ -212,4 +212,22 @@ export class AuthService {
       console.error('Error clearing auth tokens', error);
     }
   }
+
+  static async uploadPersonalProfile(file: File, token: string | undefined) {
+    try {
+      const formData = new FormData();
+      formData.append('files', file); // 'files' matches your FastAPI param
+      const response = await axiosInstance.post('/upload/files', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response);
+      return response.data;
+    } catch (error) {
+      console.error('Error uploading Personal Profile', error);
+      throw error;
+    }
+  }
 }
