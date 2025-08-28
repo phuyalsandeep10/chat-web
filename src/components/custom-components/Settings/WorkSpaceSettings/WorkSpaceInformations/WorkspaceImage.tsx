@@ -91,8 +91,8 @@ const WorkspaceImage = ({ organization }: any) => {
 
   const logoSrc =
     imageUrl ||
-    (organization?.owner_image?.startsWith('https')
-      ? organization.owner_image
+    (organization?.workspace_owner_image?.startsWith('https')
+      ? organization.workspace_owner_image
       : '/profile.jpg');
 
   return (

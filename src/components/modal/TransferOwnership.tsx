@@ -17,6 +17,7 @@ import Image from 'next/image';
 import { useGetMembers } from '@/hooks/organizations/useGetMembers';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useSendOwnershipInvitation } from '@/hooks/organizations/useSendOwnershipInvitation';
+import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganization';
 
 interface TransferOwnershipModalProps {
   open: boolean;
@@ -33,13 +34,12 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
     enabled: !!orgId,
   });
 
-  const sendOwnershipInvitation = useSendOwnershipInvitation();
+  const sendOwnershipInvitation = useUpdateOrganization();
 
   const handleInvite = (userId: number) => {
     sendOwnershipInvitation.mutate(
       {
-        organization_id: orgId,
-        owner_id: userId,
+        workspace_owner_id: userId,
       },
       {
         onSuccess: (data) => {

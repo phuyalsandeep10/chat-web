@@ -7,7 +7,7 @@ export const useSendOwnershipInvitation = () => {
   return useMutation({
     mutationFn: async (payload: OwnershipInvitationPayload) => {
       const res = await axiosInstance.put(
-        `/organizations/change-owner`,
+        `/organizations/update-workspace`,
         payload,
       );
       return res.data;

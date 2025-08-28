@@ -14,6 +14,7 @@ export default interface WorkspaceData {
   whatsapp: string;
   timezone_id?: number;
   contact_phone: string;
+  workspace_owner_id?: number;
 }
 const defaultValues: Partial<WorkspaceData> = {
   profile_picture: '',
