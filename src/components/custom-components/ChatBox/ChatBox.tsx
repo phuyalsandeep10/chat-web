@@ -4,6 +4,8 @@ import { CustomerConversationService } from '@/services/inbox/customerConversati
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useChatBox } from './chatbox.provider';
+import Image from 'next/image';
+import { Expand, Maximize2, X } from 'lucide-react';
 
 interface Message {
   content: string;
@@ -332,6 +334,104 @@ export default function ChatBox() {
         Get Conversations
       </button> */}
     </div>
+    // <div className="w-[360px] rounded-xl bg-[#FAFAFA]">
+    //   <div className="flex items-center justify-between bg-gradient-to-b from-[#6D28D9] to-[#A77EE8] px-6 py-2">
+    //     <div className="left flex items-center gap-4">
+    //       <div className="flex min-h-[42px] min-w-[42px] items-center justify-center rounded-full bg-[#5A189A]">
+    //         <Image
+    //           src="/widget-logo.svg"
+    //           height={24}
+    //           width={20}
+    //           className="h-6 w-6"
+    //           alt=""
+    //         />
+    //       </div>
+    //       <div className="">
+    //         <h3 className="font-sans text-[20px] leading-6 font-medium text-white">
+    //           ChatBoq
+    //         </h3>
+    //         <p className="font-inter text-[11px] leading-[16.5px] font-normal text-white">
+    //           Online
+    //         </p>
+    //       </div>
+    //     </div>
+    //     <div className="flex items-center gap-[14px] text-white">
+    //       <button>
+    //         <Expand size={18} />
+    //       </button>
+    //       <button>
+    //         <X size={18} />
+    //       </button>
+    //     </div>
+    //   </div>
+    //   <div className="px-6 py-4 min-h-[413px] ">
+    //     <div>
+    //       <div className="flex gap-4">
+    //         <div className="flex items-end">
+    //           <div className="flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full bg-[#5A189A]">
+    //             <Image
+    //               src="/widget-logo.svg"
+    //               height={12}
+    //               width={12}
+    //               className="h-4 w-4"
+    //               alt=""
+    //             />
+    //           </div>
+    //         </div>
+    //         <div className="font-inter rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
+    //           <p className="text-xs leading-[18px] font-normal text-black">
+    //             Hi there! Welcome to ChatBoq! What would you like to do
+    //             today?{' '}
+    //           </p>
+    //           <p className="mt-[5px] text-xs font-normal text-[#6D6D6D]">
+    //             03:33 PM
+    //           </p>
+    //         </div>
+    //       </div>
+    //       <div className='font-inter flex  text-xs gap-2 ml-[48px] mt-2'>
+    //         <button className='p-2 text-[#8A53E1]  bg-white border border-[#E2D4F7] rounded-lg cursor-pointer hover:bg-[#E2D4F7]'>Chat with AI </button>
+    //         <button className='p-2 text-[#8A53E1]  bg-white border border-[#E2D4F7] rounded-lg cursor-pointer hover:bg-[#E2D4F7]'>Talk to Agent</button>
+
+    //       </div>
+    //     </div>
+
+    //     <div className='rounded-tl-[12px] rounded-tr-[12px] rounded-br-[2px] rounded-bl-[12px] border border-[rgba(170,170,170,0.10)] bg-gradient-to-b from-[var(--Brand-500,#6D28D9)] to-[var(--Brand-300,#A77EE8)] text-xs text-white p-2 mt-4 w-fit ml-auto'>
+    //       <p>I&apos;d like to chat with the AI assistant.</p>
+    //       <p>03:33 PM</p>
+
+    //     </div>
+
+    //       <div className="flex gap-4 mt-4">
+    //         <div className="flex items-end">
+    //           <div className="flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full bg-[#5A189A]">
+    //             <Image
+    //               src="/widget-logo.svg"
+    //               height={12}
+    //               width={12}
+    //               className="h-4 w-4"
+    //               alt=""
+    //             />
+    //           </div>
+    //         </div>
+    //         <div className="font-inter rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
+    //           <p className="text-xs leading-[18px] font-normal text-black">
+    //             Hi there! Welcome to ChatBoq! What would you like to do
+    //             today?{' '}
+    //           </p>
+    //           <p className="mt-[5px] text-xs font-normal text-[#6D6D6D]">
+    //             03:33 PM
+    //           </p>
+    //         </div>
+    //       </div>
+
+    //   </div>
+    //   <div className='px-6 text-xs text-[#6D6D6D] font-inter py-2 bg-white'>
+    //     <form>
+    //       <input type="text" placeholder='Compose your message'  className=''/>
+    //     </form>
+
+    //   </div>
+    // </div>
   );
 }
 
