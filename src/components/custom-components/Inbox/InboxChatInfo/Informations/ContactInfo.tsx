@@ -1,8 +1,10 @@
 import { Icons } from '@/components/ui/Icons';
 import React from 'react';
 import InformationsWrapper from './InformationsWrapper';
+import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 
 const ContactInfo = () => {
+  const { customer } = useAgentConversationStore();
   return (
     <InformationsWrapper>
       <div>
@@ -14,7 +16,7 @@ const ContactInfo = () => {
           <div className="mt-3 flex items-center justify-between">
             <div className="flex gap-1">
               <Icons.mail className="h-4 w-4" />
-              <span className="text-sm text-gray-600">noah.p@example.com</span>
+              <span className="text-sm text-gray-600">{customer?.email}</span>
             </div>
             <div className="flex items-center gap-2">
               <Icons.copy className="h-4 w-4 text-gray-400" />
@@ -24,7 +26,7 @@ const ContactInfo = () => {
           <div className="flex items-center justify-between">
             <div className="flex gap-1">
               <Icons.phone className="h-4 w-4" />
-              <span className="text-sm text-gray-600">0000000000</span>
+              <span className="text-sm text-gray-600">{customer?.phone}</span>
             </div>
             <div className="flex items-center gap-2">
               <Icons.copy className="h-4 w-4 text-gray-400" />

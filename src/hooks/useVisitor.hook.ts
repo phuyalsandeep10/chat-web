@@ -61,5 +61,5 @@ export const useVisitor = () => {
     }
   }, [initVisitor, orgId]);
 
-  return { visitor, loading };
+  return { visitor, loading, setVisitor };
 };

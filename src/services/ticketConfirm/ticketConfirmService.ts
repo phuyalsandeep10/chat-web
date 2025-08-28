@@ -7,11 +7,12 @@ export interface ConfirmTicketResponse {
 }
 
 export const confirmTicket = async (
+  orgId: string,
   ticketId: string,
   token: string,
 ): Promise<ConfirmTicketResponse> => {
   const response = await axiosInstance.get(
-    `/tickets/confirm/${ticketId}/${token}`,
+    `/tickets/confirm/${orgId}/${ticketId}/${token}`,
   );
   return response.data;
 };

@@ -84,16 +84,16 @@ const SidebarList: React.FC<SidebarListProps> = ({
             >
               <Icon className="h-5 w-5" />
               {!collapsed && <span>{label}</span>}
-              {route === ROUTES.TOOLS_FEATURES.VISITORS && (
+              {/* {route === ROUTES.TOOLS_FEATURES.VISITORS && visitorCount > 0 && (
                 <span className="bg-brand-primary flex h-4 w-4 items-center justify-center rounded-full text-xs text-white">
                   {visitorCount}
                 </span>
               )}
-              {route === ROUTES.YOUR_INBOXES.MAIN_INBOX && (
+              {route === ROUTES.YOUR_INBOXES.MAIN_INBOX && messageNotificationCount > 0 && (
                 <span className="bg-brand-primary flex h-4 w-4 items-center justify-center rounded-full text-xs text-white">
                   {messageNotificationCount}
                 </span>
-              )}
+              )} */}
             </button>
           );
 

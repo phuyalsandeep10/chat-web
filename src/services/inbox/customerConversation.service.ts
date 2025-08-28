@@ -12,6 +12,18 @@ export class CustomerConversationService {
       throw error;
     }
   }
+
+  static async initializeConversation(customerId: number, data: any) {
+    try {
+      const res = await axiosInstance.post(
+        `/customers/${customerId}/initialize-conversation`,
+        data,
+      );
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  }
   static async createCustomerConversationWithAgent(
     conversationId: number,
     data: any,

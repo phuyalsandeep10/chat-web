@@ -70,6 +70,7 @@ export interface ConversationState {
     fetch_conversation: boolean;
     resolve_conversation: boolean;
     fetch_all_conversations: boolean;
+    edit_message?: boolean;
   };
   req_success: {
     fetch_messages: boolean;
@@ -77,6 +78,7 @@ export interface ConversationState {
     fetch_conversation: boolean;
     resolve_conversation: boolean;
     fetch_all_conversations: boolean;
+    edit_message?: boolean;
   };
   setConversationData: (data: ConversationResponse) => void;
   setMessages: (messages: Message[]) => void;
@@ -94,6 +96,7 @@ export interface ConversationState {
   resolveConversation: (chatId: number) => Promise<void>;
   joinConversation: (conversationId: number) => Promise<void>;
   fetchAllConversations: () => Promise<void>;
+  editMessage: (messageId: number, content: string) => Promise<void>;
   incrementVisitorCount: () => void;
   resetVisitorCount: () => void;
   incrementMessageNotificationCount: () => void;

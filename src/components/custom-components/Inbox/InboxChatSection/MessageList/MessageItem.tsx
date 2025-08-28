@@ -6,8 +6,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+
 import { Icons } from '@/components/ui/Icons';
 import { useSocket } from '@/context/socket.context';
+import { formatTime } from '@/lib/timeFormatUtils';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import { MoreVertical } from 'lucide-react';
 import { useEffect } from 'react';
@@ -15,111 +23,143 @@ import { useEffect } from 'react';
 interface MessageItemProps {
   message: any;
   onReply: (messageText: string) => void;
+  handleEditMessage: (messageText: string) => void;
 }
 
-const MessageItem = ({ message, onReply }: MessageItemProps) => {
+const MessageItem = ({
+  message,
+  onReply,
+  handleEditMessage,
+}: MessageItemProps) => {
   const handleReplyClick = () => {
     onReply(message);
+  };
+  const editMessageClick = () => {
+    handleEditMessage(message);
   };
   const { socket } = useSocket();
   const { customer }: any = useAgentConversationStore();
 
+  const isUserId = message?.user_id;
+
+  // console.log(message);
+
   useEffect(() => {
     if (!socket) return;
-    if (!message?.user_id && !message?.seen) {
+    if (!isUserId && !message?.seen) {
       socket.emit('message_seen', {
         message_id: message?.id,
       });
     }
   }, [message]);
 
-  // console.log(message?.user_id && message?.seen ,message)
-
   return (
-    <div>
-      {/* {message?.updated_at && (
-        <div className="mb-4 flex items-center">
-          <div className="bg-gray-light h-[0.5px] w-full"></div>
-          <div className="text-gray-light text-center text-xs">
-            {ShowTime(message?.updated_at)}
-          </div>
-          <div className="bg-gray-light h-[0.5px] w-full"></div>
+    <div className={`flex ${isUserId ? 'justify-end' : 'justify-start'} mb-4`}>
+      {!isUserId && (
+        <div className="bg-gray-light mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
+          <span className="text-theme-text-dark text-xs font-medium">
+            {customer?.name?.substring(0, 2)?.toLocaleUpperCase()}
+          </span>
         </div>
-      )} */}
+      )}
 
-      <div
-        className={`flex ${message?.user_id ? 'justify-end' : 'justify-start'} mb-4`}
-      >
-        {!message?.user_id && (
-          <div className="bg-gray-light mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
-            <span className="text-theme-text-dark text-xs font-medium">
-              {customer?.name?.substring(0, 2)?.toLocaleUpperCase()}
-            </span>
-          </div>
-        )}
+      <div className={`flex`}>
+        <div className={`flex ${isUserId ? 'flex-col' : ''}`}>
+          {message?.edited_content && (
+            <div className="group relative mr-12 flex justify-end">
+              <span className="text-info text-xs font-medium">Edited</span>
+              <p className="text-info bg-info-light absolute top-[-30px] hidden rounded-lg px-3 py-1.5 text-xs group-hover:block">
+                {message?.edited_content}
+              </p>
+            </div>
+          )}
 
-        <div className="flex items-center">
-          <div
-            className={`max-w-xs rounded-lg px-4 py-2 lg:max-w-sm ${
-              message?.user_id
-                ? 'bg-brand-primary px-5 py-2.5 text-white'
-                : 'bg-brand-disable text-gray-dark'
-            }`}
-          >
-            {message?.reply_to && message?.reply_to_id && (
-              <div className="bg-brand-bg-gradient flex items-center justify-center overflow-hidden">
-                <div className="w-full items-center rounded-[8px] border border-l-4 py-2.5 pr-7 pl-7">
-                  <div className="flex items-center gap-3 text-sm font-semibold text-white">
-                    <Icons.reply className="h-5 w-5" />
-                    <span className="text-sm">Replied</span>
-                  </div>
-                  <p className="mt-1 text-sm font-normal text-white">
-                    {message?.reply_to?.content}
-                  </p>
-                </div>
+          <div className="flex items-center gap-4">
+            {isUserId && (
+              <div className="transition-opacity duration-200">
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="text-theme-text-primary flex h-6 w-6 cursor-pointer items-center justify-center transition-colors">
+                    <MoreVertical size={16} />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem
+                      className="hover:bg-secondary-disabled flex cursor-pointer items-center"
+                      onClick={editMessageClick}
+                    >
+                      Edit Message
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-error focus:text-error flex cursor-pointer items-center gap-2">
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
-
-            <p
-              className={`${
-                message?.user_id ? 'text-sm font-normal break-all' : 'text-sm'
+            <div
+              className={`max-w-xs rounded-lg px-4 py-2 lg:max-w-sm ${
+                isUserId
+                  ? 'bg-brand-primary px-5 py-2.5 text-white'
+                  : 'bg-light-blue text-black'
               }`}
             >
-              {message?.content}
-            </p>
-            {/* <p>{ShowTime(message?.updated_at)}</p> */}
+              {message?.reply_to && message?.reply_to_id && (
+                <div className="bg-brand-bg-gradient flex items-center justify-center overflow-hidden">
+                  <div className="w-full items-center rounded-[8px] border border-l-4 py-2.5 pr-7 pl-7">
+                    <div className="flex items-center gap-3 text-sm font-semibold text-white">
+                      <Icons.reply className="h-5 w-5" />
+                      <span className="text-sm">Replied</span>
+                    </div>
+                    <p className="mt-1 text-sm font-normal text-white">
+                      {message?.reply_to?.content}
+                    </p>
+                  </div>
+                </div>
+              )}
 
-            <div
-              className={`mt-1 flex items-center ${message?.user_id ? 'justify-end' : ''}`}
-            >
-              <span
-                className={`text-xs ${
-                  message?.user_id ? 'text-white' : 'text-gray-dark'
-                }`}
-              ></span>
+              <p
+                className={`text-lg leading-[29px] font-normal ${
+                  isUserId ? 'text-sm font-normal break-all' : ''
+                } ${message?.reply_to && message?.reply_to_id && 'mt-1'}`}
+              >
+                {message?.content}
+              </p>
+              <div
+                className={`mt-1 flex items-center text-xs font-normal ${isUserId ? 'justify-start text-left text-white' : 'text-theme-text-primary justify-end'}`}
+              >
+                <span>{formatTime(message?.updated_at)}</span>
+              </div>
+            </div>
+
+            <div className="">
+              {isUserId && (
+                <Avatar>
+                  {message?.user && message?.user?.image ? (
+                    <AvatarImage
+                      src={message?.user?.image}
+                      alt="user image"
+                      className="ml-2 flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full"
+                    />
+                  ) : (
+                    <AvatarFallback className="text-theme-text-dark text-xs font-medium">
+                      {message?.user?.name
+                        ?.substring(0, 2)
+                        ?.toLocaleUpperCase()}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              )}
             </div>
           </div>
-
-          <div className="">
-            {message?.user_id && (
-              <Avatar>
-                {message?.user && message?.user?.image ? (
-                  <AvatarImage
-                    src={message?.user?.image}
-                    alt="user image"
-                    className="ml-2 flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full"
-                  />
-                ) : (
-                  <AvatarFallback className="text-theme-text-dark text-xs font-medium">
-                    {message?.user?.name?.substring(0, 2)?.toLocaleUpperCase()}
-                  </AvatarFallback>
-                )}
-              </Avatar>
+          <div>
+            {isUserId && message?.seen && (
+              <div className="mr-11 flex justify-end">
+                <Icons.double_check className="text-brand-primary" />
+              </div>
             )}
           </div>
         </div>
 
-        {!message?.user_id && (
+        {!isUserId && (
           <div className="transition-opacity duration-200">
             <DropdownMenu>
               <DropdownMenuTrigger className="text-theme-text-primary flex h-6 w-6 cursor-pointer items-center justify-center transition-colors">
@@ -143,12 +183,6 @@ const MessageItem = ({ message, onReply }: MessageItemProps) => {
           </div>
         )}
       </div>
-
-      {message?.user_id && message?.seen && (
-        <div className="-mt-2 mr-10 flex justify-end">
-          <Icons.double_check className="text-brand-primary" />
-        </div>
-      )}
     </div>
   );
 };
