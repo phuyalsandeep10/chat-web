@@ -1,25 +1,23 @@
 'use client';
 import { baseURL } from '@/apiConfigs/axiosInstance';
+import { formatTime } from '@/lib/timeFormatUtils';
+import { cn } from '@/lib/utils';
 import { CustomerConversationService } from '@/services/inbox/customerConversation.service';
+import { RiMessage2Line } from '@remixicon/react';
+import { X } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useChatBox } from './chatbox.provider';
-import Image from 'next/image';
-import { Expand, House, Maximize2, X } from 'lucide-react';
 import {
   AttachmentIcon,
   EmojiIcon,
-  HeadCallIcon,
   HomeIcon,
   InfoIcon,
   MaximizeIcon,
   MicIcon,
   SendIcon,
-  StarIcon,
 } from './ChatBoxIcons';
-import { RiMessage2Line } from '@remixicon/react';
-import { cn } from '@/lib/utils';
-import { formatTime } from '@/lib/timeFormatUtils';
 
 interface Message {
   content: string;
@@ -75,10 +73,10 @@ export default function ChatBox() {
     if (socket) {
       socket.off('connect');
       socket.off('disconnect');
-      socket.off('receive-message');
+      socket.off('receive_message');
       socket.off('message_seen');
       socket.off('typing');
-      socket.off('stop-typing');
+      socket.off('stop_typing');
       socket.disconnect();
     }
 
@@ -119,19 +117,19 @@ export default function ChatBox() {
       // Set up event listeners
       newSocket.on('connect', handleConnect);
       newSocket.on('disconnect', handleDisconnect);
-      newSocket.on('receive-message', handleMessage);
+      newSocket.on('receive_message', handleMessage);
       newSocket.on('message_seen', (data) => console.log('message_seen', data));
       newSocket.on('typing', () => setOtherTyping(true));
-      newSocket.on('stop-typing', () => setOtherTyping(false));
+      newSocket.on('stop_typing', () => setOtherTyping(false));
 
       // Store cleanup function
       const cleanup = () => {
         newSocket.off('connect', handleConnect);
         newSocket.off('disconnect', handleDisconnect);
-        newSocket.off('receive-message', handleMessage);
+        newSocket.off('receive_message', handleMessage);
         newSocket.off('message_seen');
         newSocket.off('typing');
-        newSocket.off('stop-typing');
+        newSocket.off('stop_typing');
         newSocket.disconnect();
       };
 
@@ -220,7 +218,7 @@ export default function ChatBox() {
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
     }
-    emitStopTyping();
+    await emitStopTyping();
 
     try {
       const res =
@@ -247,10 +245,12 @@ export default function ChatBox() {
     });
   };
 
-  const emitStopTyping = () => {
+  const emitStopTyping = async () => {
     if (!socket || !isConnected || !visitor?.conversation?.id) return;
     console.log('stop typing....');
-    socket.emit('stop_typing', { conversation_id: visitor.conversation.id });
+    await socket.emit('stop_typing', {
+      conversation_id: visitor.conversation.id,
+    });
   };
 
   // if (!visitor?.customer?.email) {

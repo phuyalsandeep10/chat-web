@@ -51,8 +51,8 @@ const Inbox = () => {
 
   // 🔹 Define event handlers once
   const handleReceiveMessage = (data: any) => {
-    console.log('Message received:', data);
     const isSenderMessage = data?.user_id === userId;
+    console.log('Message received:', data);
     if (!isSenderMessage) {
       addMessageToStore(data);
       playSound();
@@ -73,16 +73,17 @@ const Inbox = () => {
   };
 
   const handleMessageSeen = (data: any) => {
+    console.log('message seen', data);
     updateMessageSeen(data?.message_id);
   };
 
   // 🔹 Common cleanup function
   const cleanupSocketListeners = () => {
     if (!socket) return;
-    socket.off('receive-message', handleReceiveMessage);
+    socket.off('receive_message', handleReceiveMessage);
     socket.off('typing', handleTyping);
     socket.off('message_seen', handleMessageSeen);
-    socket.off('stop-typing', handleStopTyping);
+    socket.off('stop_typing', handleStopTyping);
   };
 
   useEffect(() => {
@@ -100,23 +101,20 @@ const Inbox = () => {
     joinConversation(Number(chatId));
     getAgentChatConversationDetails();
 
-    socket.emit('join_conversation', {
-      conversation_id: chatId,
-      user_id: userId,
-    });
+    // socket.emit('join_conversation', {
+    //   conversation_id: chatId,
+    //   user_id: userId,
+    // });
 
     // Attach listeners
-    socket.on('receive-message', handleReceiveMessage);
+    socket.on('receive_message', handleReceiveMessage);
     socket.on('typing', handleTyping);
     socket.on('message_seen', handleMessageSeen);
-    socket.on('stop-typing', handleStopTyping);
+    socket.on('stop_typing', handleStopTyping);
 
     return () => {
       cleanupSocketListeners();
-      socket.emit('leave_conversation', {
-        conversation_id: chatId,
-        user_id: userId,
-      });
+      socket.emit('leave_conversation');
     };
   }, [chatId, socket, userId, playSound]);
 
@@ -170,7 +168,9 @@ const Inbox = () => {
 
   const emitStopTyping = () => {
     if (!socket) return;
-    socket.emit('stop-typing', { conversation_id: Number(chatId) });
+    socket.emit('stop_typing', {
+      conversation_id: Number(chatId),
+    });
   };
 
   return (

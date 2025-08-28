@@ -60,7 +60,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     incrementVisitorCount,
     fetchAllConversations,
   } = useAgentConversationStore();
-
+  const handleCustomerJoinConversation = (data: any) => {
+    console.log('Customer join conversation', data);
+  };
   const connectSocket = useCallback(() => {
     if (typeof window === 'undefined') return;
     const authTokens = AuthService.getAuthTokens();
@@ -102,13 +104,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         // incrementVisitorCount();
         // fetchAllConversations();
       });
-      newSocket.on('resolved-conversation', (data: Message) => {
+      newSocket.on('resolved_conversation', (data: Message) => {
         console.log('unresolved conversation:', data);
         // playSound();
         // incrementMessageNotificationCount();
       });
+      newSocket.on(
+        'customer_conversation_join',
+        handleCustomerJoinConversation,
+      );
 
-      newSocket.on('message-notification', (data: Message) => {
+      newSocket.on('message_notification', (data: Message) => {
         console.log('Message notification:', data);
         playSound();
         // incrementMessageNotificationCount();
