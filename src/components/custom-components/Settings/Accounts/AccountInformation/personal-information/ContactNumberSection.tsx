@@ -19,7 +19,7 @@ export const ContactNumberSection = ({
       ></Label>
       <div className="mt-3 w-[80%]">
         <Controller
-          name="phoneNumber"
+          name="mobile"
           control={control}
           render={({ field }) => <PhoneInput field={field} />}
         />

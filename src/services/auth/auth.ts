@@ -11,6 +11,7 @@ import {
   verify2FaPayload,
   VerifyEmailpayload,
 } from './types';
+import { UpdateProfileFormValues } from '@/components/custom-components/Settings/Accounts/AccountInformation/types';
 
 export class AuthService {
   // Login User
@@ -148,7 +149,10 @@ export class AuthService {
   // Verify 2fa otp
   static async verify2FAOtp(payload: verify2FaPayload) {
     try {
-      const response = await axiosInstance.post('/auth/2fa-verify', payload);
+      const response = await axios.patch(
+        `${baseURL}/auth/resend-verification-token`,
+        payload,
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -213,16 +217,27 @@ export class AuthService {
     }
   }
 
-  static async uploadPersonalProfile(file: File, token: string | undefined) {
+  // update account information
+  static async updatePersonalInformation(payload: UpdateProfileFormValues) {
+    try {
+      const response = await axiosInstance.patch('/auth/profile', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating Personal Information');
+    }
+  }
+
+  static async uploadPersonalProfile(file: File) {
     try {
       const formData = new FormData();
       formData.append('files', file); // 'files' matches your FastAPI param
+
       const response = await axiosInstance.post('/upload/files', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
         },
       });
+
       console.log(response);
       return response.data;
     } catch (error) {

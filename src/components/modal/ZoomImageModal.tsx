@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, ReactNode } from 'react';
+import React, { useState, ReactNode, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 import { Button, type ButtonProps } from '../ui/button';
 import Image from 'next/image';
@@ -47,24 +47,46 @@ const ZoomImageModal = ({
   onSave,
   onClose,
   open,
-  // triggerButton = <Button>Change Profile Picture</Button>,
   labelClickText = 'Click to upload',
   labelRestText = ' or drag and drop SVG,PNG,JPG.',
   descriptionText = 'Upload a PNG and JPG, up to 10 MB.',
 }: ZoomImageModalProps) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [isOpen, setIsOpen] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
-  const handleImageUpload = (imageDataUrl: string) => {
-    setUploadedImage(imageDataUrl);
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
+  // helper function: convert File to base64 data URL
+  const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          reject('Failed to convert file');
+        }
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
   };
 
+  // handle image file from child
+  const handleImageUpload = useCallback(async (file: File) => {
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      setUploadedImage(dataUrl);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+    } catch (err) {
+      console.error('Error converting file:', err);
+    }
+  }, []);
+
   const handleCancel = () => {
-    setIsOpen(false);
+    setUploadedImage(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
     onClose();
   };
 
@@ -72,17 +94,6 @@ const ZoomImageModal = ({
     if (uploadedImage) {
       onSave(uploadedImage);
       onClose();
-    }
-    setUploadedImage(null);
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
-
-    setIsOpen(false);
-  };
-
-  const handleModalClose = (open: boolean) => {
-    setIsOpen(open);
-    if (!open) {
       setUploadedImage(null);
       setCrop({ x: 0, y: 0 });
       setZoom(1);
@@ -112,15 +123,14 @@ const ZoomImageModal = ({
         ) : (
           <>
             <div className="border-grey-light bg-light-blue relative flex h-[181px] w-[383px] items-center justify-center overflow-hidden rounded-[8px] border">
-              <div className="pointer-events-none absolute inset-0 z-0 opacity-60 blur-md">
-                <Image
-                  src={uploadedImage}
-                  alt="blurred background"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  priority
-                />
-              </div>
+              <Image
+                src={uploadedImage}
+                alt="blurred background"
+                fill
+                style={{ objectFit: 'cover' }}
+                priority
+                className="absolute inset-0 z-0 opacity-60 blur-md"
+              />
 
               <div className="relative z-10 h-[181px] w-[383px]">
                 <Cropper

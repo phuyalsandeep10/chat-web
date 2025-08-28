@@ -14,6 +14,7 @@ type InputFieldProps<T extends FieldValues> = {
   className?: string;
   inputClassName?: string;
   type?: string;
+  disabled?: boolean;
   placeholder?: string;
   labelClassName?: string;
   error?: string;
@@ -25,6 +26,7 @@ export function InputField<T extends FieldValues>({
   label,
   required,
   className,
+  disabled,
   inputClassName,
   type = 'text',
   placeholder,
@@ -68,6 +70,7 @@ export function InputField<T extends FieldValues>({
               <Input
                 id={name}
                 type={inputType}
+                disabled={disabled}
                 placeholder={placeholder}
                 className={cn(
                   isPasswordField && 'pr-6',

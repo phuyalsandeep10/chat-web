@@ -14,12 +14,14 @@ const AccountInformation = () => {
       <ProfileSection
         name={authData?.data?.user?.name ?? ''}
         email={authData?.data?.user?.email ?? ''}
-        location={authData?.data?.user.location ?? ''}
-        phone={authData?.data?.user?.phone ?? ''}
-        profileImage={authData?.data?.user?.image ?? ''}
+        address={authData?.data?.user.address ?? ''}
+        country={authData?.data?.user.country ?? ''}
+        mobile={authData?.data?.user?.mobile ?? ''}
+        image={authData?.data?.user?.image ?? ''}
+        language={''}
       />
 
-      <PublicProfile />
+      {/* <PublicProfile /> */}
 
       <div className="mt-[43px] grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-0">
         <PersonalInformation />

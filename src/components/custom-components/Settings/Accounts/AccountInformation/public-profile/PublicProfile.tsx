@@ -13,6 +13,7 @@ export default function PublicProfile() {
           This will display on your profile
         </p>
         <Input
+          disabled
           className="border-gray-light text-theme-text-dark h-9 w-[284px] rounded-[4px] border bg-white text-sm leading-[21px] font-normal opacity-100"
           defaultValue={authData?.data?.user?.name}
         />

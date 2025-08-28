@@ -3,8 +3,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
 import { cn } from '@/lib/utils';
-import { useAuthStore } from '@/store/AuthStore/useAuthStore';
-import { useGetOrganizationById } from '@/hooks/organizations/useGetorganizations';
 import ProfileImageModal from '@/components/modal/ChangeImage';
 import ZoomImageModal from '@/components/modal/ZoomImageModal';
 import { getCroppedImg } from '@/lib/cropImage';
@@ -68,10 +66,7 @@ const WorkspaceImage = ({ organization }: any) => {
         const file = dataURLtoFile(croppedImage, myuid);
 
         // Upload to backend / cloud
-        const cloudinaryRes = await AuthService.uploadPersonalProfile(
-          file,
-          token?.accessToken,
-        );
+        const cloudinaryRes = await AuthService.uploadPersonalProfile(file);
         const uploadedUrl = cloudinaryRes?.data?.files?.[0]?.url;
 
         if (uploadedUrl) {
@@ -96,8 +91,8 @@ const WorkspaceImage = ({ organization }: any) => {
 
   const logoSrc =
     imageUrl ||
-    (organization?.owner_image?.startsWith('https')
-      ? organization.owner_image
+    (organization?.workspace_owner_image?.startsWith('https')
+      ? organization.workspace_owner_image
       : '/profile.jpg');
 
   return (

@@ -12,10 +12,11 @@ import Flag from 'react-world-flags';
 import { Icons } from '@/components/ui/Icons';
 import { cn } from '@/lib/utils';
 import { Country, TimeZone } from '@/services/organizations/types';
+import { Control, Controller } from 'react-hook-form';
 
 type CountrySelectProps = {
-  value: Country | null;
-  onChange: (country: Country) => void;
+  name: string;
+  control: Control<any>;
   countries?: Country[];
   buttonClassName?: string;
   contentClassName?: string;
@@ -23,6 +24,7 @@ type CountrySelectProps = {
   wrapperClassName?: string;
   placeholder?: string;
   disabled?: boolean;
+  onChange?: (country: Country) => void; // optional
 };
 
 const defaultCountries: Country[] = [
@@ -55,65 +57,94 @@ const defaultCountries: Country[] = [
 ];
 
 const CountrySelect: React.FC<CountrySelectProps> = ({
-  value,
-  onChange,
+  name,
+  control,
   countries = defaultCountries,
   buttonClassName = 'w-60 justify-between',
   contentClassName = 'w-60',
   itemClassName = '',
   wrapperClassName = '',
+  placeholder = 'Select Country',
+  disabled = false,
+  onChange,
 }) => {
   const [open, setOpen] = useState(false);
 
   return (
     <div className={wrapperClassName}>
-      <DropdownMenu open={open} onOpenChange={(o) => setOpen(o)}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            className={`border-gray-light h-10 border-1 bg-white ${contentClassName} ${buttonClassName}`}
-          >
-            <div className="flex w-full items-center justify-between">
-              {value ? (
-                <div className="flex items-center gap-2">
-                  <Flag code={value.code} style={{ width: 24, height: 16 }} />
-                  <span className="text-pure-black font-normal">
-                    {value.name}
-                  </span>
-                </div>
-              ) : (
-                <span>Select Country</span>
-              )}
-              <div className="text-gray-light ml-2">
-                {open ? (
-                  <Icons.chevron_up size={12} />
-                ) : (
-                  <Icons.chevron_down size={12} />
-                )}
-              </div>
-            </div>
-          </Button>
-        </DropdownMenuTrigger>
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => {
+          const selectedCountry = countries.find((c) => c.name === field.value);
 
-        <DropdownMenuContent
-          align="start"
-          sideOffset={4}
-          className="min-w-[var(--radix-dropdown-menu-trigger-width)]"
-        >
-          {countries.map((country) => (
-            <DropdownMenuItem
-              key={country.code}
-              onClick={() => onChange(country)}
-              className={cn(
-                'flex cursor-pointer items-center gap-2',
-                itemClassName,
-              )}
-            >
-              <Flag code={country.code} style={{ width: 20, height: 13 }} />
-              <span>{country.name}</span>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          const handleSelect = (country: Country) => {
+            field.onChange(country.name);
+            onChange?.(country);
+            setOpen(false);
+          };
+
+          return (
+            <DropdownMenu open={open} onOpenChange={setOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  disabled={disabled}
+                  className={cn(
+                    'border-gray-light h-10 border-1 bg-white focus:ring-0 focus-visible:ring-0',
+                    contentClassName,
+                    buttonClassName,
+                  )}
+                >
+                  <div className="flex w-full items-center justify-between">
+                    {selectedCountry ? (
+                      <div className="flex items-center gap-2">
+                        <Flag
+                          code={selectedCountry.code}
+                          style={{ width: 24, height: 16 }}
+                        />
+                        <span className="text-pure-black font-normal">
+                          {selectedCountry.name}
+                        </span>
+                      </div>
+                    ) : (
+                      <span>{placeholder}</span>
+                    )}
+                    <div className="text-gray-light ml-2">
+                      <Icons.chevron_down
+                        size={12}
+                        className={`transform transition-all duration-300 ease-in-out ${open ? 'rotate-180' : ''}`}
+                      />
+                    </div>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                align="start"
+                sideOffset={4}
+                className="min-w-[var(--radix-dropdown-menu-trigger-width)]"
+              >
+                {countries.map((country) => (
+                  <DropdownMenuItem
+                    key={country.code}
+                    onClick={() => handleSelect(country)}
+                    className={cn(
+                      'flex cursor-pointer items-center gap-2',
+                      itemClassName,
+                    )}
+                  >
+                    <Flag
+                      code={country.code}
+                      style={{ width: 20, height: 13 }}
+                    />
+                    <span>{country.name}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        }}
+      />
     </div>
   );
 };

@@ -16,8 +16,8 @@ export type Organization = {
   identifier?: string;
   created_at?: string;
   contact_dial_code?: string;
-  owner_image?: string;
-  owner_name?: string;
+  workspace_owner_image?: string;
+  workspace_owner_name?: string;
   timezone_id?: number;
 };
 
@@ -42,7 +42,7 @@ export type Owner = {
 
 export type OrganizationAPIResponse = {
   organization: Organization;
-  owner: Owner;
+  owner_name: Owner;
 };
 
 export type OrganizationListResponse = {
