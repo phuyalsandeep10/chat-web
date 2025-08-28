@@ -17,8 +17,6 @@ import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 
 const Inbox = () => {
-  const params: any = useParams();
-  const chatId = params?.userId;
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const [replyingTo, setReplyingTo] = useState<any>(null);
