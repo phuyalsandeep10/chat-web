@@ -42,6 +42,8 @@ const Inbox = () => {
     fetchMessages,
     joinConversation,
   } = useAgentConversationStore();
+  const params: any = useParams();
+  const chatId = params?.userId;
 
   const userId = authData?.data?.user?.id;
 
