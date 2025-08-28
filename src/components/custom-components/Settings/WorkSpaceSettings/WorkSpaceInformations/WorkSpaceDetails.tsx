@@ -1,11 +1,18 @@
+import axiosInstance from '@/apiConfigs/axiosInstance';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
 import { cn } from '@/lib/utils';
 import { Label } from '@radix-ui/react-dropdown-menu';
 import React, { useState } from 'react';
 
-const WorkSpaceDetails = () => {
+interface WorkspaceDetailsProps {
+  workspace_identifier?: string | null;
+}
+const WorkSpaceDetails: React.FC<WorkspaceDetailsProps> = ({
+  workspace_identifier,
+}) => {
   const [copied, setCopied] = useState(false);
+  const [identifier, setIdentifier] = useState(null);
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -16,6 +23,7 @@ const WorkSpaceDetails = () => {
   const handleOpenLink = () => {
     window.open(workspaceURL, '_blank');
   };
+
   return (
     <div>
       <div className="w-full">
@@ -44,7 +52,7 @@ const WorkSpaceDetails = () => {
                     'border-gray-light font-outfit text-gray-light h-9 w-full border pt-2 pr-52 pl-5 text-sm',
                   )}
                 >
-                  wksp_01234567
+                  {workspace_identifier || ''}
                 </p>
               </div>
             </div>
