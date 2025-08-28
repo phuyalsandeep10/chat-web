@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Icons } from '@/components/ui/Icons';
@@ -16,12 +16,8 @@ const ConversationsList = () => {
   const { activeTab, setActiveTab } = useUiStore();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const {
-    all_conversations,
-    fetchAllConversations,
-    req_loading,
-    conversation: conversationData,
-  } = useAgentConversationStore();
+  const { all_conversations, fetchAllConversations, req_loading } =
+    useAgentConversationStore();
 
   const params = useParams();
 
@@ -30,8 +26,9 @@ const ConversationsList = () => {
     fetchAllConversations();
   }, []);
 
-  const filteredConversations = all_conversations?.filter(
-    (conversation: any) => {
+  // Filter conversations based on active tab and search query
+  const filteredConversations = useMemo(() => {
+    return all_conversations?.filter((conversation: any) => {
       const matchesTab =
         activeTab === 'Unresolved'
           ? !conversation.is_resolved
@@ -51,8 +48,26 @@ const ConversationsList = () => {
         (customerName.includes(searchText) ||
           lastMessageContent.includes(searchText))
       );
-    },
-  );
+    });
+  }, [all_conversations, activeTab, searchQuery]);
+
+  // Sort filtered conversations by last message updated_at (newest first)
+  const sortedConversations = useMemo(() => {
+    return [...(filteredConversations || [])].sort((a, b) => {
+      const dateA = new Date(
+        a.attributes?.last_message?.updated_at || 0,
+      ).getTime();
+      const dateB = new Date(
+        b.attributes?.last_message?.updated_at || 0,
+      ).getTime();
+      // Sort descending (newest at top)
+      return dateB - dateA;
+    });
+  }, [filteredConversations]);
+
+  const isUnseenCustomerMessage = (lastMessage: any) => {
+    return lastMessage && !lastMessage?.seen && lastMessage?.user_id === null;
+  };
 
   return (
     <>
@@ -96,13 +111,9 @@ const ConversationsList = () => {
           <p className="mt-5 text-center text-gray-500">
             Loading conversations...
           </p>
-        ) : filteredConversations?.length > 0 ? (
-          filteredConversations.map((conversation: any) => {
+        ) : sortedConversations.length > 0 ? (
+          sortedConversations.map((conversation: any) => {
             const lastMessage = conversation.attributes?.last_message;
-            const hasUnseenMessage = () => {
-              if (!lastMessage || lastMessage?.user_id) return false;
-              return lastMessage?.seen;
-            };
 
             return (
               <Link
@@ -111,7 +122,7 @@ const ConversationsList = () => {
                 className=""
               >
                 <div
-                  className={`border-gray-light border-b-gray-light hover:bg-secondary-hover flex items-center border-b py-4 pr-2.5 pl-3.5 ${
+                  className={`border-gray-light border-b-gray-light hover:bg-secondary-hover flex items-center rounded-lg border border-r-0 border-b border-l-0 py-4 pr-2.5 pl-3.5 ${
                     Number(params?.userId) === conversation?.id
                       ? 'bg-secondary-hover'
                       : ''
@@ -146,11 +157,13 @@ const ConversationsList = () => {
                     <p
                       className={cn(
                         'text-gray-primary border-b-gray-light my-1 truncate text-xs',
-                        { 'text-sm font-bold': hasUnseenMessage() },
+                        {
+                          'text-sm font-bold':
+                            isUnseenCustomerMessage(lastMessage),
+                        },
                       )}
                     >
-                      {conversation.attributes?.last_message?.content ||
-                        'No message'}
+                      {lastMessage?.content || 'No message'}
                     </p>
                   </div>
                 </div>
