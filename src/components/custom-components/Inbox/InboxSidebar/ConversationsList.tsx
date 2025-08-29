@@ -154,7 +154,7 @@ const ConversationsList = () => {
                       </span>
                     </div>
 
-                    <p
+                    <div
                       className={cn(
                         'text-gray-primary border-b-gray-light my-1 truncate text-xs',
                         {
@@ -163,8 +163,12 @@ const ConversationsList = () => {
                         },
                       )}
                     >
-                      {lastMessage?.content || 'No message'}
-                    </p>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: lastMessage?.content || 'No message',
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </Link>
