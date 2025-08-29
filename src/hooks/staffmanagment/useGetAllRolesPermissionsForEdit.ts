@@ -7,7 +7,7 @@ export const useGetAllRolesPermissionsForEdit = () => {
     mutationFn: ({ role_id }: { role_id: string }) =>
       RolesService.getAllPermissionsForEdit(role_id),
     onSuccess: (data) => {
-      toast.success('Role Fetcheds for update  successfully');
+      // toast.success('Role Fetcheds for update  successfully');
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Failed to update role');

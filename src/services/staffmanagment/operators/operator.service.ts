@@ -15,10 +15,26 @@ export class Operatorservice {
   static async DeleteOperators(member_id: string) {
     try {
       const res = await axiosInstance.delete(
-        `${baseURL}/organizations/members/${member_id}`,
+        `${baseURL}/organizations/member/${member_id}`,
       );
       return res.data;
     } catch (error) {
+      throw error;
+    }
+  }
+
+  //Edit Operators
+  static async EditOperators(member_id: string, payload: any) {
+    try {
+      console.log('operators member id and role id', member_id, payload);
+      const res = await axiosInstance.put(
+        `${baseURL}/organizations/member/${member_id}`,
+        payload,
+      );
+      console.log('UpdateRoles Operators:', res.data);
+      return res.data;
+    } catch (error) {
+      console.error('UpdateRoles error:', error);
       throw error;
     }
   }

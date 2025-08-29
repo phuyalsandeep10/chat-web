@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { InputField } from '@/components/common/hook-form/InputField';
@@ -20,6 +20,13 @@ import { DialogClose } from '@/components/ui/dialog';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RoleSchema } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Roles/RoleSchema';
 import { useGetAllPermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllPermissionGroup';
+// import {
+//   PermissionState,
+//   FormValues,
+//   RoleFormProps,
+//   OrderRow,
+//   Column,
+// } from './types';
 
 type PermissionState = {
   permission_id: number;
@@ -70,6 +77,14 @@ const RoleForm: React.FC<RoleFormProps> = ({
     defaultValues: defaultValues || { name: '' },
   });
 
+  useEffect(() => {
+    if (defaultValues) {
+      form.reset({
+        name: defaultValues.name || '',
+      });
+    }
+  }, [defaultValues, form]);
+
   const { data } = useGetAllPermissionGroup();
 
   const [changeableIds, setChangeableIds] = React.useState<Set<number>>(
@@ -118,20 +133,17 @@ const RoleForm: React.FC<RoleFormProps> = ({
       });
     }
 
-    setPermissionsState((prev) => {
-      const mergedMap = new Map<number, (typeof prev)[0]>();
-      prev.forEach((p) => mergedMap.set(p.permission_id, p));
-      mergedPermissions.forEach((p) => mergedMap.set(p.permission_id, p));
-      return Array.from(mergedMap.values());
-    });
+    setPermissionsState(mergedPermissions);
   }, [orders, defaultValues]);
 
   const handleSubmit = (formData: FormValues) => {
-    const permissions = permissionsState.filter((p) =>
-      changeableIds.has(p.permission_id),
-    );
+    // const permissions = permissionsState.filter((p) =>
+    //   changeableIds.has(p.permission_id),
+    // );
 
-    if (permissions.length === 0) {
+    const permissions = permissionsState;
+
+    if (!isEdit && permissions.length === 0) {
       console.log('Please select at least one permission.');
       return;
     }
@@ -141,6 +153,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
         is_changeable || is_viewable || is_deletable,
     );
 
+    // check if used or not
     if (!isAllPermissionsValid) {
       console.log(
         'Please select at least one permission (view/edit/delete) for each permission.',
@@ -149,6 +162,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
     }
 
     const payload = {
+      id: defaultValues?.id,
       name: formData.name,
       description: '',
       permission_group: 1,
@@ -312,6 +326,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
               <Button
                 className="bg-brand-primary h-[36px] w-full max-w-[130px] rounded-lg px-4 py-3 text-xs leading-4 font-semibold text-white"
                 type="submit"
+                onClick={() => setOpenCreateRole?.(false)}
               >
                 Save
               </Button>

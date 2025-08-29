@@ -25,11 +25,16 @@ import AddMember from '@/components/custom-components/Settings/WorkSpaceSettings
 import { SelectField } from '@/components/common/hook-form/SelectField';
 import { useTimeStore } from '@/components/store/timeStore';
 import TimePicker from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Invites/InviteClock';
+import { useEditOperator } from '@/hooks/staffmanagment/operators/useEditOperator';
+import { useGetTeams } from '@/hooks/staffmanagment/teams/useGetTeams';
+import { useGetAllRolePermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllRolePermissionGroup';
+import { parse, format } from 'date-fns';
 
 type FormValues = {
+  role_ids: number;
   email: string;
   fullName: string;
-  role: string;
+  role: string | string[];
   clientHandled: string;
   day: string | null;
   shift: string;
@@ -39,8 +44,17 @@ type FormValues = {
   team: string;
 };
 
+type Team = { value: string; label: string };
+type Role = { role_id: number; role_name: string };
+
+// to remove from this file
+type RolePermission = {
+  role_id: number; // add this
+  role_name: string;
+};
+
 interface AddOrEditAgentFormProps {
-  defaultValues?: Partial<FormValues>;
+  defaultValues?: Partial<FormValues> & { id?: number };
   onSubmit?: (data: FormValues) => void;
   submitButton?: string;
   onClose?: () => void;
@@ -54,8 +68,8 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
 }) => {
   const form = useForm<FormValues>({
     defaultValues: {
-      day: 'sunday',
-      shift: 'morning',
+      day: 'Select Day',
+      shift: 'Select Shift',
       email: '',
       fullName: '',
       role: '',
@@ -68,14 +82,28 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
     },
   });
 
+  // components states
   const [open, setOpen] = useState(false);
   const [openInviteMember, setOpenInviteMember] = useState(false);
-  const [teams, setTeams] = useState([
-    { value: 'team1', label: 'Team 1' },
-    { value: 'team2', label: 'Team 2' },
-    { value: 'team3', label: 'Team 3' },
-    { value: 'team4', label: 'Team 4' },
-  ]);
+  const [teams, setTeams] = useState<Team[]>([]);
+
+  // edit operatorss
+  const { mutate: editOperators, isPending, isError } = useEditOperator();
+
+  //get all teams
+  const {
+    data: teamsData,
+    isPending: isTeamsPending,
+    isSuccess: isTeamsSuccess,
+    refetch,
+  } = useGetTeams();
+
+  // get all roles
+  const {
+    data: roleTableData,
+    isPending: roleDataPending,
+    isSuccess: roleSuccess,
+  } = useGetAllRolePermissionGroup();
 
   const savedTime = useTimeStore((state) => state.savedTime);
   const { setValue } = form; // Get setValue from the main form instance
@@ -93,36 +121,105 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
     'Saturday',
   ];
 
+  useEffect(() => {
+    if (defaultValues) form.reset(defaultValues);
+  }, [defaultValues, form]);
+
   const handleAddTeamMember = (data: any) => {
+    setTeams((prev) => [...prev, { value: data.value, label: data.label }]);
     setOpenInviteMember(false);
   };
 
-  // When savedTime changes, update the appropriate form input value
-  useEffect(() => {
-    if (savedTime) {
-      const formatted = `${savedTime.hours
-        .toString()
-        .padStart(2, '0')}:${savedTime.minutes
-        .toString()
-        .padStart(2, '0')} ${savedTime.period}`;
+  // helper (handles overnight shifts too)
+  const diffInMinutes = (start12: string, end12: string) => {
+    if (!start12 || !end12) return 0;
+    const start = parse(start12, 'hh:mm a', new Date());
+    const end = parse(end12, 'hh:mm a', new Date());
+    if (end < start) end.setDate(end.getDate() + 1); // cross-midnight
+    return Math.round((end.getTime() - start.getTime()) / (1000 * 60));
+  }; //place in another function
 
-      if (openStartTime) {
-        setValue('startTime', formatted);
-      } else if (openEndTime) {
-        setValue('endTime', formatted);
+  const handleSubmit = (data: FormValues) => {
+    // capitalize first letter of days
+    const capitalize = (s: string | string[]) => {
+      if (Array.isArray(s)) {
+        return s.map(
+          (str) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase(),
+        );
       }
+      if (typeof s !== 'string') return s;
+      return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+    };
+
+    // find team
+    const selectedTeam = teamsData?.data?.find(
+      (team: any) => team.name === data.team,
+    );
+
+    // normalize roles to always be an array
+    const roleNames = Array.isArray(data.role) ? data.role : [data.role];
+
+    // select role
+    const selectedRoles = roleTableData?.data?.filter((role: any) =>
+      roleNames.includes(role.role_name),
+    );
+
+    // conver etime format into 24 hour
+    const to24Hour = (time12h: string) => {
+      if (!time12h) return '';
+      const parsed = parse(time12h, 'hh:mm a', new Date());
+      return format(parsed, 'HH:mm');
+    };
+
+    const total_minutes = diffInMinutes(data.startTime, data.endTime);
+
+    const payload = {
+      role_ids: selectedRoles?.map((r: any) => r.role_id) || [],
+      client_handled: data.clientHandled,
+      day: capitalize(data.day || ''),
+      shift: data.shift,
+      start_time: to24Hour(data.startTime),
+      end_time: to24Hour(data.endTime),
+      team_id: selectedTeam?.id ?? null,
+      email: data.email,
+      total_hours: total_minutes,
+    };
+
+    editOperators(
+      { member_id: defaultValues?.id ?? 0, payload },
+      { onSuccess: () => onClose?.() },
+    );
+  };
+
+  // Calculate totalHours whenever startTime or endTime changes
+  useEffect(() => {
+    const startTime = form.getValues('startTime');
+    const endTime = form.getValues('endTime');
+
+    const timeRegex = /^([0]?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/i;
+
+    if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) return;
+
+    try {
+      const start = parse(startTime, 'hh:mm a', new Date());
+      const end = parse(endTime, 'hh:mm a', new Date());
+
+      // Difference in minutes
+      const diffInMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
+      form.setValue(
+        'totalHours',
+        diffInMinutes > 0 ? diffInMinutes.toString() : '0',
+      );
+    } catch {
+      form.setValue('totalHours', '0');
     }
-  }, [savedTime, setValue, openStartTime, openEndTime]);
+  }, [form.watch('startTime'), form.watch('endTime')]);
 
   return (
     <>
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit((data) => {
-            onSubmit?.(data);
-            form.reset();
-            onClose?.();
-          })}
+          onSubmit={form.handleSubmit(handleSubmit)}
           className="font-outfit grid grid-cols-1 gap-6 text-xs leading-[21px] font-normal md:grid-cols-2"
         >
           {/* Email Field */}
@@ -134,6 +231,8 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
               labelClassName=" text-base leading-[26px] font-medium"
               control={form.control}
               required
+              readOnly
+              disabled
             />
           </div>
 
@@ -145,6 +244,8 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
               control={form.control}
               label="Full Name"
               labelClassName="text-base leading-[26px] font-medium"
+              readOnly
+              disabled
             />
           </div>
 
@@ -155,20 +256,20 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
               control={form.control}
               render={({ field }) => (
                 <SelectField
-                  name="role"
+                  {...field}
                   required
-                  control={form.control}
                   placeholder="Admin"
                   className="font-outfit rounded-md p-0 py-1 text-sm leading-[16px] font-medium"
                   placeholderClassName="font-outfit rounded-md text-xs leading-[21px] font-normal text-black"
                   LabelClassName="text-base leading-[26px] font-medium"
                   label="Role"
-                  options={[
-                    { value: 'admin', label: 'Admin' },
-                    { value: 'agent', label: 'Agent' },
-                    { value: 'moderator', label: 'Moderator' },
-                    { value: 'lead', label: 'Lead' },
-                  ]}
+                  isMulti={true}
+                  options={
+                    roleTableData?.data?.map((role: any) => ({
+                      value: role.role_name, // keep name
+                      label: role.role_name,
+                    })) || []
+                  }
                 />
               )}
             />
@@ -186,16 +287,17 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                   required
                   LabelClassName="pb-3 text-base leading-[26px] font-medium"
                   label="Client Handled"
+                  // placeholder="select values"
                   placeholderClassName="font-outfit rounded-md text-xs leading-[21px] font-normal text-black"
                   options={[
+                    // { value: '', label: 'Select Clients' },
                     { value: '0-6', label: '0-6' },
                     { value: '7-20', label: '7-20' },
                     { value: '21-50', label: '21-50' },
                     { value: '50-120', label: '50-120' },
                     { value: '120-200', label: '120-200' },
                   ]}
-                  placeholder="0-6"
-                  className="font-outfit rounded-md py-1 text-sm leading-[16px] font-medium"
+                  className="font-outfit inline-block rounded-md py-1 text-sm leading-[16px] font-medium"
                 />
               )}
             />
@@ -213,48 +315,83 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
             <Controller
               control={form.control}
               name="day"
-              render={({ field }) => (
-                <Popover open={open} onOpenChange={setOpen}>
-                  <PopoverTrigger
-                    asChild
-                    className="border-grey-light h-[44px] px-4 text-xs leading-[21px] hover:bg-transparent"
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full justify-between text-xs leading-[21px] font-normal text-black"
+              render={({ field }) => {
+                const selectedDays: string[] = Array.isArray(field.value)
+                  ? field.value
+                  : [];
+
+                const removeDay = (dayToRemove: string) => {
+                  field.onChange(selectedDays.filter((d) => d !== dayToRemove));
+                };
+
+                return (
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger
+                      asChild
+                      className="border-grey-light h-[44px] px-4 text-xs leading-[21px] hover:bg-transparent"
                     >
-                      {field.value
-                        ? weekDays.find((d) => d.toLowerCase() === field.value)
-                        : 'Sunday'}
-                      <Icons.ri_calendar_line />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-auto overflow-hidden p-0"
-                    align="start"
-                  >
-                    <ToggleGroup
-                      type="single"
-                      className="border-grey-light flex w-full gap-7 border px-3"
-                      value={field.value ?? undefined}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        setOpen(false);
-                      }}
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between text-xs leading-[21px] font-normal text-black"
+                      >
+                        {selectedDays.length > 0 ? (
+                          <span className="flex flex-wrap gap-1">
+                            {selectedDays.map((d) => {
+                              const day = weekDays.find(
+                                (day) => day.toLowerCase() === d,
+                              );
+                              return (
+                                <span
+                                  key={d}
+                                  className="flex items-center gap-1 rounded bg-gray-100 px-2 py-0.5 text-xs"
+                                >
+                                  {day?.substring(0, 3)}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // prevent popover from opening
+                                      removeDay(d);
+                                    }}
+                                    className="text-gray-500 hover:text-red-500"
+                                  >
+                                    ✕
+                                  </button>
+                                </span>
+                              );
+                            })}
+                          </span>
+                        ) : (
+                          'Select days'
+                        )}
+                        <Icons.ri_calendar_line />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto overflow-hidden p-0"
+                      align="start"
                     >
-                      {weekDays.map((day) => (
-                        <ToggleGroupItem
-                          key={day}
-                          className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
-                          value={day.toLowerCase()}
-                        >
-                          {day.substring(0, 3)}
-                        </ToggleGroupItem>
-                      ))}
-                    </ToggleGroup>
-                  </PopoverContent>
-                </Popover>
-              )}
+                      <ToggleGroup
+                        type="multiple"
+                        className="border-grey-light flex w-full gap-7 border px-3"
+                        value={selectedDays}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                        }}
+                      >
+                        {weekDays.map((day) => (
+                          <ToggleGroupItem
+                            key={day}
+                            className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
+                            value={day.toLowerCase()}
+                          >
+                            {day.substring(0, 3)}
+                          </ToggleGroupItem>
+                        ))}
+                      </ToggleGroup>
+                    </PopoverContent>
+                  </Popover>
+                );
+              }}
             />
           </div>
 
@@ -376,6 +513,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                   inputClassName="!text-xs leading-[21px] font-normal"
                   label="Total Hours"
                   labelClassName="text-base leading-[26px] font-mediumF"
+                  // value={totalHours}
                   required
                 />
               </div>
@@ -411,10 +549,11 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      {teams.map((team) => (
-                        <SelectItem key={team.value} value={team.value}>
+                      {/* teamsData?.data?.map((teamsDataItems: any) => ({ */}
+                      {teamsData?.data?.map((team: any) => (
+                        <SelectItem key={team.id} value={team.name}>
                           <span className="font-outfit rounded-md px-3 py-1 text-sm leading-[16px] font-medium">
-                            {team.label}
+                            {team.name}
                           </span>
                         </SelectItem>
                       ))}

@@ -46,29 +46,15 @@ export default function OperatorsTable({
   const [openTeamView, setOpenTeamView] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
+  // select which row to edit for operators
+  const [selectedOperator, setSelectedOperator] = useState<any | null>(null);
+
+  // mebers to delete from operators table
   const [membersToDeleteID, setMembersToDeleteID] = useState<string | null>(
     null,
   );
 
-  // const orders: OrderRow[] = [
-  //   {
-  //     FullName: 'Yubesh Koirala',
-  //     Roles: 'Admin',
-  //     Shift: 'morning',
-  //     OperatingHours: '9:00 - 17:00',
-  //     Invitedon: '08/07/2025',
-  //     Actions: '',
-  //   },
-  //   {
-  //     FullName: 'Yubesh Koirala',
-  //     Roles: 'Agent',
-  //     Shift: 'Day',
-  //     OperatingHours: '9:00 - 17:00',
-  //     Invitedon: '08/07/2025',
-  //     Actions: '',
-  //   },
-  // ];
-
+  // table columbe header field and row data
   const columns: Column<OrderRow>[] = [
     { key: 'FullName', label: 'Full Name' },
     {
@@ -113,19 +99,16 @@ export default function OperatorsTable({
           <div className="flex gap-5">
             <div
               className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
-              onClick={() => setOpenEdit(true)}
+              onClick={() => {
+                const operator = allOperators?.data?.find(
+                  (op: any) => op.id === row.id,
+                );
+                setSelectedOperator(operator);
+                setOpenEdit(true);
+              }}
             >
               <Icons.ri_edit2_fill className="text-black" />
             </div>
-            {/* add agennt button */}
-            <AgentInviteModal
-              open={openEdit}
-              onOpenChange={setOpenEdit}
-              dialogTitle="Edit Information"
-              dialogClass="!max-w-[768px]"
-            >
-              <AddOrEditAgentForm />
-            </AgentInviteModal>
           </div>
 
           {/* view modal */}
@@ -133,19 +116,17 @@ export default function OperatorsTable({
           <div className="flex gap-5">
             <div
               className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
-              onClick={() => setOpenTeamView(true)}
+              onClick={() => {
+                const operator = allOperators?.data?.find(
+                  (op: any) => op.id === row.id,
+                );
+                setSelectedOperator(operator);
+                setOpenTeamView(true);
+              }}
             >
               <Icons.ri_eye_fill className="text-black" />
               {/* <Icons.ri_edit2_fill /> */}
             </div>
-            {/* add agennt button */}
-            <AgentInviteModal
-              open={openTeamView}
-              onOpenChange={setOpenTeamView}
-              dialogClass="gap-0 !max-w-[554px]"
-            >
-              <AgenChatHistoryCard submitButton="Edit Agent" />
-            </AgentInviteModal>
           </div>
 
           <div className="flex items-center gap-2">
@@ -157,15 +138,6 @@ export default function OperatorsTable({
               }}
             />
           </div>
-          <DeleteModal
-            open={openDeleteModal}
-            onOpenChange={setOpenDeleteModal}
-            title="Delete Agent "
-            description="This action will delete agent , you can temporarily suspend agent which wont delete his/her data."
-            confirmText="Confirm & Delete"
-            onCancel={() => {}}
-            onConfirm={() => {}}
-          ></DeleteModal>
         </div>
       ),
     },
@@ -181,19 +153,21 @@ export default function OperatorsTable({
     isSuccess: deleteSuccess,
   } = useDeleteMember();
 
+  // row data of operators table
   const orders: OrderRow[] = React.useMemo(() => {
     return (
       allOperators?.data?.map((allOperators: any) => ({
         id: allOperators.id,
         FullName: allOperators.user_name,
-        Roles: allOperators.role_name,
         Shift: allOperators.shift,
         // invite: inviteMemberItems.email,
         Invitedon: allOperators.created_at
           ? format(new Date(allOperators.created_at), 'dd MMMM, yyyy')
           : 'N/A',
         // status: inviteMemberItems.status,
-        // Roles: inviteMemberItems.name,
+        Roles: allOperators.roles
+          .map((roleItems: any) => roleItems.role_name)
+          .join(', '),
         OperatingHours: allOperators.operating_hour,
         Actions: '',
       })) || []
@@ -207,14 +181,64 @@ export default function OperatorsTable({
       onSuccess: () => {
         setOpenDeleteModal(false);
         setMembersToDeleteID(null);
-        // refetch roles here or trigger update UI logic
       },
       onError: (error) => {
-        console.error('Failed to delete role:', error);
-        // Optionally show error message/toast
+        console.error('Failed to delete member:', error);
       },
     });
   };
 
-  return <ReuseableTable columns={columns} data={orders} />;
+  return (
+    <>
+      <ReuseableTable columns={columns} data={orders} />
+      {/* add agennt button */}
+      <AgentInviteModal
+        open={openEdit}
+        onOpenChange={setOpenEdit}
+        dialogTitle="Edit Information"
+        dialogClass="!max-w-[768px]"
+      >
+        <AddOrEditAgentForm
+          defaultValues={{
+            id: selectedOperator?.id,
+            email: selectedOperator?.email,
+            fullName: selectedOperator?.user_name,
+            role: selectedOperator?.role_name,
+            shift: selectedOperator?.shift,
+            startTime: selectedOperator?.startTime,
+            endTime: selectedOperator?.endTime,
+            clientHandled: selectedOperator?.client_handled,
+            totalHours: selectedOperator?.totalHours,
+            team: selectedOperator?.team,
+            day: selectedOperator?.day,
+          }}
+          onClose={() => setOpenEdit(false)}
+        />
+      </AgentInviteModal>
+
+      {/* add agennt button */}
+
+      <AgentInviteModal
+        open={openTeamView}
+        onOpenChange={setOpenTeamView}
+        dialogClass="gap-0 !max-w-[554px]"
+      >
+        <AgenChatHistoryCard
+          selectedOperator={selectedOperator}
+          submitButton="Edit Agent"
+        />
+      </AgentInviteModal>
+
+      {/* delete modal of operatos table */}
+      <DeleteModal
+        open={openDeleteModal}
+        onOpenChange={setOpenDeleteModal}
+        title="Delete Agent "
+        description="This action will delete agent , you can temporarily suspend agent which wont delete his/her data."
+        confirmText="Confirm & Delete"
+        onCancel={() => {}}
+        onConfirm={handleDeleteConfirm}
+      ></DeleteModal>
+    </>
+  );
 }

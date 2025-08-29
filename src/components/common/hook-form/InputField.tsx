@@ -16,6 +16,8 @@ type InputFieldProps<T extends FieldValues> = {
   type?: string;
   placeholder?: string;
   labelClassName?: string;
+  readOnly?: boolean;
+  disabled?: boolean;
 };
 
 export function InputField<T extends FieldValues>({
@@ -28,6 +30,8 @@ export function InputField<T extends FieldValues>({
   type = 'text',
   placeholder,
   labelClassName,
+  readOnly,
+  disabled,
 }: InputFieldProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = type === 'password';
@@ -68,6 +72,8 @@ export function InputField<T extends FieldValues>({
                   inputClassName,
                   'border-grey-light h-[36px] border-[1px] px-3 placeholder:text-[14px] focus:outline-none',
                 )}
+                readOnly={readOnly}
+                disabled={disabled}
                 {...field}
               />
 

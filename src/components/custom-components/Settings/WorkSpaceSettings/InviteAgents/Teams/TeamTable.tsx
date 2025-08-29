@@ -14,8 +14,11 @@ import { useInvitesMembers } from '@/hooks/staffmanagment/teams/useInvitesMember
 import { useDeleteTeam } from '@/hooks/staffmanagment/teams/useDeleteTeam';
 import { useGetTeams } from '@/hooks/staffmanagment/teams/useGetTeams';
 import TeamEdit from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamEdit';
+// import { OrderRow, Column, TeamTableProps, FormValues } from './types';
+import { useGetTeamMembersById } from '@/hooks/staffmanagment/teams/useGetTeamMembersById';
+import { useUpdateTeamMembersById } from '@/hooks/staffmanagment/teams/useUpdateTeamMemberById';
 
-export interface OrderRow {
+interface OrderRow {
   id: string;
   TeamName: string;
   Lead: string;
@@ -46,6 +49,18 @@ type FormValues = {
   // description: string;
 };
 
+// member_id -> access_level
+type EditTeamMemberFormValues = {
+  members: Record<number, string>;
+};
+
+type MemberAccess = {
+  member_id: number;
+  access_level: string;
+};
+
+type EditTeamMemberHandler = (data: EditTeamMemberFormValues) => void;
+
 const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
   // states to toggle modal
   const [open, setOpen] = useState(false);
@@ -56,11 +71,12 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
   const [openTeamView, setOpenTeamView] = useState(false);
   const [openInviteMember, setOpenInviteMember] = useState(false);
   const [teamDeleteId, setTeamDeleteId] = useState<string | null>(null);
+  const [teamId, setTeamId] = useState<number | undefined>(undefined);
 
   //create new team
   const { mutate: createRoles, isPending, isSuccess } = useCreateTeams();
 
-  //invite new member
+  //invite new member to the team
   const { mutate: inviteMembers } = useInvitesMembers();
 
   //get all teams
@@ -79,12 +95,14 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
     isSuccess: deleteSuccess,
   } = useDeleteTeam();
 
-  // useEffect(() => {
-  //   if (inviteMembers) {
-  //     console.log('teamsDatainviteMembers:', inviteMembers);
-  //   }
-  // }, [inviteMembers]);
+  //fetch team members by id
 
+  const { data: teamMembersById } = useGetTeamMembersById(teamId);
+
+  //update member by id
+  const { mutate: updateTeamMemberById } = useUpdateTeamMembersById();
+
+  // onsubit functions
   const handleSubmit = (formData?: FormValues) => {
     const payload = {
       name: formData?.newteam,
@@ -108,7 +126,9 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
     const payload = {
       email: InviteData.email,
       name: InviteData.fullName,
-      role_ids: [Number(InviteData.role)],
+      role_ids: Array.isArray(InviteData.role)
+        ? InviteData.role.map((id) => Number(id)).filter((id) => !isNaN(id))
+        : [],
     };
     console.log('Payload being sent to inviteMembers:', payload);
 
@@ -140,13 +160,32 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
     });
   };
 
+  // handle edit team member by id
+  const handleEditTeamMemberById: EditTeamMemberHandler = (formData) => {
+    if (!teamId) return;
+
+    const membersPayload: MemberAccess[] = Object.entries(
+      formData.members || {},
+    )
+      .filter(([_, access_level]) => access_level)
+      .map(([member_id, access_level]) => ({
+        member_id: Number(member_id),
+        access_level: String(access_level),
+      }));
+
+    if (!membersPayload.length) return;
+
+    updateTeamMemberById({ teamId, members: membersPayload });
+    setOpenEdit(false);
+  };
+
   const orders: OrderRow[] = React.useMemo(() => {
     return (
       teamsData?.data?.map((teamsDataItems: any) => ({
         id: teamsDataItems.id,
         TeamName: teamsDataItems.name,
-        // Lead: teamsDataItems.Lead,
-        // Status: teamsDataItems.Status,
+        Lead: teamsDataItems.lead_name,
+        Status: teamsDataItems.Status,
         Actions: '',
       })) || []
     );
@@ -175,7 +214,10 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
           {/* edit form */}
           <div
             className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
-            onClick={() => setOpenEdit(true)}
+            onClick={() => {
+              setTeamId(Number(row.id)); //based on id open edit modal
+              setOpenEdit(true);
+            }}
           >
             <Icons.ri_edit2_fill className="text-black" />
           </div>
@@ -183,7 +225,10 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
           {/* view team */}
           <div
             className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
-            onClick={() => setOpenTeamView(true)}
+            onClick={() => {
+              setTeamId(Number(row.id));
+              setOpenTeamView(true);
+            }}
           >
             <Icons.ri_eye_fill className="text-black" />
           </div>
@@ -203,6 +248,10 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
       ),
     },
   ];
+
+  useEffect(() => {
+    if (teamMembersById) console.log('teamMembersById', teamMembersById);
+  }, [teamMembersById]);
 
   return (
     <>
@@ -267,7 +316,14 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
         dialogTitle="Edit Information"
         dialogClass="!max-w-[768px]"
       >
-        <TeamEdit onSubmit={() => {}} />
+        <TeamEdit
+          // onSubmit={handleEditTeamMemberById}
+          // onSubmit={handleEditTeamMemberById as unknown as (data: any) => void}
+          onSubmit={handleEditTeamMemberById as EditTeamMemberHandler}
+          data={teamMembersById}
+          teamId={teamId}
+          // defaultValues={teamsData?.data?.find((t) => t.id === teamId)}
+        />
       </AgentInviteModal>
       {/* view modal for view team */}
       <AgentInviteModal
@@ -276,7 +332,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
         dialogTitle="Edit Information"
         dialogClass="!max-w-[768px]"
       >
-        <TeamView />
+        <TeamView teamId={teamId!} data={teamMembersById} />
       </AgentInviteModal>
       {/* delete modal for delete team */}
       <DeleteModal

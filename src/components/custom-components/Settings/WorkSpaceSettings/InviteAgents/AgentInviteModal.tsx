@@ -29,13 +29,17 @@ const AgentInviteModal: React.FC<AgentInviteModalProps> = ({
   open,
   onOpenChange,
 }) => {
-  const handleOpenChange = () => {
-    onOpenChange?.(false);
+  const handleOpenChange = (newOpen: boolean) => {
+    // Only allow closing when triggered from internal DialogClose
+    onOpenChange?.(newOpen);
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className={`!w-full !max-w-[1240px] gap-8 ${dialogClass}`}>
+    <Dialog open={open} onOpenChange={handleOpenChange} modal>
+      <DialogContent
+        className={`!w-full !max-w-[1240px] gap-8 ${dialogClass}`}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader className="gap-0">
           <DialogTitle className="text-xl leading-[30px] font-semibold">
             {dialogTitle}

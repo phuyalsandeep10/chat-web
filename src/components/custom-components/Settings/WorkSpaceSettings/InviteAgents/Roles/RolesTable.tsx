@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { useUpdateRoles } from '@/hooks/staffmanagment/roles/useUpdateRoles';
 import { useDeleteRole } from '@/hooks/staffmanagment/roles/useDeleteRole';
 import { useGetAllRolesPermissionsForEdit } from '@/hooks/staffmanagment/useGetAllRolesPermissionsForEdit';
+// import { RolesTableProps, Column, OrderRow } from './types';
 
 export interface OrderRow {
   RoleName: string;
@@ -28,7 +29,7 @@ interface Column<T> {
   render?: (row: T) => React.ReactNode;
 }
 
-interface RolesTableProps {
+export interface RolesTableProps {
   handleOpenDialog: (options: {
     heading: string;
     subheading: string;
@@ -45,6 +46,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
     isPending: roleDataPending,
     isSuccess: roleSuccess,
   } = useGetAllRolePermissionGroup();
+
   const { mutate: GetAllRolesPermissionsForEdit } =
     useGetAllRolesPermissionsForEdit();
 
@@ -143,12 +145,12 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
             if (perm.is_deletable) deletableSet.add(perm.permission_id);
           }
 
-          // Update your Set states
+          // Update  Set states
           setChangeableIds(changeableSet);
           setViewableIds(viewableSet);
           setDeletableIds(deletableSet);
 
-          // Optional: If your UI still expects a flat list of permission objects:
+          // flat list of permission objects:
           const mappedPermissions = (res.role_permissions || []).map(
             (perm: any) => ({
               permission_id: perm.permission_id,
@@ -161,7 +163,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
           setSelectedRole({
             id: row.id,
             RoleName: row.RoleName,
-            permissions: mappedPermissions, // You can also use the sets if your UI is adjusted
+            permissions: mappedPermissions,
             groups: {
               Setting: res.Setting || [],
               Channels: res.Channels || [],
@@ -282,6 +284,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
         open={openRole}
         onOpenChange={setOpenRole}
         dialogClass="!max-w-[676px] px-5 py-10 gap-0"
+        // key={selectedRole?.id}
       >
         {selectedRole && (
           <RoleForm

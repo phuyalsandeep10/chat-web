@@ -13,6 +13,8 @@ import { useInvites } from '@/hooks/staffmanagment/invites/useInvites';
 import { useDeleteInvite } from '@/hooks/staffmanagment/invites/useDeleteInvite';
 import { format } from 'date-fns';
 
+// import { OrderRow, Column, InviteAgentProps } from './types';
+
 export interface OrderRow {
   id: string;
   invite: string;
@@ -23,7 +25,7 @@ export interface OrderRow {
   Actions: string;
 }
 
-interface Column<T> {
+export interface Column<T> {
   key: keyof T | 'actions';
   label: string;
   render?: (row: T) => React.ReactNode;
@@ -40,8 +42,8 @@ export interface InviteAgentProps {
 }
 
 export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
-  const [open, setOpen] = useState(false);
-  const [openReminder, setOpenReminder] = useState(false);
+  const [open, setOpen] = useState<boolean>(false);
+  const [openReminder, setOpenReminder] = useState<boolean>(false);
 
   // track which invite is selected
   const [inviteToDeleteId, setInviteToDeleteId] = useState<string | null>(null);
@@ -72,35 +74,14 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
           ? format(new Date(inviteMemberItems.created_at), 'dd/MM/yyyy')
           : 'N/A',
         status: inviteMemberItems.status,
-        Roles: inviteMemberItems.role_names.map((role, index) => {
-          console.log('role', role);
-          return <span key={index}>{role.role_name}</span>;
-        }),
-
+        Roles: inviteMemberItems.role_names
+          .map((roleitems: any) => roleitems.role_name)
+          .join(', '),
         OperatingHours: '',
         Actions: '',
       })) || []
     );
   }, [getInviteMember]);
-
-  // const orders: OrderRow[] = [
-  //   {
-  //     invite: 'unish@yahoo.com',
-  //     invite_Sent: '08/07/2025',
-  //     status: 'Sent',
-  //     Roles: 'Admin',
-  //     OperatingHours: '9:00 - 17:00',
-  //     Actions: '',
-  //   },
-  //   {
-  //     invite: 'yubeshkoirala11@gmail.com',
-  //     invite_Sent: '08/07/2025',
-  //     status: 'Rejected',
-  //     Roles: 'Agent',
-  //     OperatingHours: '9:00 - 17:00',
-  //     Actions: '',
-  //   },
-  // ];
 
   // invit etable column define
   const columns: Column<OrderRow>[] = [
@@ -163,14 +144,7 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
       key: 'Roles',
       label: 'Roles',
       render: (row) => (
-        <div className="flex items-center gap-2">
-          {/* {row.Roles.toLowerCase().includes('admin') ? (
-              <Icons.ri_user_settings_fill />
-            ) : (
-              <Icons.ri_user_fill />
-            )}
-            <span>{row.Roles}</span> */}
-        </div>
+        <div className="flex items-center gap-2">{row.Roles}</div>
       ),
     },
     {
@@ -194,8 +168,7 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
     },
   ];
 
-  // handle delete invitation
-  // New function to handle delete confirmation
+  // function to handle delete confirmation
   const handleDeleteConfirm = () => {
     if (!inviteToDeleteId) return; // Guard clause
     deleteInvite(inviteToDeleteId, {

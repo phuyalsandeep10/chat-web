@@ -54,10 +54,19 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
     onConfirm?.();
     onOpenChange(false);
   };
+
+  // prevent auto close on outside click
+  const handleOpenChange = (newOpen: boolean) => {
+    // Only allow closing when triggered from internal DialogClose
+    onOpenChange?.(newOpen);
+  };
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="flex w-[326px] flex-col items-center text-center">
+      <DialogContent
+        className="flex w-[326px] flex-col items-center text-center"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogTitle className="sr-only">{title}</DialogTitle>
 
         <div

@@ -15,20 +15,21 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+// import { FormValues, RolePermission, AddMemberProps } from './types';
 
-type FormValues = {
+export type FormValues = {
   email: string;
   fullName: string;
   role: string;
 };
 
 // added role permission
-type RolePermission = {
+export type RolePermission = {
   role_id: string;
   role_name: string;
 };
 
-interface AddMemberProps {
+export interface AddMemberProps {
   defaultValues?: Partial<FormValues>;
   onSubmit: (data: any) => void;
 }
@@ -99,18 +100,16 @@ const AddMember: React.FC<AddMemberProps> = ({
                 <SelectField
                   name="role"
                   control={form.control}
-                  placeholder="Select Role"
+                  placeholder="Select Role(s)"
                   label="Role"
-                  // labelClassName="pb-3 text-base leading-[26px] font-medium"
                   required
+                  isMulti={true} // enable multiple selection
                   options={
                     Array.isArray(roleTableData?.data)
-                      ? roleTableData.data.map((item: any) => {
-                          return {
-                            value: item.role_id.toString(),
-                            label: item.role_name,
-                          };
-                        })
+                      ? roleTableData.data.map((item: any) => ({
+                          value: item.role_id.toString(),
+                          label: item.role_name,
+                        }))
                       : []
                   }
                 />
