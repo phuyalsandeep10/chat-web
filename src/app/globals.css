@@ -248,3 +248,8 @@
 .animate-pulse-fill {
   animation: pulse-fill 1.8s ease-in-out infinite;
 }
+
+html,
+body {
+  background: transparent;
+}

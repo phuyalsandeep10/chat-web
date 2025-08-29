@@ -275,7 +275,7 @@ export default function ChatBox() {
               height={24}
               width={20}
               className="h-6 w-6"
-              alt=""
+              alt="chatboq bot logo"
             />
           </button>
         )}
