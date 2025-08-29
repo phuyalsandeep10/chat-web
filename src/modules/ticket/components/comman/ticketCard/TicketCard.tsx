@@ -4,6 +4,11 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { TicketCardProps } from '@/modules/ticket/types/type';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function TicketCard({
   email,
@@ -79,18 +84,22 @@ export default function TicketCard({
             {/* Avatars */}
             <div className="flex -space-x-4">
               {assignees.map((assignee) => (
-                <Avatar
-                  key={assignee.id}
-                  className="h-10.5 w-10.5 border-2 border-white"
-                >
-                  {assignee.image ? (
-                    <AvatarImage src={assignee.image} alt={assignee.name} />
-                  ) : (
-                    <AvatarFallback>
-                      {assignee.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
+                <Tooltip key={assignee.id}>
+                  <TooltipTrigger asChild>
+                    <Avatar className="h-10.5 w-10.5 cursor-pointer border-2 border-white">
+                      {assignee.image ? (
+                        <AvatarImage src={assignee.image} alt={assignee.name} />
+                      ) : (
+                        <AvatarFallback>
+                          {assignee.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="font-outfit text-xs">
+                    {assignee.name}
+                  </TooltipContent>
+                </Tooltip>
               ))}
             </div>
           </div>

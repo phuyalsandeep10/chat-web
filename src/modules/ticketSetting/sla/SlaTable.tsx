@@ -18,6 +18,7 @@ import { Icons } from '@/components/ui/Icons';
 import { cn } from '@/lib/utils';
 import DeleteModal from '@/components/modal/DeleteModal';
 import { useSlaLogic } from './hooks/useSlaLogic';
+import { useSlaAutoSaveHook } from './hooks/useSlaAutoSave';
 
 interface SlaTableProps {
   slaList: any[];
@@ -40,6 +41,8 @@ export default function SlaTable({ slaList }: SlaTableProps) {
     timeUnitOptions,
     capitalizeFirstLetter,
   } = useSlaLogic();
+
+  const { control: autoSaveControl } = useSlaAutoSaveHook(slaList);
 
   return (
     <div>
@@ -156,13 +159,13 @@ export default function SlaTable({ slaList }: SlaTableProps) {
                   <TableCell>
                     <div className="flex gap-2">
                       <InputField
-                        control={control}
+                        control={autoSaveControl}
                         name={`${key}_responseTime`}
                         type="number"
                         className="h-9 w-28 text-sm"
                       />
                       <SelectField
-                        control={control}
+                        control={autoSaveControl}
                         name={`${key}_responseUnit`}
                         options={timeUnitOptions}
                         className="h-9 w-28"
@@ -173,13 +176,13 @@ export default function SlaTable({ slaList }: SlaTableProps) {
                   <TableCell>
                     <div className="flex gap-2">
                       <InputField
-                        control={control}
+                        control={autoSaveControl}
                         name={`${key}_resolutionTime`}
                         type="number"
                         className="h-9 w-28 text-sm"
                       />
                       <SelectField
-                        control={control}
+                        control={autoSaveControl}
                         name={`${key}_resolutionUnit`}
                         options={timeUnitOptions}
                         className="h-9 w-28"
