@@ -8,12 +8,16 @@ interface InboxChatSectionProps {
   messages: Message[];
   onReply: (messageText: string) => void;
   handleEditMessage: (messageText: string) => void;
+  showTyping: boolean;
+  typingmessage: string;
 }
 
 const InboxChatSection = ({
   messages,
   onReply,
   handleEditMessage,
+  showTyping,
+  typingmessage,
 }: InboxChatSectionProps) => {
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +75,8 @@ const InboxChatSection = ({
                 message={message}
                 onReply={onReply}
                 handleEditMessage={handleEditMessage}
+                showTyping={showTyping}
+                typingmessage={typingmessage}
               />
             ))}
           </div>

@@ -6,12 +6,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 
 import { Icons } from '@/components/ui/Icons';
 import { useSocket } from '@/context/socket.context';
@@ -19,17 +13,22 @@ import { formatTime } from '@/lib/timeFormatUtils';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import { MoreVertical } from 'lucide-react';
 import { useEffect } from 'react';
+import DottedAnimation from './DottedAnimation';
 
 interface MessageItemProps {
   message: any;
   onReply: (messageText: string) => void;
   handleEditMessage: (messageText: string) => void;
+  showTyping: boolean;
+  typingmessage: string;
 }
 
 const MessageItem = ({
   message,
   onReply,
   handleEditMessage,
+  showTyping,
+  typingmessage,
 }: MessageItemProps) => {
   const handleReplyClick = () => {
     onReply(message);
@@ -183,6 +182,43 @@ const MessageItem = ({
           </div>
         )}
       </div>
+      {!isUserId && (
+        <>
+          <div className="flex space-x-1">
+            <div
+              className="h-2 w-2 animate-pulse rounded-full bg-white/30"
+              style={{
+                animation: 'typingDot 1.5s infinite',
+                animationDelay: '0s',
+              }}
+            ></div>
+            <div
+              className="h-2 w-2 animate-pulse rounded-full bg-white/30"
+              style={{
+                animation: 'typingDot 1.5s infinite',
+                animationDelay: '0.3s',
+              }}
+            ></div>
+            <div
+              className="h-2 w-2 animate-pulse rounded-full bg-white/30"
+              style={{
+                animation: 'typingDot 1.5s infinite',
+                animationDelay: '0.6s',
+              }}
+            ></div>
+          </div>
+
+          {/* Standalone animations */}
+          <div className="">
+            <div className="">
+              <DottedAnimation size="sm" color="gray" />
+            </div>
+            <div className="mt-2 max-h-[119px] min-h-[119px] w-full overflow-y-auto rounded-xl border border-[##D4D4D4] text-sm md:w-[462px]">
+              {typingmessage}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

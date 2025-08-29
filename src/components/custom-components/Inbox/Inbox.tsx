@@ -15,6 +15,7 @@ import InboxSubSidebar from './InboxSidebar/InboxSubSidebar';
 import { ConversationService } from '@/services/inbox/agentCoversation.service';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
+import { CHAT_EVENTS } from '@/events/InboxEvents';
 
 const Inbox = () => {
   const params: any = useParams();
@@ -80,10 +81,10 @@ const Inbox = () => {
   // 🔹 Common cleanup function
   const cleanupSocketListeners = () => {
     if (!socket) return;
-    socket.off('receive_message', handleReceiveMessage);
-    socket.off('receive_typing', handleTyping);
-    socket.off('message_seen', handleMessageSeen);
-    socket.off('stop_typing', handleStopTyping);
+    socket.off(CHAT_EVENTS.receive_message, handleReceiveMessage);
+    socket.off(CHAT_EVENTS.receive_typing, handleTyping);
+    socket.off(CHAT_EVENTS.message_seen, handleMessageSeen);
+    socket.off(CHAT_EVENTS.stop_typing, handleStopTyping);
   };
 
   useEffect(() => {
@@ -107,14 +108,14 @@ const Inbox = () => {
     // });
 
     // Attach listeners
-    socket.on('receive_message', handleReceiveMessage);
-    socket.on('receive_typing', handleTyping);
-    socket.on('message_seen', handleMessageSeen);
-    socket.on('stop_typing', handleStopTyping);
+    socket.on(CHAT_EVENTS.receive_message, handleReceiveMessage);
+    socket.on(CHAT_EVENTS.receive_typing, handleTyping);
+    socket.on(CHAT_EVENTS.message_seen, handleMessageSeen);
+    socket.on(CHAT_EVENTS.stop_typing, handleStopTyping);
 
     return () => {
       cleanupSocketListeners();
-      socket.emit('leave_conversation');
+      socket.emit(CHAT_EVENTS.leave_conversation);
     };
   }, [chatId, socket, userId, playSound]);
 
@@ -168,7 +169,7 @@ const Inbox = () => {
 
   const emitStopTyping = () => {
     if (!socket) return;
-    socket.emit('stop_typing', {
+    socket.emit(CHAT_EVENTS.stop_typing, {
       conversation_id: Number(chatId),
     });
   };
@@ -188,14 +189,16 @@ const Inbox = () => {
               messages={messages}
               onReply={handleReply}
               handleEditMessage={handleEditMessage}
+              showTyping
+              typingmessage={typingmessage}
             />
 
             <div className="relative m-4">
-              <div>
+              {/* <div>
                 {showTyping && (
                   <p className="text-red-300">Typing...{typingmessage}</p>
                 )}
-              </div>
+              </div> */}
 
               <div className="relative">
                 {replyingTo && (
