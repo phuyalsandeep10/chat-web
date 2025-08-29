@@ -194,12 +194,6 @@ const Inbox = () => {
             />
 
             <div className="relative m-4">
-              {/* <div>
-                {showTyping && (
-                  <p className="text-red-300">Typing...{typingmessage}</p>
-                )}
-              </div> */}
-
               <div className="relative">
                 {replyingTo && (
                   <div className="bg bg-brand-disable absolute top-2 right-2 left-2 z-10 flex w-fit items-center justify-between rounded-md border px-4 py-2 text-black">
@@ -227,7 +221,7 @@ const Inbox = () => {
                     setMessage(e.target.value);
                     if (!socket) return;
 
-                    if (!isTyping) {
+                    if (!isTyping && e.target.value.trim()) {
                       setIsTyping(true);
                       emitTyping(e.target.value);
                     }

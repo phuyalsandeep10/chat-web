@@ -581,7 +581,7 @@ const MessageItem = ({ socket, message }: any) => {
       ) : (
         <>
           {/* Customer message  */}
-          <div className="mt-4 ml-auto w-fit rounded-tl-[12px] rounded-tr-[12px] rounded-br-[2px] rounded-bl-[12px] border border-[rgba(170,170,170,0.10)] bg-gradient-to-b from-[var(--Brand-500,#6D28D9)] to-[var(--Brand-300,#A77EE8)] p-2 text-xs text-white">
+          <div className="mt-4 ml-auto w-fit rounded-tl-[12px] rounded-tr-[12px] rounded-br-[2px] rounded-bl-[12px] border border-[rgba(170,170,170,0.10)] bg-gradient-to-b from-[#6D28D9] to-[#A77EE8] p-2 text-xs text-white">
             <p> {message?.content}</p>
             <p>{formatTime(message?.updated_at)}</p>
           </div>
