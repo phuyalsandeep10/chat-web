@@ -226,3 +226,25 @@
   color: #6d28d9;
   fill: #6d28d9;
 }
+
+@keyframes pulse-fill {
+  0%,
+  20% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    background-color: #fff;
+    transform: scale(1.1);
+  }
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+}
+
+.animate-pulse-fill {
+  animation: pulse-fill 1.8s ease-in-out infinite;
+}

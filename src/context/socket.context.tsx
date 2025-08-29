@@ -1,6 +1,7 @@
 'use client';
 
 import { baseURL } from '@/apiConfigs/axiosInstance';
+import { CHAT_EVENTS } from '@/events/InboxEvents';
 import { useMessageAudio } from '@/hooks/useMessageAudio.hook';
 import { AuthService } from '@/services/auth/auth';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
@@ -55,12 +56,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   // Use the new useAudio hook
   const { playSound } = useMessageAudio();
 
-  const {
-    incrementMessageNotificationCount,
-    incrementVisitorCount,
-    fetchAllConversations,
-  } = useAgentConversationStore();
-
+  const { fetchAllConversations } = useAgentConversationStore();
+  const handleCustomerJoinConversation = (data: any) => {
+    console.log('Customer join conversation', data);
+  };
   const connectSocket = useCallback(() => {
     if (typeof window === 'undefined') return;
     const authTokens = AuthService.getAuthTokens();
@@ -96,22 +95,23 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         console.log('Connected to:', socketUrl);
       });
 
-      newSocket.on('customer_land', (data: Message) => {
+      newSocket.on(CHAT_EVENTS.customer_land, (data: Message) => {
         console.log('Customer land:', data);
         playSound();
-        // incrementVisitorCount();
         // fetchAllConversations();
       });
-      newSocket.on('resolved-conversation', (data: Message) => {
+      newSocket.on(CHAT_EVENTS.resolved_conversation, (data: Message) => {
         console.log('unresolved conversation:', data);
         // playSound();
-        // incrementMessageNotificationCount();
       });
+      newSocket.on(
+        CHAT_EVENTS.customer_conversation_join,
+        handleCustomerJoinConversation,
+      );
 
-      newSocket.on('message-notification', (data: Message) => {
+      newSocket.on(CHAT_EVENTS.message_notification, (data: Message) => {
         console.log('Message notification:', data);
         playSound();
-        // incrementMessageNotificationCount();
         fetchAllConversations();
       });
 
@@ -134,8 +134,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   const cleanupSocketListeners = () => {
     if (!socket) return;
-    socket.off('message-notification', handleCleanup);
-    socket.off('customer_land', handleCleanup);
+    socket.off(CHAT_EVENTS.message_notification, handleCleanup);
+    socket.off(CHAT_EVENTS.customer_land, handleCleanup);
   };
 
   const disconnectSocket = useCallback(() => {

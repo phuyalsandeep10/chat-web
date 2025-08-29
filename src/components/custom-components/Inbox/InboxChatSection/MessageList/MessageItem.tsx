@@ -6,12 +6,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 
 import { Icons } from '@/components/ui/Icons';
 import { useSocket } from '@/context/socket.context';
@@ -19,17 +13,22 @@ import { formatTime } from '@/lib/timeFormatUtils';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import { MoreVertical } from 'lucide-react';
 import { useEffect } from 'react';
+import { CHAT_EVENTS } from '@/events/InboxEvents';
 
 interface MessageItemProps {
   message: any;
   onReply: (messageText: string) => void;
   handleEditMessage: (messageText: string) => void;
+  showTyping: boolean;
+  typingmessage: string;
 }
 
 const MessageItem = ({
   message,
   onReply,
   handleEditMessage,
+  showTyping,
+  typingmessage,
 }: MessageItemProps) => {
   const handleReplyClick = () => {
     onReply(message);
@@ -47,7 +46,7 @@ const MessageItem = ({
   useEffect(() => {
     if (!socket) return;
     if (!isUserId && !message?.seen) {
-      socket.emit('message_seen', {
+      socket.emit(CHAT_EVENTS.message_seen, {
         message_id: message?.id,
       });
     }

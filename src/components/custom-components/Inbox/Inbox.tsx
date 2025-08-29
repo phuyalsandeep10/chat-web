@@ -15,6 +15,7 @@ import InboxSubSidebar from './InboxSidebar/InboxSubSidebar';
 import { ConversationService } from '@/services/inbox/agentCoversation.service';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
+import { CHAT_EVENTS } from '@/events/InboxEvents';
 
 const Inbox = () => {
   const params: any = useParams();
@@ -51,8 +52,8 @@ const Inbox = () => {
 
   // 🔹 Define event handlers once
   const handleReceiveMessage = (data: any) => {
-    console.log('Message received:', data);
     const isSenderMessage = data?.user_id === userId;
+    console.log('Message received:', data);
     if (!isSenderMessage) {
       addMessageToStore(data);
       playSound();
@@ -73,16 +74,17 @@ const Inbox = () => {
   };
 
   const handleMessageSeen = (data: any) => {
+    console.log('message seen', data);
     updateMessageSeen(data?.message_id);
   };
 
   // 🔹 Common cleanup function
   const cleanupSocketListeners = () => {
     if (!socket) return;
-    socket.off('receive-message', handleReceiveMessage);
-    socket.off('typing', handleTyping);
-    socket.off('message_seen', handleMessageSeen);
-    socket.off('stop-typing', handleStopTyping);
+    socket.off(CHAT_EVENTS.receive_message, handleReceiveMessage);
+    socket.off(CHAT_EVENTS.receive_typing, handleTyping);
+    socket.off(CHAT_EVENTS.message_seen, handleMessageSeen);
+    socket.off(CHAT_EVENTS.stop_typing, handleStopTyping);
   };
 
   useEffect(() => {
@@ -100,23 +102,20 @@ const Inbox = () => {
     joinConversation(Number(chatId));
     getAgentChatConversationDetails();
 
-    socket.emit('join_conversation', {
-      conversation_id: chatId,
-      user_id: userId,
-    });
+    // socket.emit('join_conversation', {
+    //   conversation_id: chatId,
+    //   user_id: userId,
+    // });
 
     // Attach listeners
-    socket.on('receive-message', handleReceiveMessage);
-    socket.on('typing', handleTyping);
-    socket.on('message_seen', handleMessageSeen);
-    socket.on('stop-typing', handleStopTyping);
+    socket.on(CHAT_EVENTS.receive_message, handleReceiveMessage);
+    socket.on(CHAT_EVENTS.receive_typing, handleTyping);
+    socket.on(CHAT_EVENTS.message_seen, handleMessageSeen);
+    socket.on(CHAT_EVENTS.stop_typing, handleStopTyping);
 
     return () => {
       cleanupSocketListeners();
-      socket.emit('leave_conversation', {
-        conversation_id: chatId,
-        user_id: userId,
-      });
+      socket.emit(CHAT_EVENTS.leave_conversation);
     };
   }, [chatId, socket, userId, playSound]);
 
@@ -170,7 +169,9 @@ const Inbox = () => {
 
   const emitStopTyping = () => {
     if (!socket) return;
-    socket.emit('stop-typing', { conversation_id: Number(chatId) });
+    socket.emit(CHAT_EVENTS.stop_typing, {
+      conversation_id: Number(chatId),
+    });
   };
 
   return (
@@ -188,15 +189,11 @@ const Inbox = () => {
               messages={messages}
               onReply={handleReply}
               handleEditMessage={handleEditMessage}
+              showTyping
+              typingmessage={typingmessage}
             />
 
             <div className="relative m-4">
-              <div>
-                {showTyping && (
-                  <p className="text-red-300">Typing...{typingmessage}</p>
-                )}
-              </div>
-
               <div className="relative">
                 {replyingTo && (
                   <div className="bg bg-brand-disable absolute top-2 right-2 left-2 z-10 flex w-fit items-center justify-between rounded-md border px-4 py-2 text-black">
@@ -224,7 +221,7 @@ const Inbox = () => {
                     setMessage(e.target.value);
                     if (!socket) return;
 
-                    if (!isTyping) {
+                    if (!isTyping && e.target.value.trim()) {
                       setIsTyping(true);
                       emitTyping(e.target.value);
                     }
