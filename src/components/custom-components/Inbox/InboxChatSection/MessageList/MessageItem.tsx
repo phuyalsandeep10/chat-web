@@ -6,12 +6,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 
 import { Icons } from '@/components/ui/Icons';
 import { useSocket } from '@/context/socket.context';
@@ -68,9 +62,11 @@ const MessageItem = ({
           {message?.edited_content && (
             <div className="group relative mr-12 flex justify-end">
               <span className="text-info text-xs font-medium">Edited</span>
-              <p className="text-info bg-info-light absolute top-[-30px] hidden rounded-lg px-3 py-1.5 text-xs group-hover:block">
-                {message?.edited_content}
-              </p>
+              <div className="text-info bg-info-light absolute top-[-30px] hidden rounded-lg px-3 py-1.5 text-xs group-hover:block">
+                <div
+                  dangerouslySetInnerHTML={{ __html: message?.edited_content }}
+                />
+              </div>
             </div>
           )}
 
@@ -109,20 +105,24 @@ const MessageItem = ({
                       <Icons.reply className="h-5 w-5" />
                       <span className="text-sm">Replied</span>
                     </div>
-                    <p className="mt-1 text-sm font-normal text-white">
-                      {message?.reply_to?.content}
-                    </p>
+                    <div className="mt-1 text-sm font-normal text-white">
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: message?.reply_to?.content,
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               )}
 
-              <p
+              <div
                 className={`text-lg leading-[29px] font-normal ${
                   isUserId ? 'text-sm font-normal break-all' : ''
                 } ${message?.reply_to && message?.reply_to_id && 'mt-1'}`}
               >
-                {message?.content}
-              </p>
+                <div dangerouslySetInnerHTML={{ __html: message?.content }} />
+              </div>
               <div
                 className={`mt-1 flex items-center text-xs font-normal ${isUserId ? 'justify-start text-left text-white' : 'text-theme-text-primary justify-end'}`}
               >
