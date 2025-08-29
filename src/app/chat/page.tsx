@@ -1,10 +1,13 @@
-import { PublicChatProvider } from '@/components/custom-components/ChatBox/public.chat.provider';
+import ChatBox from '@/components/custom-components/ChatBox/ChatBox';
+import { ChatBoxProvider } from '@/components/custom-components/ChatBox/chatbox.provider';
 import { Suspense } from 'react';
 
 const ChatPage = () => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <PublicChatProvider />
+      <ChatBoxProvider>
+        <ChatBox />
+      </ChatBoxProvider>
     </Suspense>
   );
 };

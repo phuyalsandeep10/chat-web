@@ -3,6 +3,7 @@ import { baseURL } from '@/apiConfigs/axiosInstance';
 import { CustomerConversationService } from '@/services/inbox/customerConversation.service';
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { useChatBox } from './chatbox.provider';
 
 interface Message {
   content: string;
@@ -26,7 +27,8 @@ interface socketOptions {
   namespace?: string;
 }
 
-export default function ChatBox({ visitor }: { visitor: any }) {
+export default function ChatBox() {
+  const { visitor, setVisitor } = useChatBox();
   const [socketUrl, setSocketUrl] = useState(`${baseURL}/chat`);
   const [authToken, setAuthToken] = useState('');
   const [isConnected, setIsConnected] = useState(false);
@@ -49,7 +51,14 @@ export default function ChatBox({ visitor }: { visitor: any }) {
   };
 
   const connectSocket = () => {
+    // Disconnect and clean up previous socket if exists
     if (socket) {
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.off('receive-message');
+      socket.off('message_seen');
+      socket.off('typing');
+      socket.off('stop-typing');
       socket.disconnect();
     }
 
@@ -61,50 +70,56 @@ export default function ChatBox({ visitor }: { visitor: any }) {
         customer_id: visitor?.customer?.id,
         conversation_id: visitor?.conversation?.id,
         organization_id: visitor?.customer?.organization_id,
+        token: authToken.trim() || undefined,
       },
+      autoConnect: true,
     };
-
-    if (authToken.trim()) {
-      socketOptions.auth.token = authToken.trim();
-    }
 
     try {
       const newSocket = io(socketUrl, socketOptions);
 
-      newSocket.on('connect', () => {
+      const handleConnect = () => {
         setSocketId(newSocket.id);
         setIsConnected(true);
         console.log('Connected to:', socketUrl);
-      });
+      };
 
-      newSocket.on('disconnect', () => {
+      const handleDisconnect = () => {
         setIsConnected(false);
         console.log('Disconnected from:', socketUrl);
-      });
+      };
 
-      newSocket.on('receive-message', (data: Message) => {
+      const handleMessage = (data: Message) => {
+        console.log({ data });
         if (!data?.user_id) return;
         setMessages((prev) => [...prev, data]);
         console.log('Received message:', data);
-      });
+      };
 
-      newSocket.on('message_seen', (data) => {
-        console.log('message_seen', data);
-      });
+      // Set up event listeners
+      newSocket.on('connect', handleConnect);
+      newSocket.on('disconnect', handleDisconnect);
+      newSocket.on('receive-message', handleMessage);
+      newSocket.on('message_seen', (data) => console.log('message_seen', data));
+      newSocket.on('typing', () => setOtherTyping(true));
+      newSocket.on('stop-typing', () => setOtherTyping(false));
 
-      newSocket.on('typing', () => {
-        console.log('typing ...');
-        setOtherTyping(true);
-      });
-
-      newSocket.on('stop-typing', () => {
-        console.log('stop typing ...');
-        setOtherTyping(false);
-      });
+      // Store cleanup function
+      const cleanup = () => {
+        newSocket.off('connect', handleConnect);
+        newSocket.off('disconnect', handleDisconnect);
+        newSocket.off('receive-message', handleMessage);
+        newSocket.off('message_seen');
+        newSocket.off('typing');
+        newSocket.off('stop-typing');
+        newSocket.disconnect();
+      };
 
       setSocket(newSocket);
+      return cleanup;
     } catch (error) {
       console.error('Failed to connect socket:', error);
+      return () => {}; // Return empty cleanup function if connection fails
     }
   };
 
@@ -120,6 +135,7 @@ export default function ChatBox({ visitor }: { visitor: any }) {
   };
 
   const getConversations = async () => {
+    if (!visitor?.conversation?.id) return;
     setLoading(true);
     setError(null);
     try {
@@ -139,31 +155,54 @@ export default function ChatBox({ visitor }: { visitor: any }) {
   };
 
   useEffect(() => {
-    connectSocket();
+    const cleanup = connectSocket();
     getConversations();
     return () => {
+      cleanup?.();
       disconnectSocket();
     };
-  }, []);
+  }, [visitor?.conversation?.id]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages, otherTyping]);
 
+  const initializeConversation = async (data: any) => {
+    try {
+      const res = await CustomerConversationService.initializeConversation(
+        visitor?.customer?.id,
+        data,
+      );
+      const payload = { ...visitor, conversation: res?.data?.conversation };
+      setVisitor(payload);
+      localStorage.setItem('visitor', JSON.stringify(payload));
+
+      setMessage('');
+      setMessages((prev) => [...prev, res?.data?.message]);
+    } catch (error) {
+      console.error('Failed to initialize conversation:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!socket || !isConnected || !message.trim()) return;
+    if (!socket || !message.trim()) return;
+    if (!visitor?.conversation?.id) {
+      await initializeConversation({
+        customer_id: visitor?.customer?.id,
+        organization_id: visitor?.customer?.organization_id,
+        content: message,
+      });
+      return;
+    }
 
-    const messageData: Message = {
-      content: message,
-      mode: 'message',
-      organization_id: 1,
-      conversation_id: 1,
-      customer_id: 1,
-    };
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+      setTypingTimeout(null);
+    }
+    emitStopTyping();
 
     try {
-      socket.emit('message', messageData);
       const res =
         await CustomerConversationService.createCustomerConversationWithAgent(
           visitor?.conversation?.id,
@@ -172,20 +211,13 @@ export default function ChatBox({ visitor }: { visitor: any }) {
 
       setMessages((prev) => [...prev, res?.data]);
       setMessage('');
-      setIsTyping(false);
-
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
-        setTypingTimeout(null);
-      }
-      emitStopTyping();
     } catch (error) {
       console.error('Failed to send message:', error);
     }
   };
 
-  const emitTyping = () => {
-    if (!socket || !isConnected) return;
+  const emitTyping = (message: string) => {
+    if (!socket || !isConnected || !visitor?.conversation?.id) return;
     socket.emit('typing', {
       mode: 'typing',
       conversation_id: visitor.conversation.id,
@@ -195,10 +227,18 @@ export default function ChatBox({ visitor }: { visitor: any }) {
   };
 
   const emitStopTyping = () => {
-    if (!socket || !isConnected) return;
+    if (!socket || !isConnected || !visitor?.conversation?.id) return;
     console.log('stop typing....');
     socket.emit('stop_typing', { conversation_id: visitor.conversation.id });
   };
+
+  // if (!visitor?.customer?.email) {
+  //   return (
+  //     <div className="mx-auto flex h-screen max-w-2xl flex-col items-center justify-center p-4">
+  //       <CustomerUpdateForm />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="mx-auto flex h-screen max-w-2xl flex-col p-4">
@@ -236,14 +276,14 @@ export default function ChatBox({ visitor }: { visitor: any }) {
         <input
           type="text"
           value={message}
-          onChange={(e) => {
+          onChange={(e: any) => {
             setMessage(e.target.value);
-            console.log({ socket, isConnected });
+
             if (!socket || !isConnected) return;
 
             if (e.target.value.trim()) {
               setIsTyping(true);
-              emitTyping();
+              emitTyping(e.target.value);
             }
 
             if (isTyping && !e.target.value.trim()) {
@@ -257,7 +297,7 @@ export default function ChatBox({ visitor }: { visitor: any }) {
             const timeout = setTimeout(() => {
               setIsTyping(false);
               emitStopTyping();
-            }, 1000);
+            }, 550);
 
             setTypingTimeout(timeout);
           }}
@@ -270,9 +310,9 @@ export default function ChatBox({ visitor }: { visitor: any }) {
         />
         <button
           type="submit"
-          disabled={!isConnected || !message.trim()}
+          disabled={!message.trim() || !isConnected}
           className={`rounded px-4 py-2 ${
-            !isConnected || !message.trim()
+            !message.trim() || !isConnected
               ? 'cursor-not-allowed bg-gray-300 text-gray-500'
               : 'bg-green-500 text-white hover:bg-green-600'
           }`}

@@ -21,7 +21,7 @@ const InboxChatSection = ({ messages, onReply }: InboxChatSectionProps) => {
     <div className="flex-1 p-4">
       <InboxChatSectionHeader />
       {/* <LanguageSelector /> */}
-      <div className="max-h-[calc(100vh-260px)] min-h-[calc(100vh-260px)] space-y-4 overflow-y-auto py-10">
+      <div className="max-h-[calc(100vh-280px)] min-h-[calc(100vh-280px)] space-y-4 overflow-y-auto py-10">
         {messages?.map((message, index) => (
           <MessageItem key={index} message={message} onReply={onReply} />
         ))}

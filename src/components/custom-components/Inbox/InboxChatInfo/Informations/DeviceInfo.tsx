@@ -1,8 +1,10 @@
 import React from 'react';
 import InformationsWrapper from './InformationsWrapper';
 import { Icons } from '@/components/ui/Icons';
+import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 
 const DeviceInfo = () => {
+  const { customer } = useAgentConversationStore();
   return (
     <InformationsWrapper>
       <div className="">
@@ -21,7 +23,7 @@ const DeviceInfo = () => {
               IP Address:
             </span>
             <span className="text-brand-dark text-sm font-normal">
-              192.168.1.100
+              {customer?.ip_address}
             </span>
           </div>
         </div>

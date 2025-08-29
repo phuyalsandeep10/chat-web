@@ -17,8 +17,10 @@ import { ReusableAssignModal } from '../../comman/AssignModal';
 import { useTicketStore } from './apiCalls/updateAssign/ticketStore';
 import { useUpdateTicket } from './apiCalls/updateAssign/useUpdateTicket';
 import { showToast } from '@/shared/toast';
+import { useRouter } from 'next/navigation';
 
 export default function CardView() {
+  const router = useRouter();
   const f = useCreateTicketForm();
   const {
     statusLoading,
@@ -193,25 +195,30 @@ export default function CardView() {
           <p>No Ticket Found.</p>
         ) : (
           currentTickets.map((ticket) => (
-            <TicketCard
+            <div
               key={ticket?.id}
-              id={ticket?.id}
-              email={ticket?.created_by?.email || 'No Email'}
-              timeAgo={formatTimeAgo(ticket?.created_at)}
-              title={ticket?.title}
-              priority={ticket.priority?.name}
-              priority_fg_color={ticket?.priority?.fg_color}
-              priority_bg_color={ticket?.priority?.bg_color}
-              status_fg_color={ticket?.status?.fg_color}
-              status_bg_color={ticket?.status?.bg_color}
-              status={ticket?.status?.name}
-              created_by={ticket?.created_by?.name}
-              assignees={ticket?.assignees || []}
-              checked={checkedTickets[ticket?.id] || false}
-              onCheckChange={(isChecked) =>
-                handleCheckChange(ticket?.id, isChecked)
-              }
-            />
+              onClick={() => router.push(`/ticket/details/${ticket?.id}`)}
+              className="cursor-pointer"
+            >
+              <TicketCard
+                id={ticket?.id}
+                email={ticket?.created_by?.email || 'No Email'}
+                timeAgo={formatTimeAgo(ticket?.created_at)}
+                title={ticket?.title}
+                priority={ticket.priority?.name}
+                priority_fg_color={ticket?.priority?.fg_color}
+                priority_bg_color={ticket?.priority?.bg_color}
+                status_fg_color={ticket?.status?.fg_color}
+                status_bg_color={ticket?.status?.bg_color}
+                status={ticket?.status?.name}
+                created_by={ticket?.created_by?.name}
+                assignees={ticket?.assignees || []}
+                checked={checkedTickets[ticket?.id] || false}
+                onCheckChange={(isChecked) =>
+                  handleCheckChange(ticket?.id, isChecked)
+                }
+              />
+            </div>
           ))
         )}
       </div>

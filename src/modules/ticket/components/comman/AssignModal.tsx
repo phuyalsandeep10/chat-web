@@ -10,21 +10,41 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Control, FieldValues } from 'react-hook-form';
+import { Control, FieldValues, Controller, Path } from 'react-hook-form';
 import { SelectField } from '@/components/common/hook-form/SelectField';
-import { MultiSelectField } from '@/components/common/hook-form/MultipleSelect';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronsUpDown } from 'lucide-react';
 
 export type ModalFieldType = 'select' | 'multiselect';
 
-export interface ModalFieldConfig<TForm extends FieldValues> {
-  type: ModalFieldType;
-  name: keyof TForm;
+type BaseFieldConfig<TForm extends FieldValues> = {
+  name: Path<TForm>;
   label: string;
   placeholder?: string;
   options: { label: string; value: string }[];
   required?: boolean;
-  defaultValue?: string | string[];
-}
+};
+
+type SelectFieldConfig<TForm extends FieldValues> = BaseFieldConfig<TForm> & {
+  type: 'select';
+};
+
+type MultiSelectFieldConfig<TForm extends FieldValues> =
+  BaseFieldConfig<TForm> & {
+    type: 'multiselect';
+    defaultValue?: string[];
+  };
+
+export type ModalFieldConfig<TForm extends FieldValues> =
+  | SelectFieldConfig<TForm>
+  | MultiSelectFieldConfig<TForm>;
 
 interface ReusableAssignModalProps<TForm extends FieldValues> {
   open: boolean;
@@ -57,7 +77,7 @@ export function ReusableAssignModal<TForm extends FieldValues>({
 
         <div className="mt-4 space-y-2">
           {selectedItems.length > 0 ? (
-            selectedItems.map((item) => (
+            selectedItems.map((item: any) => (
               <div
                 key={item.id}
                 className="rounded-md border border-gray-200 p-2 text-sm"
@@ -70,16 +90,15 @@ export function ReusableAssignModal<TForm extends FieldValues>({
           )}
         </div>
 
-        {/* Render fields dynamically */}
         {fields.map((field) => {
-          const fieldName = String(field.name); // cast to string
+          const fieldName = field.name as Path<TForm>;
 
           if (field.type === 'select') {
             return (
               <SelectField<TForm>
                 key={fieldName}
                 control={control}
-                name={fieldName as any} // react-hook-form expects string | Path<TForm>
+                name={fieldName}
                 label={field.label}
                 placeholder={field.placeholder}
                 required={field.required}
@@ -90,15 +109,86 @@ export function ReusableAssignModal<TForm extends FieldValues>({
           }
 
           if (field.type === 'multiselect') {
+            const multi = field as MultiSelectFieldConfig<TForm>;
             return (
-              <MultiSelectField
+              <Controller
                 key={fieldName}
                 control={control}
-                name={fieldName as any} // cast to string | Path<TForm>
-                label={field.label}
-                placeholder={field.placeholder}
-                options={field.options}
-                LabelClassName="text-brand-dark font-outfit font-semibold text-sm"
+                name={fieldName}
+                defaultValue={multi.defaultValue ?? ([] as any)}
+                render={({ field: rhfField }) => {
+                  const selectedValues: string[] = Array.isArray(rhfField.value)
+                    ? rhfField.value
+                    : [];
+
+                  const setSelected = (next: string[]) => {
+                    rhfField.onChange(next);
+                  };
+
+                  const selectedLabels =
+                    selectedValues.length > 0
+                      ? field.options
+                          .filter((opt) => selectedValues.includes(opt.value))
+                          .map((opt) => opt.label)
+                          .join(', ')
+                      : '';
+
+                  return (
+                    <div className="flex flex-col space-y-1">
+                      <label className="text-brand-dark font-outfit text-sm font-semibold">
+                        {field.label}
+                      </label>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="w-full justify-between"
+                          >
+                            {selectedLabels ||
+                              field.placeholder ||
+                              'Select options'}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent className="w-[300px]">
+                          <DropdownMenuLabel>{field.label}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {field.options.map((option) => {
+                            const checked = selectedValues.includes(
+                              option.value,
+                            );
+                            return (
+                              <DropdownMenuCheckboxItem
+                                key={option.value}
+                                checked={checked}
+                                onCheckedChange={(isChecked) => {
+                                  if (isChecked) {
+                                    setSelected([
+                                      ...selectedValues,
+                                      option.value,
+                                    ]);
+                                  } else {
+                                    setSelected(
+                                      selectedValues.filter(
+                                        (v) => v !== option.value,
+                                      ),
+                                    );
+                                  }
+                                }}
+                                className="cursor-pointer"
+                              >
+                                {option.label}
+                              </DropdownMenuCheckboxItem>
+                            );
+                          })}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  );
+                }}
               />
             );
           }

@@ -63,6 +63,7 @@ export default function TicketCard({
                 <input
                   type="checkbox"
                   checked={checked}
+                  onClick={(e) => e.stopPropagation()} // ⬅ prevent parent click
                   onChange={(e) => onCheckChange?.(e.target.checked)}
                   className="accent-brand-primary h-4 w-4 cursor-pointer"
                 />

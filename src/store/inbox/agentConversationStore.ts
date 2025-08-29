@@ -64,6 +64,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
             }
           : conv,
       );
+      console.log(updatedConversations);
       return {
         messages: [...state.messages, message],
         all_conversations: updatedConversations,

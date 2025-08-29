@@ -1,21 +1,30 @@
-// lib/timeFormatUtils.ts
-import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
+import {
+  format,
+  isToday,
+  isYesterday,
+  isWithinInterval,
+  subDays,
+} from 'date-fns';
 
-export default function ShowTime(dateString?: string) {
-  if (!dateString) return ''; // No time available
-
+// Existing ShowTime for ConversationsList
+export const ShowTime = (dateString: string) => {
   const date = new Date(dateString);
-  const now = new Date();
-  const diffInDays = differenceInDays(now, date);
+  return format(date, 'h:mm a'); // e.g., "10:46 PM"
+};
 
-  if (diffInDays < 1) {
-    // same day → "x hours/minutes ago"
-    return formatDistanceToNow(date, { addSuffix: true });
-  } else if (diffInDays < 7) {
-    // within 1 week → "x days ago"
-    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-  } else {
-    // older than a week → show date
-    return format(date, 'MMM dd, yyyy');
+// New function for message grouping headers
+export const getMessageDateHeader = (dateString: string) => {
+  const date = new Date(dateString);
+  const today = new Date();
+
+  if (isToday(date)) {
+    return 'Today';
   }
-}
+  if (isYesterday(date)) {
+    return 'Yesterday';
+  }
+  if (isWithinInterval(date, { start: subDays(today, 7), end: today })) {
+    return format(date, 'EEEE'); // e.g., "Sunday"
+  }
+  return format(date, 'd MMM'); // e.g., "18 Aug"
+};
