@@ -1,17 +1,22 @@
 'use client';
 import GeneralInfo from '@/components/custom-components/Inbox/InboxChatInfo/Informations/GeneralInfo';
+import { TicketProvider } from '@/context/ticket.context';
 import TicketDetails from '@/modules/ticket/pages/TicketDetails';
 import { getTicketDetails } from '@/services/ticket/services';
+import React from 'react';
 import { useParams } from 'next/navigation';
-import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
 
-const page = () => {
+const Page = () => {
+  const params: any = useParams();
+  const ticketId = params?.ticketId;
+
   return (
     <div>
-      <TicketDetails />
+      <TicketProvider ticketId={Number(ticketId)}>
+        <TicketDetails />
+      </TicketProvider>
     </div>
   );
 };
 
-export default page;
+export default Page;
