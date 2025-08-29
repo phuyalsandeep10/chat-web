@@ -5,8 +5,6 @@ import AuthenticatorModal from '@/components/modal/Authenticator/AuthenticatorMo
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import VerifyEmailModal from '@/components/custom-components/Dashboard/VerifyEmailModal/VerifyEmailModal';
 import BusinessCreateFormModal from '@/components/custom-components/Dashboard/BusinessCreateFormModal/BusinessCreateFormModal';
-import { useTickectSlaSocket } from '@/context/ticketsla.context';
-import TicketSLABreachDialog from '@/shared/TicketSLABreachDialog';
 
 const DashboardPage = () => {
   const [open2FaAuthenticatorModal, setOpen2FaAuthenticatorModal] =
@@ -14,16 +12,7 @@ const DashboardPage = () => {
   const [openEmailVerifyForm, setOpenVerifyEmail] = useState(false);
   const [openCreateBusinessModal, setOpenCreateBusinessModal] = useState(false);
 
-  const [openTicketSLABeachDialog, setOpenTicketBreachDialog] = useState(false);
-
   const authData = useAuthStore((state) => state.authData);
-
-  const { socket } = useTickectSlaSocket();
-
-  const showTicketSlaAlert = (data: any) => {
-    console.log('data', data);
-    setOpenTicketBreachDialog(true);
-  };
 
   useEffect(() => {
     if (!authData?.data?.user?.email_verified_at) {
@@ -31,8 +20,6 @@ const DashboardPage = () => {
     } else {
       setOpenVerifyEmail(false);
     }
-
-    socket?.on('ticket_sla_alert', showTicketSlaAlert);
 
     if (
       Object.keys(authData?.data?.user?.attributes || {}).length === 0 &&
@@ -74,10 +61,6 @@ const DashboardPage = () => {
       <BusinessCreateFormModal
         open={openCreateBusinessModal}
         setOpen={setOpenCreateBusinessModal}
-      />
-      <TicketSLABreachDialog
-        open={openTicketSLABeachDialog}
-        setOpen={setOpenTicketBreachDialog}
       />
     </div>
   );
