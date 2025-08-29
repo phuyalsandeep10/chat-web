@@ -11,16 +11,16 @@ export const useGetAllPermissionGroup = () => {
     queryKey: ['getAllPermissionGroup'],
 
     queryFn: RolesService.GetAllPermissionGroup,
-    meta: {
-      onSuccess: (data: any) => {
-        toast.success('Get Set Permission Successfully'); //data.message
-        // queryClient.invalidateQueries({ queryKey: ['getAllPermissionGroup'] });
-      },
-      onError: (error: any) => {
-        toast.error(
-          error?.response?.data?.message || 'Failed to get set permission',
-        );
-      },
-    },
+    // meta: {
+    //   onSuccess: (data: any) => {
+    //     toast.success('Get Set Permission Successfully'); //data.message
+    //     // queryClient.invalidateQueries({ queryKey: ['getAllPermissionGroup'] });
+    //   },
+    //   onError: (error: any) => {
+    //     toast.error(
+    //       error?.response?.data?.message || 'Failed to get set permission',
+    //     );
+    //   },
+    // },
   });
 };

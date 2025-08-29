@@ -12,7 +12,7 @@ export const useDeleteMember = () => {
     onSuccess: (data) => {
       toast.success('Members deleted successfully');
       // Invalidate and refetch roles data
-      //   queryClient.invalidateQueries({ queryKey: ['allRolePermissionGroup'] });
+      queryClient.invalidateQueries({ queryKey: ['operators'] });
     },
     onError: (error: any) => {
       toast.error(

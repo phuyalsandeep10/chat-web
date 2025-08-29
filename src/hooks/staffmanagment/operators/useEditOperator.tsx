@@ -38,9 +38,10 @@ export const useEditOperator = () => {
     onSuccess: (data, variables, context) => {
       toast.success('Role updated successfully');
       // Invalidate and refetch roles data
-      queryClient.invalidateQueries({
-        queryKey: ['operators', variables.member_id],
-      });
+      // queryClient.invalidateQueries({
+      //   queryKey: ['operators'],
+      // });
+      queryClient.invalidateQueries({ queryKey: ['operators'] });
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Failed to update role');

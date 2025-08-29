@@ -12,7 +12,7 @@ export const useCreateTeams = () => {
     onSuccess: (data) => {
       toast.success('Team created successfully');
       // Invalidate and refetch roles data
-      //   queryClient.invalidateQueries({ queryKey: ['teams'] });
+      queryClient.invalidateQueries({ queryKey: ['getAllTeams'] });
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Failed to create Team');

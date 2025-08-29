@@ -10,12 +10,12 @@ export const useInvitesMembers = () => {
   return useMutation({
     mutationFn: TeamsService.InviteTeams,
     onSuccess: (data) => {
-      toast.success('Team created successfully');
+      toast.success('Member Invited successfully');
       // Invalidate and refetch roles data
       //   queryClient.invalidateQueries({ queryKey: ['teams'] });
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to create Team');
+      toast.error(error?.response?.data?.message || 'Failed to Invite Member');
     },
   });
 };

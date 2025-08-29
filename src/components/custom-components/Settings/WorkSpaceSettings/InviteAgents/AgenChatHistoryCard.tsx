@@ -3,6 +3,7 @@ import { Button, type ButtonProps } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/components/ui/Icons';
 import { useForm, Controller } from 'react-hook-form';
+import { DialogClose } from '@/components/ui/dialog';
 
 import {
   Card,
@@ -208,12 +209,14 @@ export function AgenChatHistoryCard({
             View Conversations
           </Button>
 
-          <Button
-            className="h-full max-h-[36px] w-full max-w-[149px] rounded-lg px-[22px] py-2.5 text-xs leading-4 font-semibold"
-            variant="outline"
-          >
-            Cancel
-          </Button>
+          <DialogClose asChild>
+            <Button
+              className="h-full max-h-[36px] w-full max-w-[149px] rounded-lg px-[22px] py-2.5 text-xs leading-4 font-semibold"
+              variant="outline"
+            >
+              Cancel
+            </Button>
+          </DialogClose>
         </CardFooter>
       </Card>
     </>

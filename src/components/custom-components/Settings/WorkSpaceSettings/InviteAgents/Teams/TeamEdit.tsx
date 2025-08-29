@@ -9,6 +9,7 @@ import { Icons } from '@/components/ui/Icons';
 import { cn } from '@/lib/utils';
 import { useDeleteTeamFromTeam } from '@/hooks/staffmanagment/teams/useDeleteTeamFromTeam';
 import DeleteModal from '@/components/modal/DeleteModal';
+import { useQueryClient } from '@tanstack/react-query';
 
 import {
   Card,
@@ -106,9 +107,8 @@ const TeamEdit: React.FC<TeamEditProps> = ({
     deleteMembersFromTeam(
       { team_id: teamId, member_id: memberIdToDelete },
       {
-        onSuccess: () => {},
         onError: (error: any) => {
-          console.error('Failed to delete member:', error);
+          console.log('Failed to delete member:', error);
         },
       },
     );

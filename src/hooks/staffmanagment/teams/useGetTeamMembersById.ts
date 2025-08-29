@@ -22,13 +22,5 @@ export const useGetTeamMembersById = (teamId?: number) => {
       return TeamsService.getTeamMembersById(teamId);
     },
     enabled: !!teamId, // React Query will not run the query until teamId is truthy
-    // onSuccess: () => {
-    //   toast.success('Team data fetched successfully');
-    // },
-    // onError: (error: any) => {
-    //   toast.error(
-    //     error?.response?.data?.message || 'Failed to fetch team members',
-    //   );
-    // },
   });
 };

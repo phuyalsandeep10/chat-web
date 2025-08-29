@@ -20,6 +20,7 @@ import { DialogClose } from '@/components/ui/dialog';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RoleSchema } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Roles/RoleSchema';
 import { useGetAllPermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllPermissionGroup';
+import { toast } from 'sonner';
 // import {
 //   PermissionState,
 //   FormValues,
@@ -144,7 +145,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
     const permissions = permissionsState;
 
     if (!isEdit && permissions.length === 0) {
-      console.log('Please select at least one permission.');
+      toast.error('Please select at least one permission.');
       return;
     }
 
@@ -155,9 +156,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
 
     // check if used or not
     if (!isAllPermissionsValid) {
-      console.log(
-        'Please select at least one permission (view/edit/delete) for each permission.',
-      );
+      toast.error('Please select at least one permission from each table');
       return;
     }
 
@@ -170,6 +169,9 @@ const RoleForm: React.FC<RoleFormProps> = ({
     };
 
     onSubmit(payload);
+
+    // prevent modal from closing without selecting one permission
+    if (isAllPermissionsValid) setOpenCreateRole?.(false);
   };
 
   const columns: Column<OrderRow>[] = [
@@ -326,7 +328,6 @@ const RoleForm: React.FC<RoleFormProps> = ({
               <Button
                 className="bg-brand-primary h-[36px] w-full max-w-[130px] rounded-lg px-4 py-3 text-xs leading-4 font-semibold text-white"
                 type="submit"
-                onClick={() => setOpenCreateRole?.(false)}
               >
                 Save
               </Button>
