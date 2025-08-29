@@ -81,7 +81,7 @@ const Inbox = () => {
   const cleanupSocketListeners = () => {
     if (!socket) return;
     socket.off('receive_message', handleReceiveMessage);
-    socket.off('typing', handleTyping);
+    socket.off('receive_typing', handleTyping);
     socket.off('message_seen', handleMessageSeen);
     socket.off('stop_typing', handleStopTyping);
   };
@@ -108,7 +108,7 @@ const Inbox = () => {
 
     // Attach listeners
     socket.on('receive_message', handleReceiveMessage);
-    socket.on('typing', handleTyping);
+    socket.on('receive_typing', handleTyping);
     socket.on('message_seen', handleMessageSeen);
     socket.on('stop_typing', handleStopTyping);
 

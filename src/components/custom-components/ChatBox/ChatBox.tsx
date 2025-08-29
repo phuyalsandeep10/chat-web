@@ -119,7 +119,7 @@ export default function ChatBox() {
       newSocket.on('disconnect', handleDisconnect);
       newSocket.on('receive_message', handleMessage);
       newSocket.on('message_seen', (data) => console.log('message_seen', data));
-      newSocket.on('typing', () => setOtherTyping(true));
+      newSocket.on('receive_typing', () => setOtherTyping(true));
       newSocket.on('stop_typing', () => setOtherTyping(false));
 
       // Store cleanup function
@@ -128,7 +128,7 @@ export default function ChatBox() {
         newSocket.off('disconnect', handleDisconnect);
         newSocket.off('receive_message', handleMessage);
         newSocket.off('message_seen');
-        newSocket.off('typing');
+        newSocket.off('receive_typing');
         newSocket.off('stop_typing');
         newSocket.disconnect();
       };
