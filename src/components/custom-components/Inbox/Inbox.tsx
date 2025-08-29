@@ -18,8 +18,6 @@ import { useAgentConversationStore } from '@/store/inbox/agentConversationStore'
 import { CHAT_EVENTS } from '@/events/InboxEvents';
 
 const Inbox = () => {
-  const params: any = useParams();
-  const chatId = params?.userId;
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const [replyingTo, setReplyingTo] = useState<any>(null);
@@ -47,6 +45,8 @@ const Inbox = () => {
     editMessage,
     joinConversation,
   } = useAgentConversationStore();
+  const params: any = useParams();
+  const chatId = params?.userId;
 
   const userId = authData?.data?.user?.id;
 
