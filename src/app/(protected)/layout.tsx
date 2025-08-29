@@ -1,13 +1,13 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import CustomSidebar from '@/components/custom-components/CustomSidebar/CustomSidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { SocketProvider } from '@/context/socket.context';
+import { useAuthenticatedUser } from '@/hooks/auth/useAuthenticatedUser';
 import { ROUTES } from '@/routes/routes';
 import { AuthService } from '@/services/auth/auth';
-import { useAuthenticatedUser } from '@/hooks/auth/useAuthenticatedUser';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import CustomSidebar from '@/components/custom-components/CustomSidebar/CustomSidebar';
-import { useAuthStore } from '@/store/AuthStore/useAuthStore';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function ProtectedDashboardLayout({
   children,
@@ -40,8 +40,10 @@ export default function ProtectedDashboardLayout({
   return (
     <SidebarProvider>
       <CustomSidebar />
-      {/* <SidebarTrigger /> */}
-      <div className="w-full">{children}</div>
+      <SocketProvider>
+        {/* <SidebarTrigger /> */}
+        <div className="w-full">{children}</div>
+      </SocketProvider>
     </SidebarProvider>
   );
 }

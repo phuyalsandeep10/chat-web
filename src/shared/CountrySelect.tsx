@@ -11,13 +11,9 @@ import { Button } from '@/components/ui/button';
 import Flag from 'react-world-flags';
 import { Icons } from '@/components/ui/Icons';
 import { cn } from '@/lib/utils';
+import { Country } from '@/services/organizations/types';
 
-export type Country = {
-  name: string;
-  code: string;
-};
-
-interface CountrySelectProps {
+type CountrySelectProps = {
   value: Country | null;
   onChange: (country: Country) => void;
   countries?: Country[];
@@ -25,35 +21,37 @@ interface CountrySelectProps {
   contentClassName?: string;
   itemClassName?: string;
   wrapperClassName?: string;
-}
+  placeholder?: string;
+  disabled?: boolean;
+};
 
 const defaultCountries: Country[] = [
-  { name: 'Nepal', code: 'NP' },
-  { name: 'United States', code: 'US' },
-  { name: 'France', code: 'FR' },
-  { name: 'Japan', code: 'JP' },
-  { name: 'India', code: 'IN' },
-  { name: 'Germany', code: 'DE' },
-  { name: 'Canada', code: 'CA' },
-  { name: 'United Kingdom', code: 'GB' },
-  { name: 'Australia', code: 'AU' },
-  { name: 'China', code: 'CN' },
-  { name: 'Brazil', code: 'BR' },
-  { name: 'Russia', code: 'RU' },
-  { name: 'South Korea', code: 'KR' },
-  { name: 'Italy', code: 'IT' },
-  { name: 'Spain', code: 'ES' },
-  { name: 'Pakistan', code: 'PK' },
-  { name: 'Bangladesh', code: 'BD' },
-  { name: 'United Arab Emirates', code: 'AE' },
-  { name: 'Singapore', code: 'SG' },
-  { name: 'Thailand', code: 'TH' },
-  { name: 'Indonesia', code: 'ID' },
-  { name: 'Philippines', code: 'PH' },
-  { name: 'Vietnam', code: 'VN' },
-  { name: 'Egypt', code: 'EG' },
-  { name: 'Mexico', code: 'MX' },
-  { name: 'South Africa', code: 'ZA' },
+  { id: 1, name: 'Nepal', code: 'NP', phone_code: '+977' },
+  { id: 2, name: 'United States', code: 'US', phone_code: '+1' },
+  { id: 3, name: 'France', code: 'FR', phone_code: '+33' },
+  { id: 4, name: 'Japan', code: 'JP', phone_code: '+81' },
+  { id: 5, name: 'India', code: 'IN', phone_code: '+91' },
+  { id: 6, name: 'Germany', code: 'DE', phone_code: '+49' },
+  { id: 7, name: 'Canada', code: 'CA', phone_code: '+1' },
+  { id: 8, name: 'United Kingdom', code: 'GB', phone_code: '+44' },
+  { id: 9, name: 'Australia', code: 'AU', phone_code: '+61' },
+  { id: 10, name: 'China', code: 'CN', phone_code: '+86' },
+  { id: 11, name: 'Brazil', code: 'BR', phone_code: '+55' },
+  { id: 12, name: 'Russia', code: 'RU', phone_code: '+7' },
+  { id: 13, name: 'South Korea', code: 'KR', phone_code: '+82' },
+  { id: 14, name: 'Italy', code: 'IT', phone_code: '+39' },
+  { id: 15, name: 'Spain', code: 'ES', phone_code: '+34' },
+  { id: 16, name: 'Pakistan', code: 'PK', phone_code: '+92' },
+  { id: 17, name: 'Bangladesh', code: 'BD', phone_code: '+880' },
+  { id: 18, name: 'United Arab Emirates', code: 'AE', phone_code: '+971' },
+  { id: 19, name: 'Singapore', code: 'SG', phone_code: '+65' },
+  { id: 20, name: 'Thailand', code: 'TH', phone_code: '+66' },
+  { id: 21, name: 'Indonesia', code: 'ID', phone_code: '+62' },
+  { id: 22, name: 'Philippines', code: 'PH', phone_code: '+63' },
+  { id: 23, name: 'Vietnam', code: 'VN', phone_code: '+84' },
+  { id: 24, name: 'Egypt', code: 'EG', phone_code: '+20' },
+  { id: 25, name: 'Mexico', code: 'MX', phone_code: '+52' },
+  { id: 26, name: 'South Africa', code: 'ZA', phone_code: '+27' },
 ];
 
 const CountrySelect: React.FC<CountrySelectProps> = ({

@@ -1,47 +1,158 @@
 'use client';
 
 import Settings from '@/components/custom-components/Settings/Settings';
-import React from 'react';
-import RecommendedChannel from './RecommendedChannel';
-import CRMSection from './CRMSection';
-import Marketing from './Marketing';
-import Messaging from './Messaging';
-import ActiveChannels from './ActiveChannels';
+import React, { useState } from 'react';
+import TabsFilter from './TabsFilter';
+import SectionWrapper from './SectionWrapper';
+import ChannelSection from './ChannelSection';
+import {
+  activeChannels,
+  recommendedChannels,
+  crmChannels,
+  marketingChannels,
+  messagingChannels,
+} from './data';
+import { Channel } from './types';
 
-const Integration = () => {
+const hasVisibleChannels = (
+  channels: Channel[],
+  selectedTab: 'view-all' | 'active' | 'inactive',
+  connectionStatus: Record<string, boolean>,
+) =>
+  channels.some(
+    (channel) =>
+      selectedTab === 'view-all' ||
+      (selectedTab === 'active' && connectionStatus[channel.name]) ||
+      (selectedTab === 'inactive' && !connectionStatus[channel.name]),
+  );
+
+const Integration: React.FC = () => {
+  const [selectedTab, setSelectedTab] = useState<
+    'view-all' | 'active' | 'inactive'
+  >('view-all');
+  const [connectionStatus, setConnectionStatus] = useState<
+    Record<string, boolean>
+  >(() => {
+    const initialStatus: Record<string, boolean> = {};
+    const allChannels: Channel[] = [
+      ...activeChannels,
+      ...recommendedChannels,
+      ...crmChannels,
+      ...marketingChannels,
+      ...messagingChannels,
+    ];
+    allChannels.forEach((channel) => {
+      initialStatus[channel.name] = false;
+    });
+    return initialStatus;
+  });
+
+  const handleConnectionChange = (
+    channelName: string,
+    isConnected: boolean,
+  ) => {
+    setConnectionStatus((prev) => ({ ...prev, [channelName]: isConnected }));
+  };
+
   return (
     <Settings>
-      <div className="mb-13.5">
+      <div className="mb-5">
         <h1 className="mb-1 text-[32px] leading-10 font-semibold">
           All Integration
         </h1>
-        <p className="text-xs leading-4 font-normal">
-          Connect the tool you use everyday.
-        </p>
       </div>
 
-      <div className="mb-4">
-        <ActiveChannels />
-      </div>
-      <hr className="bg-gray-light mb-6 h-[1px] border-0" />
+      <TabsFilter selectedTab={selectedTab} onTabChange={setSelectedTab} />
 
-      <div className="mb-4">
-        <RecommendedChannel />
-      </div>
-      <hr className="bg-gray-light mb-6 h-[1px] border-0" />
+      {/* Active Channels */}
+      <SectionWrapper
+        isVisible={hasVisibleChannels(
+          activeChannels,
+          selectedTab,
+          connectionStatus,
+        )}
+      >
+        <ChannelSection
+          channels={activeChannels}
+          heading="Active Channels"
+          selectedTab={selectedTab}
+          connectionStatus={connectionStatus}
+          onConnectionChange={handleConnectionChange}
+          showViewDetails={false}
+        />
+      </SectionWrapper>
 
-      <div className="mb-4">
-        <CRMSection />
-      </div>
-      <hr className="bg-gray-light mb-6 h-[1px] border-0" />
-      <div className="mb-4">
-        <Marketing />
-      </div>
-      <hr className="bg-gray-light mb-6 h-[1px] border-0" />
-      <div className="mb-4">
-        <Messaging />
-      </div>
-      <hr className="bg-gray-light mb-6 h-[1px] border-0" />
+      {/* Recommended Channels */}
+      <SectionWrapper
+        isVisible={hasVisibleChannels(
+          recommendedChannels,
+          selectedTab,
+          connectionStatus,
+        )}
+      >
+        <ChannelSection
+          channels={recommendedChannels}
+          heading="Recommended Channel"
+          selectedTab={selectedTab}
+          connectionStatus={connectionStatus}
+          onConnectionChange={handleConnectionChange}
+          viewMoreLink="/integration/recommendedChannel"
+        />
+      </SectionWrapper>
+
+      {/* CRM Channels */}
+      <SectionWrapper
+        isVisible={hasVisibleChannels(
+          crmChannels,
+          selectedTab,
+          connectionStatus,
+        )}
+      >
+        <ChannelSection
+          channels={crmChannels}
+          heading="CRM"
+          selectedTab={selectedTab}
+          connectionStatus={connectionStatus}
+          onConnectionChange={handleConnectionChange}
+          viewMoreLink="/integration/crm"
+        />
+      </SectionWrapper>
+
+      {/* Marketing Channels */}
+      <SectionWrapper
+        isVisible={hasVisibleChannels(
+          marketingChannels,
+          selectedTab,
+          connectionStatus,
+        )}
+      >
+        <ChannelSection
+          channels={marketingChannels}
+          heading="Marketing"
+          selectedTab={selectedTab}
+          connectionStatus={connectionStatus}
+          onConnectionChange={handleConnectionChange}
+          viewMoreLink="/integration/marketing"
+        />
+      </SectionWrapper>
+
+      {/* Messaging Channels */}
+      <SectionWrapper
+        isVisible={hasVisibleChannels(
+          messagingChannels,
+          selectedTab,
+          connectionStatus,
+        )}
+      >
+        <ChannelSection
+          channels={messagingChannels}
+          heading="Messaging"
+          selectedTab={selectedTab}
+          connectionStatus={connectionStatus}
+          onConnectionChange={handleConnectionChange}
+          viewMoreLink="/integration/messaging"
+        />
+      </SectionWrapper>
     </Settings>
   );
 };

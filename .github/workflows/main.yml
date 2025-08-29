@@ -51,6 +51,7 @@ jobs:
             git pull origin main
             pm2 stop chatboq-web
             npm install
+            npm run build
             PORT=3002 pm2 start npm --name chatboq-web -- run start
             pm2 list
             echo "✅ Deployment completed successfully!"

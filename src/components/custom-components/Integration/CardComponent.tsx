@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import React, { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +13,8 @@ const CardComponent: React.FC<CardComponentProps> = ({
   description,
   price = 'Free',
   websiteUrl,
+  isConnected,
+  onConnectionChange,
 }) => {
   const [starred, setStarred] = useState(false);
 
@@ -49,12 +53,20 @@ const CardComponent: React.FC<CardComponentProps> = ({
 
       <div className="border-gray-light flex justify-between rounded-t-[8px] border-t py-3 pr-2 pl-4">
         <div className="flex items-center gap-1">
-          <Icons.ri_plug_line className="text-brand-primary size-3.5" />
+          {isConnected ? (
+            <Icons.ri_settings_5_fill className="text-brand-primary size-3.5" />
+          ) : (
+            <Icons.ri_plug_line className="text-brand-primary size-3.5" />
+          )}
           <p className="text-brand-primary text-xs leading-4 font-semibold">
-            Connect
+            {isConnected ? 'Configure' : 'Connect'}
           </p>
         </div>
-        <Switch className="data-[state=checked]:bg-brand-primary" />
+        <Switch
+          className="data-[state=checked]:bg-brand-primary"
+          checked={isConnected}
+          onCheckedChange={onConnectionChange}
+        />
       </div>
     </div>
   );

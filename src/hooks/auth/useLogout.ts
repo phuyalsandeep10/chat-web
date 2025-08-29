@@ -10,12 +10,12 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: AuthService.logoutUser,
     onSuccess: (data) => {
-      AuthService.clearAuthTokens();
+      // AuthService.clearAuthTokens();
+      // router.replace(ROUTES.LOGIN);
       toast.success(data?.message || 'Logged out successfully');
-      router.replace(ROUTES.LOGIN);
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Logout failed');
+      // toast.error(error?.response?.data?.message || 'Logout failed');
       console.error('Logout failed:', error);
     },
   });

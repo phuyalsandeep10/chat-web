@@ -9,8 +9,9 @@ import stripe from '@/assets/images/integration/stripe.svg';
 import instagram from '@/assets/images/integration/instagram.svg';
 import salesforce from '@/assets/images/integration/salesforce.svg';
 import tabular from '@/assets/images/integration/tabular.svg';
+import { Channel } from './types';
 
-export const activeChannels = [
+export const activeChannels: Channel[] = [
   {
     image: shopify,
     name: 'Shopify',
@@ -56,7 +57,7 @@ export const activeChannels = [
   },
 ];
 
-export const crmChannels = [
+export const crmChannels: Channel[] = [
   {
     image: hubspot,
     name: 'HubSpot',
@@ -83,7 +84,7 @@ export const crmChannels = [
   },
 ];
 
-export const marketingChannels = [
+export const marketingChannels: Channel[] = [
   {
     image: shopify,
     name: 'Shopify',
@@ -109,7 +110,7 @@ export const marketingChannels = [
   },
 ];
 
-export const messagingChannels = [
+export const messagingChannels: Channel[] = [
   {
     image: messenger,
     name: 'Messenger',
@@ -135,7 +136,7 @@ export const messagingChannels = [
   },
 ];
 
-export const recommendedChannels = [
+export const recommendedChannels: Channel[] = [
   {
     image: salesforce,
     name: 'SalesForce',

@@ -29,6 +29,7 @@ type DataTableProps<TData> = {
   headerHeight?: string;
   headerClassName?: string;
   rowClassName?: string;
+  underlineHeader?: boolean;
 };
 
 function DataTable<TData>({
@@ -42,9 +43,11 @@ function DataTable<TData>({
   headerHeight = 'auto',
   headerClassName = 'text-theme-text-primary border-none text-[14px] leading-[21px] font-semibold',
   rowClassName = 'text-theme-text-primary border-none pl-[8px] text-[12px] leading-[17px]',
+  underlineHeader = false,
 }: DataTableProps<TData>) {
   const [globalFilter, setGlobalFilter] = useState('');
   const [filterActive, setFilterActive] = useState(false);
+  const [rowSelection, setRowSelection] = useState({});
 
   const handleFilterClick = (e: React.MouseEvent) => {
     setFilterActive((prev) => !prev);
@@ -56,16 +59,17 @@ function DataTable<TData>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onRowSelectionChange: setRowSelection,
     state: {
       globalFilter,
+      rowSelection,
     },
-    onGlobalFilterChange: setGlobalFilter,
   });
 
   return (
     <div className="space-y-4">
       {(showSearch || showFilterIcon) && (
-        <div className="mb-[33px] flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between">
           {showFilterIcon ? (
             <div
               onClick={handleFilterClick}
@@ -103,15 +107,19 @@ function DataTable<TData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
-                className="bg-light hover:bg-light border-none"
+                className={`${
+                  underlineHeader ? 'border-gray-light border-b' : 'border-none'
+                }`}
                 style={{ height: headerHeight }}
               >
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id} className={headerClassName}>
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -121,7 +129,18 @@ function DataTable<TData>({
           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="border-none">
+                <TableRow
+                  key={row.id}
+                  className="border-none bg-transparent"
+                  data-state={row.getIsSelected() ? 'selected' : undefined}
+                  style={{ backgroundColor: 'transparent' }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor = 'transparent')
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.backgroundColor = 'transparent')
+                  }
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className={rowClassName}>
                       {flexRender(

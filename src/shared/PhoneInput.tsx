@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
 import { Icons } from '@/components/ui/Icons';
-import { allCountries } from 'country-telephone-data';
+import { useGetCountries } from '@/hooks/organizations/useGetCountries';
 
 // Zod Schema
 const schema = z.object({
@@ -20,20 +20,12 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 interface Country {
+  id: number;
   name: string;
   code: string;
   dialCode: string;
   flagUrl: string;
 }
-
-// Map countries
-const countries: Country[] = allCountries.map((c) => ({
-  name: c.name,
-  code: c.iso2.toUpperCase(),
-  dialCode: `+${c.dialCode}`,
-  flagUrl: `https://flagcdn.com/24x18/${c.iso2}.png`,
-}));
-
 const PhoneInput: React.FC = () => {
   const {
     register,
@@ -43,10 +35,28 @@ const PhoneInput: React.FC = () => {
     resolver: zodResolver(schema),
   });
 
-  const [selectedCountry, setSelectedCountry] = useState<Country | undefined>(
-    countries.find((c) => c.code === 'US'),
-  );
-  const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const { data, isLoading, error } = useGetCountries();
+  const countries: Country[] = useMemo(() => {
+    return (
+      data?.data?.countries.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        code: c.code,
+        dialCode: c.phone_code,
+        flagUrl: `https://flagcdn.com/24x18/${c.iso_code_2.toLowerCase()}.png`,
+      })) || []
+    );
+  }, [data]);
+
+  const [selectedCountry, setSelectedCountry] = useState<Country | undefined>();
+
+  React.useEffect(() => {
+    if (countries.length && !selectedCountry) {
+      setSelectedCountry(countries.find((c) => c.code === 'US'));
+    }
+  }, [countries, selectedCountry]);
+
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const handleCountrySelect = (countryCode: string) => {
     const country = countries.find((c) => c.code === countryCode);
@@ -60,6 +70,10 @@ const PhoneInput: React.FC = () => {
     const fullPhone = `${selectedCountry?.dialCode}${data.phoneNumber}`;
     console.log('Full Phone Number:', fullPhone);
   };
+
+  if (isLoading) return <p>Loading countries...</p>;
+  if (error) return <p>Failed to fetch countries</p>;
+  if (!countries.length) return <p>No phone codes available</p>;
 
   return (
     // <form onSubmit={handleSubmit(onSubmit)}>
@@ -77,7 +91,7 @@ const PhoneInput: React.FC = () => {
                 height={18}
                 src={selectedCountry.flagUrl}
                 alt={selectedCountry.code}
-                className="h-4 w-6 object-cover"
+                className="h-4 w-auto object-cover"
               />
               <span className="text-sm">{selectedCountry.dialCode}</span>
               <Icons.chevron_down className="mt-0.5 text-xs text-gray-500" />
@@ -116,7 +130,7 @@ const PhoneInput: React.FC = () => {
         <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded border bg-white shadow">
           {countries.map((country) => (
             <li
-              key={country.code}
+              key={country.id}
               onClick={() => handleCountrySelect(country.code)}
               className="flex cursor-pointer items-center gap-2 px-3 py-1 hover:bg-gray-100"
             >
@@ -125,7 +139,7 @@ const PhoneInput: React.FC = () => {
                 height={18}
                 src={country.flagUrl}
                 alt={country.code}
-                className="h-4 w-6 object-cover"
+                className="h-4 w-auto object-cover"
               />
               <span>
                 {country.name} ({country.dialCode})

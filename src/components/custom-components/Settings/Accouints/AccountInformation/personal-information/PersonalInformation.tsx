@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import CountrySelect, { Country } from '@/shared/CountrySelect';
+import CountrySelect from '@/shared/CountrySelect';
 
 import { InputField } from '@/components/common/hook-form/InputField';
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -8,6 +8,7 @@ import { CountySection } from './CountySection';
 import LanguageSection from './LanguageSection';
 import { FormValues } from '../types';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
+import { Country } from '@/services/organizations/types';
 
 export default function PersonalInformation() {
   const authData = useAuthStore((state) => state.authData);

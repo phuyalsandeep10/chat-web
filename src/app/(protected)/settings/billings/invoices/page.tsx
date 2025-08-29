@@ -1,8 +1,8 @@
-import Invoices from '@/components/custom-components/Billings/Invoices/CardsInvoices';
+import CardsInvoices from '@/components/custom-components/Settings/Billings/Invoices/CardsInvoices';
 import React from 'react';
 
 const page = () => {
-  return <Invoices />;
+  return <CardsInvoices />;
 };
 
 export default page;

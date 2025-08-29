@@ -1,9 +1,10 @@
+import { Toaster } from '@/components/ui/sonner';
+import { SocketProvider } from '@/context/socket.context';
+import { QueryProvider } from '@/providers/query-provider';
+import 'country-flag-icons/react/3x2';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Outfit } from 'next/font/google';
 import './globals.css';
-import { Toaster } from '@/components/ui/sonner';
-import { QueryProvider } from '@/providers/query-provider';
-import 'country-flag-icons/react/3x2';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -42,10 +43,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} antialiased`}
       >
         <QueryProvider>
-          {children}
-          <Toaster richColors position="top-right" />
-          {/* <Toaster /> */}
+          <SocketProvider>
+            {children}
+            <Toaster richColors position="top-right" />
+            {/* <SoundEnabler /> */}
+            {/* <Toaster /> */}
+          </SocketProvider>
         </QueryProvider>
+        {/* Audio Elements */}
       </body>
     </html>
   );

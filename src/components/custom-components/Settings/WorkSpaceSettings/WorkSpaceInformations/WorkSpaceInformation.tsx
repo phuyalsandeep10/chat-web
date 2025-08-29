@@ -18,21 +18,27 @@ import Information from './Information';
 import WorkSpaceDetails from './WorkSpaceDetails';
 import WorkSpaceHeader from './WorkSpaceHeader';
 import { useGetorganizationDetails } from '@/hooks/organizations/useGetorganizations';
-type Country = {
-  code: string;
-  name: string;
-  flag?: string;
-};
-
+import { useGetCountries } from '@/hooks/organizations/useGetCountries';
+import ErrorText from '@/components/common/hook-form/ErrorText';
+import { Country } from '@/services/organizations/types';
 export default function WorkspaceInformation() {
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
-
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChangePhotoModal, setShowChangePhotoModal] = useState(false);
 
   const { data: organizationDetails, isPending } = useGetorganizationDetails();
+
+  const {
+    data: countriesResponse,
+    isLoading: isLoadingCountries,
+    error: countriesError,
+  } = useGetCountries();
+
+  const countries = countriesResponse?.data?.countries || [];
+
   console.log(organizationDetails);
+  console.log('Countries:', countries);
 
   const handleRemovePhoto = () => {
     setImageUrl(null);
@@ -175,20 +181,33 @@ export default function WorkspaceInformation() {
               >
                 Time zone
               </Label>
-              <CountrySelect
-                value={selectedCountry}
-                onChange={(country) => setSelectedCountry(country)}
-                buttonClassName={cn('w-full  text-black py-2')}
-                contentClassName={cn('cursor-pointer hover:bg-white')}
-                itemClassName={cn('hover:bg-gray-100 px-2 py-1')}
-                wrapperClassName={cn('w-full')}
-              />
+
+              {isLoadingCountries && (
+                <div className="text-theme-text-primary text-sm">
+                  Loading countries...
+                </div>
+              )}
+
+              {countriesError && (
+                <ErrorText error="The data couldn't be fetched" />
+              )}
+
+              {!isLoadingCountries && !countriesError && (
+                <CountrySelect
+                  value={selectedCountry}
+                  onChange={(country) => setSelectedCountry(country)}
+                  buttonClassName={cn('w-full  text-black py-2')}
+                  contentClassName={cn('cursor-pointer hover:bg-white')}
+                  itemClassName={cn('hover:bg-gray-100 px-2 py-1')}
+                  wrapperClassName={cn('w-full')}
+                  countries={countries}
+                />
+              )}
             </div>
           </div>
         </div>
 
         {/* Workspace Details */}
-
         <WorkSpaceDetails />
 
         {/* Workspace Information */}
