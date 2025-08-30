@@ -40,7 +40,7 @@ export class CustomerConversationService {
   }
   static async createCustomer() {
     try {
-      const res = await axiosInstance.post(`/customers`);
+      const res = await axiosInstance.post(`/customers/create`);
       return res.data;
     } catch (error) {
       throw error;
