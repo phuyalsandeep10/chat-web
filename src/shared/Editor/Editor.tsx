@@ -1,14 +1,21 @@
 'use client';
 
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
-import Placeholder from '@tiptap/extension-placeholder';
-import Document from '@tiptap/extension-document';
-import Paragraph from '@tiptap/extension-paragraph';
-import Text from '@tiptap/extension-text';
-import Strike from '@tiptap/extension-strike';
+import { DropdownMenu } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@radix-ui/react-dropdown-menu';
 import { Extension } from '@tiptap/core';
+import Document from '@tiptap/extension-document';
+import { BulletList, ListItem } from '@tiptap/extension-list';
+import Paragraph from '@tiptap/extension-paragraph';
+import Placeholder from '@tiptap/extension-placeholder';
+import Strike from '@tiptap/extension-strike';
+import Text from '@tiptap/extension-text';
+import Underline from '@tiptap/extension-underline';
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import EmojiPicker from 'emoji-picker-react';
 import {
   Bold,
   Italic,
@@ -18,14 +25,7 @@ import {
   Smile,
   UnderlineIcon,
 } from 'lucide-react';
-import { BulletList, ListItem } from '@tiptap/extension-list';
-import EmojiPicker from 'emoji-picker-react';
-import { useState, useRef, useEffect } from 'react';
-import {
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@radix-ui/react-dropdown-menu';
-import { DropdownMenu } from '@/components/ui/dropdown-menu';
+import { useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 // to disable the default enter behaivor from entering new line
 // while shift+enter will still do the tricks😊
@@ -44,7 +44,7 @@ const SubmitOnEnter = Extension.create({
 
   addOptions() {
     return {
-      onSubmit: () => {}, // Default no-op
+      onSubmit: async () => {}, // Default no-op
     };
   },
 
@@ -53,7 +53,9 @@ const SubmitOnEnter = Extension.create({
       Enter: () => {
         // Safely call onSubmit
         if (typeof this.options.onSubmit === 'function') {
-          this.options.onSubmit();
+          Promise.resolve(this.options.onSubmit(this.editor)).then(() => {
+            // this.editor.commands.clearContent();
+          });
           console.log('inside if');
         }
 
@@ -64,6 +66,7 @@ const SubmitOnEnter = Extension.create({
 
         return true;
       },
+      'Shift-Enter': () => false,
     };
   },
 });
@@ -72,10 +75,12 @@ const Tiptap = ({
   value,
   onChange,
   onSubmit,
+  ref,
 }: {
-  value: string;
+  value: string | null;
   onChange: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (editor: any) => void;
+  ref: any;
 }) => {
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const emojiRef = useRef<HTMLDivElement>(null);
@@ -107,7 +112,7 @@ const Tiptap = ({
         bulletList: false,
         listItem: false,
       }),
-      DisableEnter,
+      // DisableEnter, // <-- Remove this line
       Underline,
       Document,
       Paragraph,
@@ -117,7 +122,7 @@ const Tiptap = ({
         placeholder: 'Write your thought here....',
       }),
       SubmitOnEnter.configure({
-        onSubmit: onSubmit,
+        onSubmit: onSubmit, // Pass the editor instance
       }),
       BulletList,
       ListItem,
@@ -127,13 +132,21 @@ const Tiptap = ({
     autofocus: true,
     editable: true,
     injectCSS: true,
-    content: value,
+    content: value || undefined,
 
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       onChange(html);
     },
   });
+
+  useImperativeHandle(ref, () => {
+    return {
+      onClear: () => {
+        editor?.commands.clearContent();
+      },
+    };
+  }, [editor?.commands]);
 
   if (!editor) {
     return <div>Loading editor...</div>;
@@ -272,7 +285,7 @@ const Tiptap = ({
 
           <button
             onClick={() => {
-              onSubmit();
+              onSubmit(editor);
               // editor.commands.clearContent();
             }}
             className="flex items-center gap-1 rounded-[8px] border bg-[#7914ca] px-4 py-2 text-base font-semibold text-white"

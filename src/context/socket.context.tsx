@@ -114,6 +114,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         playSound();
         fetchAllConversations();
       });
+      newSocket.on(CHAT_EVENTS.customer_disconnected, (data) => {
+        console.log('customer disconnected', { data });
+      });
 
       newSocket.on('disconnect', () => {
         setIsConnected(false);

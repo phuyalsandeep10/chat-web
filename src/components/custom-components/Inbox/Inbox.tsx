@@ -1,6 +1,4 @@
 'use client';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { useSocket } from '@/context/socket.context';
 import { useMessageAudio } from '@/hooks/useMessageAudio.hook';
 import { useUiStore } from '@/store/UiStore/useUiStore';
@@ -12,11 +10,11 @@ import InboxChatInfo from './InboxChatInfo/InboxChatInfo';
 import InboxChatSection from './InboxChatSection/InboxChatSection';
 import InboxSubSidebar from './InboxSidebar/InboxSubSidebar';
 
+import { CHAT_EVENTS } from '@/events/InboxEvents';
 import { ConversationService } from '@/services/inbox/agentCoversation.service';
+import Editor from '@/shared/Editor/Editor';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
-import { CHAT_EVENTS } from '@/events/InboxEvents';
-import Editor from '@/shared/Editor/Editor';
 
 const Inbox = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -29,7 +27,8 @@ const Inbox = () => {
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
     null,
   );
-  const [message, setMessage] = useState('');
+  const editorRef = useRef<any>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   const { showChatInfo } = useUiStore();
   const { socket } = useSocket();
@@ -54,7 +53,7 @@ const Inbox = () => {
   // 🔹 Define event handlers once
   const handleReceiveMessage = (data: any) => {
     const isSenderMessage = data?.user_id === userId;
-    console.log('Message received:', data);
+    setTypingMessage('');
     if (!isSenderMessage) {
       addMessageToStore(data);
       playSound();
@@ -71,6 +70,7 @@ const Inbox = () => {
     console.log('Stopping...');
     setTimeout(() => {
       setShowTyping(false);
+      setTypingMessage('');
     }, 2000);
   };
 
@@ -121,12 +121,12 @@ const Inbox = () => {
   }, [chatId, socket, userId, playSound]);
 
   // ---- SEND MESSAGE ----
-  const onSend = async () => {
-    // e.preventDefault();
-    // const text = inputRef.current?.value;
-    console.log(message);
-    if (!socket || !message) return;
-    console.log('inbox onsend');
+  const onSend = async (editorInstance?: any) => {
+    // Get the latest content from the editor if available
+    const latestMessage = editorInstance?.getHTML?.();
+    console.log({ latestMessage, socket });
+
+    if (!latestMessage) return;
 
     setIsTyping(false);
     if (typingTimeout) {
@@ -134,15 +134,20 @@ const Inbox = () => {
       setTypingTimeout(null);
     }
 
-    emitStopTyping();
+    await emitStopTyping();
 
     if (editedMessage && editedMessage.id) {
-      await editMessage(editedMessage.id, message);
+      await editMessage(editedMessage.id, latestMessage);
       setEditedMessage(null);
     } else {
-      await sendMessageToDB(Number(chatId), message, replyingTo?.id || null);
+      await sendMessageToDB(
+        Number(chatId),
+        latestMessage,
+        replyingTo?.id || null,
+      );
     }
-    setMessage('');
+    setMessage(null);
+    editorRef.current.onClear();
     if (inputRef.current) inputRef.current.value = '';
     setReplyingTo(null);
   };
@@ -170,9 +175,9 @@ const Inbox = () => {
     });
   };
 
-  const emitStopTyping = () => {
+  const emitStopTyping = async () => {
     if (!socket) return;
-    socket.emit(CHAT_EVENTS.stop_typing, {
+    await socket.emit(CHAT_EVENTS.stop_typing, {
       conversation_id: Number(chatId),
     });
   };
@@ -202,6 +207,7 @@ const Inbox = () => {
                   <div className="bg bg-brand-disable absolute top-2 right-2 left-2 z-10 flex w-fit items-center justify-between rounded-md border px-4 py-2 text-black">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-black">Replying to:</span>
+
                       <span className="text-theme-text-primary max-w-[200px] truncate text-xs font-medium">
                         {replyingTo?.content}
                       </span>
@@ -215,18 +221,19 @@ const Inbox = () => {
                   </div>
                 )}
 
-                {/* <Textarea
-                  placeholder="Enter your message here"
-                  className={`replyingTo ? 'pt-14' : 'pt-3' hidden`}
-                  ref={inputRef as any}
+                <Editor
                   value={message}
-                  onChange={(e: any) => {
-                    setMessage(e.target.value);
+                  ref={editorRef}
+                  onSubmit={onSend}
+                  onChange={(value) => {
+                    // console.log(value);
+                    setMessage(value);
+                    // console.log('message here', message);
                     if (!socket) return;
 
-                    if (!isTyping && e.target.value.trim()) {
+                    if (!isTyping) {
                       setIsTyping(true);
-                      emitTyping(e.target.value);
+                      emitTyping(value);
                     }
 
                     if (typingTimeout) clearTimeout(typingTimeout);
@@ -238,52 +245,8 @@ const Inbox = () => {
 
                     setTypingTimeout(timeout);
                   }}
-                  onKeyDown={(e: any) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      onSend(e);
-                    }
-                  }}
-                /> */}
-                <form onSubmit={onSend}>
-                  <Editor
-                    value={message}
-                    onSubmit={onSend}
-                    onChange={(value) => {
-                      // console.log(value);
-                      setMessage(value);
-                      // console.log('message here', message);
-                      if (!socket) return;
-
-                      if (!isTyping) {
-                        setIsTyping(true);
-                        emitTyping(value);
-                      }
-
-                      if (typingTimeout) clearTimeout(typingTimeout);
-
-                      const timeout = setTimeout(() => {
-                        setIsTyping(false);
-                        emitStopTyping();
-                      }, 2000);
-
-                      setTypingTimeout(timeout);
-                    }}
-                    // onKeyDown={(e: any) => {
-                    //   if (e.key === 'Enter' && !e.shiftKey) {
-                    //     e.preventDefault();
-                    //     onSend(e);
-                    //   }
-                    // }}
-                  />
-                </form>
+                />
               </div>
-
-              {/* <div className="mt-3 flex justify-end">
-                <Button type="button" onClick={onSend}>
-                  Send
-                </Button>
-              </div> */}
             </div>
           </div>
 

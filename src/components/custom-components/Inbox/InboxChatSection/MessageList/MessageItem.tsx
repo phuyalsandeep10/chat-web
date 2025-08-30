@@ -9,11 +9,11 @@ import {
 
 import { Icons } from '@/components/ui/Icons';
 import { useSocket } from '@/context/socket.context';
+import { CHAT_EVENTS } from '@/events/InboxEvents';
 import { formatTime } from '@/lib/timeFormatUtils';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import { MoreVertical } from 'lucide-react';
 import { useEffect } from 'react';
-import { CHAT_EVENTS } from '@/events/InboxEvents';
 
 interface MessageItemProps {
   message: any;
