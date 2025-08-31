@@ -11,38 +11,44 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import React, { useState } from 'react';
+import React from 'react';
 import { Icons } from '../ui/Icons';
 import Image from 'next/image';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  post: string;
-}
+import { useGetMembers } from '@/hooks/organizations/useGetMembers';
+import { useAuthStore } from '@/store/AuthStore/useAuthStore';
+import { useSendOwnershipInvitation } from '@/hooks/organizations/useSendOwnershipInvitation';
+import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganization';
 
 interface TransferOwnershipModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-const dummyUsers: User[] = [
-  { id: 1, name: 'Alice Sharma', email: 'alice@example.com', post: 'agent' },
-  { id: 2, name: 'Ravi Gupta', email: 'ravi@example.com', post: 'agent' },
-  { id: 3, name: 'Sita Thapa', email: 'sita@example.com', post: 'agent' },
-  { id: 4, name: 'Alice Sharma', email: 'alice@example.com', post: 'agent' },
-  { id: 5, name: 'Ravi Gupta', email: 'ravi@example.com', post: 'agent' },
-  { id: 6, name: 'Sita Thapa', email: 'sita@example.com', post: 'agent' },
-  { id: 7, name: 'Alice Sharma', email: 'alice@example.com', post: 'agent' },
-  { id: 8, name: 'Ravi Gupta', email: 'ravi@example.com', post: 'agent' },
-  { id: 9, name: 'Sita Thapa', email: 'sita@example.com', post: 'agent' },
-];
-
 const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
   open,
   onClose,
 }) => {
+  const { authData } = useAuthStore();
+  const orgId = authData?.data.user.attributes.organization_id;
+  const { data: organizationMembers } = useGetMembers(orgId ?? 0, {
+    enabled: !!orgId,
+  });
+
+  const sendOwnershipInvitation = useUpdateOrganization();
+
+  const handleInvite = (userId: number) => {
+    sendOwnershipInvitation.mutate(
+      {
+        workspace_owner_id: userId,
+      },
+      {
+        onSuccess: (data) => {
+          onClose();
+        },
+      },
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[461px]">
@@ -68,15 +74,16 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
             Choose an Admin (Suggested)
           </p>
           <div className="space-y-4 pt-4 pr-4">
-            {dummyUsers.map((user) => (
+            {organizationMembers?.map((user) => (
               <div
                 key={user.id}
                 className="hover:bg-light-blue font-outfit text-gray-primary flex cursor-pointer items-center justify-between p-2 text-xs leading-[16px] font-semibold"
+                onClick={() => handleInvite(user.id)}
               >
                 <div className="flex items-center gap-1">
                   <div>
                     <Image
-                      src={'/new.jpg'}
+                      src={user.image}
                       alt="user"
                       width={24}
                       height={24}
@@ -90,10 +97,10 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
                     </p> */}
                   </div>
                 </div>
-                <p>{user.post}</p>
+                <p>agent</p>
               </div>
             ))}
-            {dummyUsers.length === 0 && (
+            {organizationMembers?.length === 0 && (
               <p className="text-muted-foreground py-6 text-center text-sm">
                 No users found.
               </p>

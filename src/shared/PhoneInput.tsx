@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useMemo, useState, useEffect } from 'react';
 import { z } from 'zod';
 import Image from 'next/image';
 import { Icons } from '@/components/ui/Icons';
 import { useGetCountries } from '@/hooks/organizations/useGetCountries';
+import ErrorText from '@/components/common/hook-form/ErrorText';
 
 // Zod Schema
 const schema = z.object({
@@ -26,57 +25,96 @@ interface Country {
   dialCode: string;
   flagUrl: string;
 }
-const PhoneInput: React.FC = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
-  });
+interface PhoneInputProps {
+  value?: string;
+  phoneCode?: string; // <-- new prop
+  onChange?: (value: string) => void;
+  error?: string;
+  onBlur?: () => void;
+}
 
-  const { data, isLoading, error } = useGetCountries();
+const PhoneInput: React.FC<PhoneInputProps> = ({
+  value = '',
+  phoneCode,
+  onChange,
+  error,
+  onBlur,
+}) => {
+  const { data } = useGetCountries();
   const countries: Country[] = useMemo(() => {
-    return (
-      data?.data?.countries.map((c: any) => ({
+    if (data?.data?.countries?.length) {
+      return data.data.countries.map((c: any) => ({
         id: c.id,
         name: c.name,
         code: c.code,
         dialCode: c.phone_code,
         flagUrl: `https://flagcdn.com/24x18/${c.iso_code_2.toLowerCase()}.png`,
-      })) || []
-    );
+      }));
+    } else {
+      return [
+        {
+          id: 0,
+          name: 'United States',
+          code: 'US',
+          dialCode: '+1',
+          flagUrl: 'https://flagcdn.com/24x18/us.png',
+        },
+      ];
+    }
   }, [data]);
 
-  const [selectedCountry, setSelectedCountry] = useState<Country | undefined>();
+  const [selectedCountry, setSelectedCountry] = useState<Country>();
+  const [phoneNumber, setPhoneNumber] = useState('');
 
-  React.useEffect(() => {
-    if (countries.length && !selectedCountry) {
-      setSelectedCountry(countries.find((c) => c.code === 'US'));
+  // Initialize selected country from value OR phoneCode
+  useEffect(() => {
+    if (!countries.length) return;
+
+    let matchedCountry: Country | undefined;
+
+    // prioritize value if it includes dial code
+    if (value) {
+      matchedCountry = countries.find((c) => value.startsWith(c.dialCode));
     }
-  }, [countries, selectedCountry]);
+
+    // if value doesn't match, fall back to phoneCode
+    if (!matchedCountry && phoneCode) {
+      matchedCountry = countries.find((c) => c.dialCode === phoneCode);
+    }
+
+    if (!matchedCountry) matchedCountry = countries[0];
+
+    setSelectedCountry(matchedCountry);
+
+    // set phone number only (without dial code)
+    if (value && matchedCountry && value.startsWith(matchedCountry.dialCode)) {
+      setPhoneNumber(value.replace(matchedCountry.dialCode, ''));
+    } else {
+      setPhoneNumber(value); // if value is just number
+    }
+  }, [countries, phoneCode, value]);
 
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleCountrySelect = (countryCode: string) => {
     const country = countries.find((c) => c.code === countryCode);
-    if (country) {
-      setSelectedCountry(country);
-      setShowDropdown(false);
+    if (!country) return;
+    setSelectedCountry(country);
+    setShowDropdown(false);
+    if (onChange) {
+      onChange(`${country.dialCode}${phoneNumber}`);
     }
   };
 
-  const onSubmit = (data: FormData) => {
-    const fullPhone = `${selectedCountry?.dialCode}${data.phoneNumber}`;
-    console.log('Full Phone Number:', fullPhone);
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPhone = e.target.value;
+    setPhoneNumber(newPhone);
+    if (onChange && selectedCountry) {
+      onChange(`${selectedCountry.dialCode}${newPhone}`);
+    }
   };
 
-  if (isLoading) return <p>Loading countries...</p>;
-  if (error) return <p>Failed to fetch countries</p>;
-  if (!countries.length) return <p>No phone codes available</p>;
-
   return (
-    // <form onSubmit={handleSubmit(onSubmit)}>
     <div className="relative h-9 w-full rounded-md">
       <div className="flex w-full items-center rounded border px-3 py-1">
         {/* Country selector */}
@@ -101,10 +139,12 @@ const PhoneInput: React.FC = () => {
 
         {/* Phone input */}
         <input
+          onBlur={onBlur}
           type="text"
           inputMode="numeric"
           placeholder="Enter phone number"
-          {...register('phoneNumber')}
+          value={phoneNumber}
+          onChange={handlePhoneChange}
           className="ml-3 flex-1 rounded-md border-none focus:ring-0 focus:outline-none"
           onKeyDown={(e) => {
             if (
@@ -117,13 +157,6 @@ const PhoneInput: React.FC = () => {
           }}
         />
       </div>
-
-      {/* Error display */}
-      {errors.phoneNumber && (
-        <p className="mt-1 text-xs text-red-500">
-          {errors.phoneNumber.message}
-        </p>
-      )}
 
       {/* Dropdown */}
       {showDropdown && (
@@ -149,8 +182,6 @@ const PhoneInput: React.FC = () => {
         </ul>
       )}
     </div>
-    // </form>
   );
 };
-
 export default PhoneInput;

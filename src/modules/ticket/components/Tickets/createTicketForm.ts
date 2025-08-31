@@ -1,17 +1,17 @@
-import { useState, useMemo } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
   createTicketSchema,
   TicketFormData,
 } from '@/modules/ticket/types/ticket.schema';
-import { usePriorities } from '../../hooks/usePriorities';
-import { useTeams } from '../../hooks/useTeams';
 import { useTeamStore } from '@/services/teams/useTeamStore';
-import { useTeamMembers } from '../../hooks/useTeamMembers';
-import { useCustomers } from '../../hooks/useCustomers';
-import { useCreateTicket } from '../../hooks/createTicketPayload';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMemo, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
+import { useCreateTicket } from '../../hooks/createTicketPayload';
+import { useCustomers } from '../../hooks/useCustomers';
+import { usePriorities } from '../../hooks/usePriorities';
+import { useTeamMembers } from '../../hooks/useTeamMembers';
+import { useTeams } from '../../hooks/useTeams';
 
 export const useCreateTicketForm = () => {
   const authData = useAuthStore((state) => state.authData);
@@ -24,8 +24,9 @@ export const useCreateTicketForm = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // API hooks
-  const { data: customers = [], isLoading: customersLoading } =
-    useCustomers(organizationId);
+  const { data: customers = [], isLoading: customersLoading } = useCustomers(
+    organizationId as number,
+  );
   const {
     data: priorities,
     isLoading: prioritiesLoading,
@@ -76,8 +77,8 @@ export const useCreateTicketForm = () => {
     useTeamMembers(selectedTeamId);
 
   const customerOptions = customers.map((customer: any) => ({
-    label: customer.email,
-    value: customer.email,
+    label: customer.email || customer.name || 'No Email',
+    value: customer.email || customer.name || 'No Email',
     id: customer.id,
   }));
 

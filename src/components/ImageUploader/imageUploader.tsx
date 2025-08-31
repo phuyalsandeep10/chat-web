@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { Icons } from '../ui/Icons';
 import ErrorText from '../common/hook-form/ErrorText';
 
 interface ImageUploaderProps {
-  onImageSelect: (imageDataUrl: string) => void;
+  onImageSelect: (file: File) => void;
   wrapperClassName?: string;
   labelClickText?: string;
   labelRestText?: string;
@@ -21,59 +22,53 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 }) => {
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (!file) return;
 
-    const isValidType = ['image/jpeg', 'image/png'].includes(file.type);
-    const isValidSize = file.size <= 10 * 1024 * 1024;
+      const isValidType = ['image/jpeg', 'image/png'].includes(file.type);
+      const isValidSize = file.size <= 10 * 1024 * 1024;
 
-    if (!isValidType) {
-      setError('Only PNG and JPG formats are allowed.');
-      return;
-    }
-
-    if (!isValidSize) {
-      setError('Image size should not exceed 10 MB.');
-      return;
-    }
-
-    setError(null);
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (reader.result) {
-        onImageSelect(reader.result as string);
+      if (!isValidType) {
+        setError('Only PNG and JPG formats are allowed.');
+        return;
       }
-    };
-    reader.readAsDataURL(file);
-  };
+
+      if (!isValidSize) {
+        setError('Image size should not exceed 10 MB.');
+        return;
+      }
+
+      setError(null);
+      onImageSelect(file); // 🔁 Pass File instead of base64
+    },
+    [onImageSelect],
+  );
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: {
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png'],
+    },
+    maxFiles: 1,
+    maxSize: 10 * 1024 * 1024,
+  });
 
   return (
     <div className="flex flex-col">
-      <div className={wrapperClassName}>
-        <label
-          htmlFor="imageUploadInput"
-          className="text-theme-text-dark flex cursor-pointer flex-col items-center gap-3 rounded-[8px] bg-white px-4 py-3"
-          style={{ userSelect: 'none' }}
-        >
+      <div {...getRootProps({ className: wrapperClassName })}>
+        <div className="text-theme-text-dark flex flex-col items-center gap-3 rounded-[8px] bg-white px-4 py-3">
           <Icons.download_cloud className="text-brand-primary h-7 w-8" />
-
           <div className="text-center">
             <span className="text-brand-primary text-lg leading-7 font-semibold underline">
               {labelClickText}
             </span>{' '}
             <span>{labelRestText}</span>
           </div>
-        </label>
-
-        <input
-          id="imageUploadInput"
-          type="file"
-          accept="image/png, image/jpeg"
-          onChange={handleFileChange}
-          className="hidden"
-        />
+        </div>
+        <input {...getInputProps()} className="hidden" />
       </div>
 
       {descriptionText && (
