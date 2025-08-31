@@ -7,7 +7,7 @@ import { CustomerConversationService } from '@/services/inbox/customerConversati
 import { RiMessage2Line } from '@remixicon/react';
 import { X } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useChatBox } from './chatbox.provider';
 import {
@@ -23,12 +23,13 @@ import {
 interface Message {
   content: string;
   user_id?: number;
-  mode?: 'message' | 'typing';
   organization_id?: number;
   conversation_id?: number;
   customer_id?: number;
+  updated_at?: string;
+  id?: number;
+  seen?: boolean;
 }
-
 interface socketOptions {
   auth: {
     token?: string;
@@ -200,6 +201,12 @@ export default function ChatBox() {
     scrollToBottom();
   }, [messages, otherTyping]);
 
+  useEffect(() => {
+    if (isOpen) {
+      scrollToBottom();
+    }
+  }, [isOpen]);
+
   const initializeConversation = async (data: any) => {
     try {
       const res = await CustomerConversationService.initializeConversation(
@@ -267,6 +274,57 @@ export default function ChatBox() {
       conversation_id: visitor.conversation.id,
     });
   };
+
+  const formatDateForGroup = (dateString: string | undefined) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    const isToday =
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+    const isYesterday =
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear();
+
+    if (isToday) return 'Today';
+    if (isYesterday) return 'Yesterday';
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const groupedMessages = useMemo(() => {
+    return messages.reduce((acc: { [key: string]: Message[] }, msg) => {
+      const dateKey = formatDateForGroup(msg.updated_at);
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push(msg);
+      return acc;
+    }, {});
+  }, [messages]);
+
+  const sortedGroups = useMemo(() => {
+    return Object.entries(groupedMessages).sort(([a], [b]) => {
+      const normalize = (key: string) => {
+        if (key === 'Today') return new Date().getTime();
+        if (key === 'Yesterday') {
+          const y = new Date();
+          y.setDate(y.getDate() - 1);
+          return y.getTime();
+        }
+        return new Date(key).getTime();
+      };
+      return normalize(a) - normalize(b);
+    });
+  }, [groupedMessages]);
 
   // if (!visitor?.customer?.email) {
   //   return (
@@ -343,52 +401,7 @@ export default function ChatBox() {
                 expand && 'h-[70vh] max-h-[70vh] overflow-auto',
               )}
             >
-              {/* Agent/bot message  */}
-              {/* <div>
-                <div className="flex gap-4">
-                  <div className="flex items-end">
-                    <div className="flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full bg-[#5A189A]">
-                      <Image
-                        src="/widget-logo.svg"
-                        height={12}
-                        width={12}
-                        className="h-4 w-4"
-                        alt=""
-                      />
-                    </div>
-                  </div>
-                  <div className="font-inter rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
-                    <p className="text-xs leading-[18px] font-normal text-black">
-                      Hi there! Welcome to ChatBoq! What would you like to do
-                      today?{' '}
-                    </p>
-                    <p className="mt-[5px] text-xs font-normal text-[#6D6D6D]">
-                      03:33 PM
-                    </p>
-                  </div>
-                </div>
-
-                <div className="font-inter mt-2 ml-[48px] flex gap-2 text-xs">
-                  <button className="flex cursor-pointer items-center rounded-lg border border-[#E2D4F7] bg-white p-2 text-[#8A53E1] hover:bg-[#E2D4F7]">
-                    Chat with AI{' '}
-                    <div className="ml-1">
-                      {' '}
-                      <StarIcon />
-                    </div>
-                  </button>
-                  <button className="flex cursor-pointer items-center rounded-lg border border-[#E2D4F7] bg-white p-2 text-[#8A53E1] hover:bg-[#E2D4F7]">
-                    Talk to Agent{' '}
-                    <div className="ml-1">
-                      <HeadCallIcon />
-                    </div>
-                  </button>
-                </div>
-              </div> */}
-
               {/* Date  */}
-              <p className="font-inter mt-4 text-center text-xs font-normal">
-                Thursday, July 10
-              </p>
 
               {!isConnected && (
                 <div className="mt-8 text-center text-gray-500">
@@ -407,9 +420,18 @@ export default function ChatBox() {
                 </div>
               )}
 
-              {/* Typing Indicator  */}
-              {messages.map((msg: any, index: number) => (
-                <MessageItem message={msg} key={msg?.id} socket={socket} />
+              {sortedGroups.map(([dateLabel, msgs]) => (
+                <div key={dateLabel}>
+                  {/* Date Divider */}
+                  <p className="font-inter mt-4 text-center text-xs font-normal">
+                    {dateLabel}
+                  </p>
+
+                  {/* Messages for this date */}
+                  {msgs.map((msg) => (
+                    <MessageItem message={msg} key={msg?.id} socket={socket} />
+                  ))}
+                </div>
               ))}
               {otherTyping && (
                 <div className="mt-4 flex items-center space-x-1">
@@ -530,30 +552,6 @@ export default function ChatBox() {
     </>
   );
 }
-
-// const MessageItem = ({ socket, message }: any) => {
-//   useEffect(() => {
-//     if (!socket) return;
-//     if (!!message?.user_id && !message?.seen) {
-//       console.log('message seen', message);
-//       socket.emit('message_seen', {
-//         message_id: message?.id,
-//       });
-//     }
-//   }, [message]);
-
-//   return (
-//     <div
-//       className={`rounded p-3 break-words ${
-//         !!message?.user_id
-//           ? 'mr-auto self-start bg-gray-200 text-black'
-//           : 'ml-auto self-end bg-blue-500 text-white'
-//       } max-w-xs`}
-//     >
-//       {message?.content}
-//     </div>
-//   );
-// };
 
 const MessageItem = ({ socket, message }: any) => {
   useEffect(() => {

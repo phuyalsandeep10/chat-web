@@ -44,9 +44,14 @@ const Inbox = () => {
     fetchMessages,
     editMessage,
     joinConversation,
+    customer,
+    conversation,
+    members,
   } = useAgentConversationStore();
   const params: any = useParams();
   const chatId = params?.userId;
+
+  console.log('members', members);
 
   const userId = authData?.data?.user?.id;
 
@@ -226,10 +231,11 @@ const Inbox = () => {
                   ref={editorRef}
                   onSubmit={onSend}
                   onChange={(value) => {
-                    // console.log(value);
+                    console.log(value);
                     setMessage(value);
                     // console.log('message here', message);
                     if (!socket) return;
+                    console.log(value);
 
                     if (!isTyping) {
                       setIsTyping(true);
@@ -241,7 +247,7 @@ const Inbox = () => {
                     const timeout = setTimeout(() => {
                       setIsTyping(false);
                       emitStopTyping();
-                    }, 2000);
+                    }, 500);
 
                     setTypingTimeout(timeout);
                   }}
