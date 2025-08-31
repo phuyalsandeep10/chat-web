@@ -13,30 +13,7 @@ import { format } from 'date-fns';
 import { useUpdateRoles } from '@/hooks/staffmanagment/roles/useUpdateRoles';
 import { useDeleteRole } from '@/hooks/staffmanagment/roles/useDeleteRole';
 import { useGetAllRolesPermissionsForEdit } from '@/hooks/staffmanagment/useGetAllRolesPermissionsForEdit';
-// import { RolesTableProps, Column, OrderRow } from './types';
-
-export interface OrderRow {
-  RoleName: string;
-  agents: number;
-  permission: string;
-  date: string;
-  Actions: string;
-}
-
-interface Column<T> {
-  key: keyof T | 'actions';
-  label: string;
-  render?: (row: T) => React.ReactNode;
-}
-
-export interface RolesTableProps {
-  handleOpenDialog: (options: {
-    heading: string;
-    subheading: string;
-    onAction: () => void;
-    headericon?: React.ReactNode;
-  }) => void;
-}
+import { RolesTableProps, RoleTableOrderRow, RoleColumn } from './types';
 
 const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
   // create role
@@ -177,7 +154,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
     );
   };
 
-  const columns: Column<OrderRow>[] = [
+  const columns: RoleColumn<RoleTableOrderRow>[] = [
     { key: 'RoleName', label: 'Role Name' },
     { key: 'agents', label: 'No. of Agents' },
     { key: 'permission', label: 'Permission Summary' },
@@ -219,7 +196,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
     }
   }, [roleTableData]);
 
-  const orders: OrderRow[] = React.useMemo(() => {
+  const orders: RoleTableOrderRow[] = React.useMemo(() => {
     return (
       roleTableData?.data?.map((roleTableDataItems: any) => ({
         permissions: roleTableDataItems.permission_summary,

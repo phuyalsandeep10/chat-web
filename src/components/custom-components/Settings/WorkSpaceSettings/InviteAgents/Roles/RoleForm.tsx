@@ -21,49 +21,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { RoleSchema } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Roles/RoleSchema';
 import { useGetAllPermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllPermissionGroup';
 import { toast } from 'sonner';
-// import {
-//   PermissionState,
-//   FormValues,
-//   RoleFormProps,
-//   OrderRow,
-//   Column,
-// } from './types';
-
-type PermissionState = {
-  permission_id: number;
-  is_changeable: boolean;
-  is_viewable: boolean;
-  is_deletable: boolean;
-};
-
-type FormValues = {
-  name: string;
-  id?: number;
-  role_id?: number;
-  permissions?: PermissionState[];
-  groups?: string[];
-};
-
-interface RoleFormProps {
-  defaultValues?: Partial<FormValues>;
-  onSubmit: (data: FormValues) => void;
-  roleHead: string;
-  setOpenCreateRole?: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-type OrderRow = {
-  permissions: string;
-  id?: number;
-  is_changeable?: boolean;
-  is_viewable?: boolean;
-  is_deletable?: boolean;
-};
-
-type Column<T> = {
-  key: string;
-  label: string;
-  render?: (row: T) => React.ReactNode;
-};
+import {
+  PermissionState,
+  RoleFormValues,
+  RoleFormProps,
+  RoleOrderRow,
+  RoleColumn,
+} from './types';
 
 const RoleForm: React.FC<RoleFormProps> = ({
   defaultValues,
@@ -73,7 +37,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
 }) => {
   const isEdit = !!defaultValues?.id;
 
-  const form = useForm<FormValues>({
+  const form = useForm<RoleFormValues>({
     resolver: zodResolver(RoleSchema),
     defaultValues: defaultValues || { name: '' },
   });
@@ -93,7 +57,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
   );
   const [selectedTab, setSelectedTab] = useState('setting');
 
-  const orders: OrderRow[] = React.useMemo(() => {
+  const orders: RoleOrderRow[] = React.useMemo(() => {
     const tabData =
       (data as any)?.[
         selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)
@@ -118,7 +82,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
   React.useEffect(() => {
     if (orders.length === 0) return;
 
-    let mergedPermissions = orders.map((order) => ({
+    let mergedPermissions: PermissionState[] = orders.map((order) => ({
       permission_id: order.id || 0,
       is_changeable: order.is_changeable || false,
       is_viewable: order.is_viewable || false,
@@ -137,7 +101,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
     setPermissionsState(mergedPermissions);
   }, [orders, defaultValues]);
 
-  const handleSubmit = (formData: FormValues) => {
+  const handleSubmit = (formData: RoleFormValues) => {
     // const permissions = permissionsState.filter((p) =>
     //   changeableIds.has(p.permission_id),
     // );
@@ -174,7 +138,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
     if (isAllPermissionsValid) setOpenCreateRole?.(false);
   };
 
-  const columns: Column<OrderRow>[] = [
+  const columns: RoleColumn<RoleOrderRow>[] = [
     {
       key: 'permissions',
       label: 'Permissions',

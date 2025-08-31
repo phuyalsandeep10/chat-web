@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
-import { rejectInvitation } from '@/services/staffmanagment/invitation/Invitation.service';
+import { acceptInvitaion } from '@/services/staffmanagment/invitation/Invitation.service';
 import { showToast } from '@/shared/toast';
 
 export default function RejectInvitation() {
@@ -14,7 +14,7 @@ export default function RejectInvitation() {
   const { mutate, status, data, error } = useMutation({
     mutationFn: () => {
       if (!id || !token) throw new Error('Missing Invitation');
-      return rejectInvitation(id, token);
+      return acceptInvitaion(id, token);
     },
     onSuccess: (data) => {
       showToast({
