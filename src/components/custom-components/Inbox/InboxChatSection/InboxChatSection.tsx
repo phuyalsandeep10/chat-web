@@ -3,18 +3,25 @@ import MessageItem from './MessageList/MessageItem';
 import InboxChatSectionHeader from './InboxChatSectionHeader';
 import { useUiStore } from '@/store/UiStore/useUiStore';
 import { Message } from '@/store/inbox/types';
+import DottedAnimation from './MessageList/DottedAnimation';
+import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 
 interface InboxChatSectionProps {
   messages: Message[];
   onReply: (messageText: string) => void;
   handleEditMessage: (messageText: string) => void;
+  showTyping: boolean;
+  typingmessage: string;
 }
 
 const InboxChatSection = ({
   messages,
   onReply,
   handleEditMessage,
+  showTyping,
+  typingmessage,
 }: InboxChatSectionProps) => {
+  const { customer }: any = useAgentConversationStore();
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,10 +78,33 @@ const InboxChatSection = ({
                 message={message}
                 onReply={onReply}
                 handleEditMessage={handleEditMessage}
+                showTyping={showTyping}
+                typingmessage={typingmessage}
               />
             ))}
           </div>
         ))}
+        {showTyping && typingmessage && (
+          <>
+            {/* Standalone animations */}
+            <div className="mb-4 flex">
+              <div className="bg-gray-light mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
+                <span className="text-theme-text-dark text-xs font-medium">
+                  {customer?.name?.substring(0, 2)?.toLocaleUpperCase()}
+                </span>
+              </div>
+
+              <div className="">
+                <div className="w-fit rounded-tl-[16px] rounded-tr-[16px] rounded-br-[16px] rounded-bl-[1px] bg-[#C9C9F7] p-[15.5px]">
+                  <DottedAnimation size="sm" color="gray" />
+                </div>
+                <div className="text-theme-text-primary mt-2 box-border max-h-[119px] min-h-[119px] w-full overflow-y-auto rounded-xl border border-[#D4D4D4] px-5 py-[15px] text-sm leading-[21px] font-medium md:w-[462px]">
+                  {typingmessage}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
         <div ref={endOfMessagesRef} />
       </div>
     </div>

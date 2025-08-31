@@ -3,6 +3,7 @@ import CreateTicketForm from '../components/CreateTicketForm';
 import TicketOverview from '../components/ticketOverview/TicketOverview';
 import TicketHeader from '../components/comman/Heading';
 import { Icons } from '@/components/ui/Icons';
+import TicketDetails from './TicketDetails';
 
 const Ticket = () => {
   return (
@@ -15,6 +16,7 @@ const Ticket = () => {
       />
       <CreateTicketForm />
       <TicketOverview />
+      {/* <TicketDetails /> */}
     </div>
   );
 };

@@ -10,11 +10,24 @@ import {
   updateTicketStatus,
 } from './useTicketStatuses';
 import { useDebounce } from './debounce';
+import z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-export interface FormData {
-  newStatusName: string;
-  newCategoryName: string;
-}
+// export interface FormData {
+//   newStatusName: string;
+//   newCategoryName: string;
+// }
+
+//  Zod schema for Add New Status
+const addStatusSchema = z.object({
+  newStatusName: z
+    .string()
+    .min(2, 'Status name must be at least 2 characters')
+    .max(50, 'Status name must be less than 50 characters'),
+  newCategoryName: z.string().nonempty('Please select a category'),
+});
+
+type FormData = z.infer<typeof addStatusSchema>;
 
 export const useTicketStatusLogic = () => {
   const queryClient = useQueryClient();
@@ -28,7 +41,13 @@ export const useTicketStatusLogic = () => {
   const [newStatusBgColor, setNewStatusBgColor] = useState('#000000');
   const [newStatusFgColor, setNewStatusFgColor] = useState('#ffffff');
 
-  const { control, handleSubmit, reset } = useForm<FormData>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(addStatusSchema),
     defaultValues: { newStatusName: '', newCategoryName: '' },
   });
 
@@ -66,7 +85,7 @@ export const useTicketStatusLogic = () => {
         });
       }
     },
-    600, // debounce delay
+    2000, // debounce delay
   );
 
   // Handlers for inline edits
@@ -177,6 +196,7 @@ export const useTicketStatusLogic = () => {
     control,
     handleSubmit,
     reset,
+    errors,
     categoryOptions,
     handleOpenDeleteModal,
     handleConfirmDelete,

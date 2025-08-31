@@ -5,6 +5,8 @@ import 'country-flag-icons/react/3x2';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Outfit, Inter } from 'next/font/google';
 import './globals.css';
+import { TicketSLASocketProvider } from '@/context/ticketsla.context';
+import { TicketProvider } from '@/context/ticket.context';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -49,12 +51,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${inter.variable} ${geistMono.variable} ${outfit.variable} antialiased`}
       >
         <QueryProvider>
-          <SocketProvider>
-            {children}
-            <Toaster richColors position="top-right" />
-            {/* <SoundEnabler /> */}
-            {/* <Toaster /> */}
-          </SocketProvider>
+          <TicketSLASocketProvider>
+            <SocketProvider>
+              <TicketProvider>
+                {children}
+                <Toaster richColors position="top-right" />
+                {/* <SoundEnabler /> */}
+                {/* <Toaster /> */}
+              </TicketProvider>
+            </SocketProvider>
+          </TicketSLASocketProvider>
         </QueryProvider>
         {/* Audio Elements */}
       </body>

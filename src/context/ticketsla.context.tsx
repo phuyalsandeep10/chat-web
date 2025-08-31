@@ -1,11 +1,7 @@
 'use client';
 
 import { baseURL } from '@/apiConfigs/axiosInstance';
-import { CHAT_EVENTS } from '@/events/InboxEvents';
-import { useMessageAudio } from '@/hooks/useMessageAudio.hook';
 import { AuthService } from '@/services/auth/auth';
-import { useAuthStore } from '@/store/AuthStore/useAuthStore';
-import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import {
   createContext,
   useCallback,
@@ -14,12 +10,6 @@ import {
   useState,
 } from 'react';
 import { Socket, io } from 'socket.io-client';
-
-interface Message {
-  message: string;
-  from?: string;
-  mode?: 'message' | 'typing';
-}
 
 type SocketContextType = {
   socket: Socket | null;
@@ -43,23 +33,16 @@ interface socketOptions {
   namespace?: string;
 }
 
-export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const [authToken, setAuthToken] = useState('');
+export const TicketSLASocketProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [socketUrl, setSocketUrl] = useState(`${baseURL}/agent-chat`);
+  const [socketUrl, setSocketUrl] = useState(`${baseURL}/ticket_sla`);
   const [socketId, setSocketId] = useState<string | undefined>('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [otherTyping, setOtherTyping] = useState(false);
-  const { authData } = useAuthStore();
 
-  // Use the new useAudio hook
-  const { playSound } = useMessageAudio();
-
-  const { fetchAllConversations } = useAgentConversationStore();
-  const handleCustomerJoinConversation = (data: any) => {
-    console.log('Customer join conversation', data);
-  };
   const connectSocket = useCallback(() => {
     if (typeof window === 'undefined') return;
     const authTokens = AuthService.getAuthTokens();
@@ -73,7 +56,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const socketOptions: socketOptions = {
       transports: ['websocket', 'polling'],
       path: '/ws/sockets/socket.io',
-      namespace: '/agent-chat',
+      namespace: '/ticket_sla',
       auth: {
         customer_id: 1,
         conversation_id: 1,
@@ -95,51 +78,16 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         console.log('Connected to:', socketUrl);
       });
 
-      newSocket.on(CHAT_EVENTS.customer_land, (data: Message) => {
-        console.log('Customer land:', data);
-        playSound();
-        // fetchAllConversations();
-      });
-      newSocket.on(CHAT_EVENTS.resolved_conversation, (data: Message) => {
-        console.log('unresolved conversation:', data);
-        // playSound();
-      });
-      newSocket.on(
-        CHAT_EVENTS.customer_conversation_join,
-        handleCustomerJoinConversation,
-      );
-
-      newSocket.on(CHAT_EVENTS.message_notification, (data: Message) => {
-        console.log('Message notification:', data);
-        playSound();
-        fetchAllConversations();
-      });
-      newSocket.on(CHAT_EVENTS.customer_disconnected, (data) => {
-        console.log('customer disconnected', { data });
-      });
-
       newSocket.on('disconnect', () => {
         setIsConnected(false);
         console.log('Disconnected from:', socketUrl);
       });
 
-      // typing: listen
-
       setSocket(newSocket);
     } catch (error) {
       console.log({ error });
     }
-  }, [playSound, socket, socketUrl]);
-
-  const handleCleanup = () => {
-    console.log('cleanup message notification ');
-  };
-
-  const cleanupSocketListeners = () => {
-    if (!socket) return;
-    socket.off(CHAT_EVENTS.message_notification, handleCleanup);
-    socket.off(CHAT_EVENTS.customer_land, handleCleanup);
-  };
+  }, [socket, socketUrl]);
 
   const disconnectSocket = useCallback(() => {
     if (socket) {
@@ -147,21 +95,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setSocket(null);
       setIsConnected(false);
       setSocketId('');
-      setMessages([]);
-      setOtherTyping(false); // typing: clear typing state
-      cleanupSocketListeners();
     }
   }, [socket]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    // if (!authTokens) return;
-    cleanupSocketListeners();
     connectSocket();
-
     return () => {
       disconnectSocket();
-      cleanupSocketListeners();
     };
   }, []);
 
@@ -177,7 +118,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const useSocket = () => {
+export const useTickectSlaSocket = () => {
   const context = useContext(SocketContext);
   if (!context) {
     throw new Error('useSocket must be used within a SocketProvider');

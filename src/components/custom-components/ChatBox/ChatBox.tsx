@@ -1,5 +1,6 @@
 'use client';
 import { baseURL } from '@/apiConfigs/axiosInstance';
+import { CHAT_EVENTS } from '@/events/InboxEvents';
 import { formatTime } from '@/lib/timeFormatUtils';
 import { cn } from '@/lib/utils';
 import { CustomerConversationService } from '@/services/inbox/customerConversation.service';
@@ -77,6 +78,7 @@ export default function ChatBox() {
       socket.off('message_seen');
       socket.off('typing');
       socket.off('stop_typing');
+
       socket.disconnect();
     }
 
@@ -108,10 +110,10 @@ export default function ChatBox() {
       };
 
       const handleMessage = (data: Message) => {
-        console.log({ data });
         if (!data?.user_id) return;
-        setMessages((prev) => [...prev, data]);
+        setOtherTyping(false);
         console.log('Received message:', data);
+        setMessages((prev) => [...prev, data]);
       };
 
       // Set up event listeners
@@ -119,8 +121,21 @@ export default function ChatBox() {
       newSocket.on('disconnect', handleDisconnect);
       newSocket.on('receive_message', handleMessage);
       newSocket.on('message_seen', (data) => console.log('message_seen', data));
-      newSocket.on('receive_typing', () => setOtherTyping(true));
-      newSocket.on('stop_typing', () => setOtherTyping(false));
+      newSocket.on('receive_typing', () => {
+        console.log('typing...');
+        setOtherTyping(true);
+      });
+      newSocket.on('stop_typing', () => {
+        console.log('stop typing...');
+        setOtherTyping(false);
+      });
+      newSocket.on(CHAT_EVENTS.agent_disconnected, (data) => {
+        console.log('agent disconnected');
+        console.log({ data });
+      });
+      newSocket.on(CHAT_EVENTS.agent_connected, (data) => {
+        console.log('agent connected', { data });
+      });
 
       // Store cleanup function
       const cleanup = () => {
@@ -428,8 +443,8 @@ export default function ChatBox() {
                     if (!socket || !isConnected) return;
 
                     // Debounce emitTyping (fires after 400ms of no input)
-                    if (typingTimeoutRef.current)
-                      clearTimeout(typingTimeoutRef.current);
+                    // if (typingTimeoutRef.current)
+                    //   clearTimeout(typingTimeoutRef.current);
                     if (e.target.value.trim()) {
                       setIsTyping(true);
                       typingTimeoutRef.current = setTimeout(() => {
@@ -438,18 +453,18 @@ export default function ChatBox() {
                     }
 
                     // Debounce emitStopTyping (fires after 1000ms of no input)
-                    if (stopTypingTimeoutRef.current)
-                      clearTimeout(stopTypingTimeoutRef.current);
-                    if (e.target.value.trim()) {
-                      stopTypingTimeoutRef.current = setTimeout(() => {
-                        setIsTyping(false);
-                        emitStopTyping();
-                      }, 1000);
-                    } else {
-                      // If input is cleared, stop typing immediately
-                      emitStopTyping();
-                      setIsTyping(false);
-                    }
+                    // if (stopTypingTimeoutRef.current)
+                    //   clearTimeout(stopTypingTimeoutRef.current);
+                    // if (e.target.value.trim()) {
+                    //   // stopTypingTimeoutRef.current = setTimeout(() => {
+                    //   //   setIsTyping(false);
+                    //   //   emitStopTyping();
+                    //   // }, 1000);
+                    // } else {
+                    //   // If input is cleared, stop typing immediately
+                    //   emitStopTyping();
+                    //   setIsTyping(false);
+                    // }
                   }}
                   onBlur={() => {
                     emitStopTyping();
@@ -549,7 +564,7 @@ const MessageItem = ({ socket, message }: any) => {
         message_id: message?.id,
       });
     }
-  }, [message]);
+  }, [message, socket]);
 
   return (
     <div>
@@ -569,9 +584,13 @@ const MessageItem = ({ socket, message }: any) => {
               </div>
             </div>
             <div className="font-inter rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
-              <p className="text-xs leading-[18px] font-normal text-black">
-                {message?.content}
-              </p>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: message?.content,
+                }}
+                className="text-xs leading-[18px] font-normal text-black"
+              />
+
               <p className="mt-[5px] text-xs font-normal text-[#6D6D6D]">
                 {formatTime(message?.updated_at)}
               </p>
@@ -581,7 +600,7 @@ const MessageItem = ({ socket, message }: any) => {
       ) : (
         <>
           {/* Customer message  */}
-          <div className="mt-4 ml-auto w-fit rounded-tl-[12px] rounded-tr-[12px] rounded-br-[2px] rounded-bl-[12px] border border-[rgba(170,170,170,0.10)] bg-gradient-to-b from-[var(--Brand-500,#6D28D9)] to-[var(--Brand-300,#A77EE8)] p-2 text-xs text-white">
+          <div className="mt-4 ml-auto w-fit rounded-tl-[12px] rounded-tr-[12px] rounded-br-[2px] rounded-bl-[12px] border border-[rgba(170,170,170,0.10)] bg-gradient-to-b from-[#6D28D9] to-[#A77EE8] p-2 text-xs text-white">
             <p> {message?.content}</p>
             <p>{formatTime(message?.updated_at)}</p>
           </div>

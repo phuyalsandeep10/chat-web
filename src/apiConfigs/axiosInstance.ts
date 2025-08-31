@@ -50,17 +50,25 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    console.log('Orginal request', originalRequest);
-
+    const status = error?.status || originalRequest?.status;
     if (
-      !originalRequest ||
-      error.response?.status !== 401 ||
-      originalRequest._retry
+      (!!status && status !== 401) ||
+      originalRequest._retry ||
+      originalRequest.url.includes('/auth/refresh')
     ) {
+      console.log({
+        originalRequest,
+        status: error?.status,
+        retry: originalRequest?._retry,
+        includesRefresh: originalRequest?.url.includes('/auth/refresh'),
+      });
+      originalRequest._retry = false;
+
       return Promise.reject(error);
     }
 
     originalRequest._retry = true;
+    console.log(isRefreshing, 'is refreshing');
 
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
@@ -100,7 +108,6 @@ axiosInstance.interceptors.response.use(
       return axiosInstance(originalRequest);
     } catch (err) {
       processQueue(err, null);
-      processQueue(err, null);
       AuthService.clearAuthTokens();
       window.location.href = '/login';
       return Promise.reject(err);
@@ -111,3 +118,12 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
+
+// In AuthService.refreshAccessToken
+
+export async function refreshAccessToken(refreshToken: string) {
+  const response = await axios.post(`${baseURL}/auth/refresh`, {
+    refreshToken,
+  });
+  return response.data.accessToken;
+}
