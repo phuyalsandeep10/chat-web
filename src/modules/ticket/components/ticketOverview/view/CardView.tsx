@@ -12,8 +12,16 @@ import {
 import { useCardView } from './hooks/useCardView';
 import DeleteModal from '@/components/modal/DeleteModal';
 import Pagination from '@/components/common/pagination/Pagination';
+import { useCreateTicketForm } from '../../Tickets/createTicketForm';
+import { ReusableAssignModal } from '../../comman/AssignModal';
+import { useTicketStore } from './apiCalls/updateAssign/ticketStore';
+import { useUpdateTicket } from './apiCalls/updateAssign/useUpdateTicket';
+import { showToast } from '@/shared/toast';
+import { useRouter } from 'next/navigation';
 
 export default function CardView() {
+  const router = useRouter();
+  const f = useCreateTicketForm();
   const {
     statusLoading,
     statusError,
@@ -30,9 +38,7 @@ export default function CardView() {
     isDeleteModalOpen,
     openDeleteModal,
     closeDeleteModal,
-    deleteTicketName,
     handleConfirmDelete,
-    isDeleting,
   } = useCardView();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,16 +46,67 @@ export default function CardView() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentTickets = tickets.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  // Reset to page 1 if tickets or selectedStatus change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [tickets, selectedStatus]);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
 
+  const selectedTickets = tickets.filter((ticket) => checkedTickets[ticket.id]);
+
+  const firstSelectedTicket =
+    selectedTickets.length === 1 ? selectedTickets[0] : null;
+
+  const { assignModalOpen, openAssignModal, closeAssignModal } =
+    useTicketStore();
+  const updateTicketMutation = useUpdateTicket();
+
+  // Initialize form values when modal opens
+  useEffect(() => {
+    if (!isAssignModalOpen || !firstSelectedTicket) return;
+
+    // Reset form with default values from first selected ticket
+    f.reset({
+      department_id: firstSelectedTicket.department?.id?.toString() || '',
+      assignees:
+        firstSelectedTicket.assignees?.map(
+          (a: any) => a.user?.id?.toString() || a.id?.toString(),
+        ) || [],
+    });
+  }, [isAssignModalOpen]); // Only runs when modal opens
+
+  // Handle Assign confirm
+  const handleAssign = async () => {
+    if (!firstSelectedTicket) return;
+
+    const assigneeIds: number[] =
+      f.getValues('assignees')?.map((id: string) => Number(id)) || [];
+
+    try {
+      const response = await updateTicketMutation.mutateAsync({
+        ticketId: firstSelectedTicket.id,
+        data: { assignees: assigneeIds },
+      });
+
+      setIsAssignModalOpen(false);
+
+      showToast({
+        title: 'Ticket Updated',
+        description: response?.message || 'Ticket assigned successfully',
+        variant: 'success',
+        position: 'top-right',
+      });
+    } catch (error: any) {
+      console.error('Failed to assign ticket', error);
+
+      showToast({
+        title: 'Update Failed',
+        description: error?.response?.data?.message || 'Something went wrong',
+        variant: 'error',
+        position: 'top-right',
+      });
+    }
+  };
   if (statusLoading)
     return <div className="p-4">Loading ticket statuses...</div>;
   if (statusError)
     return <div className="text-alert-prominent p-4">Error loading tabs</div>;
-
   if (ticketsLoading) return <div className="p-4">Loading tickets...</div>;
   if (ticketsError)
     return (
@@ -96,8 +153,16 @@ export default function CardView() {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <button>
-                  <Icons.ri_user_fill className="h-6 w-6 cursor-pointer" />
+                <button
+                  onClick={() => setIsAssignModalOpen(true)}
+                  disabled={selectedCountInCurrentTab > 1}
+                  className={`h-6 w-6 ${
+                    selectedCountInCurrentTab > 1
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'cursor-pointer'
+                  }`}
+                >
+                  <Icons.ri_user_fill className="h-6 w-6" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="top">Assign</TooltipContent>
@@ -112,7 +177,6 @@ export default function CardView() {
               <TooltipContent side="top">More</TooltipContent>
             </Tooltip>
 
-            {/* Delete */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button onClick={openDeleteModal}>
@@ -131,25 +195,30 @@ export default function CardView() {
           <p>No Ticket Found.</p>
         ) : (
           currentTickets.map((ticket) => (
-            <TicketCard
+            <div
               key={ticket?.id}
-              id={ticket?.id}
-              email={ticket?.created_by?.email || 'No Email'}
-              timeAgo={formatTimeAgo(ticket?.created_at)}
-              title={ticket?.title}
-              priority={ticket.priority?.name}
-              priority_fg_color={ticket?.priority?.fg_color}
-              priority_bg_color={ticket?.priority?.bg_color}
-              status_fg_color={ticket?.status?.fg_color}
-              status_bg_color={ticket?.status?.bg_color}
-              status={ticket?.status?.name}
-              created_by={ticket?.created_by?.name}
-              assignees={ticket?.assignees || []}
-              checked={checkedTickets[ticket?.id] || false}
-              onCheckChange={(isChecked) =>
-                handleCheckChange(ticket?.id, isChecked)
-              }
-            />
+              onClick={() => router.push(`/ticket/details/${ticket?.id}`)}
+              className="cursor-pointer"
+            >
+              <TicketCard
+                id={ticket?.id}
+                email={ticket?.created_by?.email || 'No Email'}
+                timeAgo={formatTimeAgo(ticket?.created_at)}
+                title={ticket?.title}
+                priority={ticket.priority?.name}
+                priority_fg_color={ticket?.priority?.fg_color}
+                priority_bg_color={ticket?.priority?.bg_color}
+                status_fg_color={ticket?.status?.fg_color}
+                status_bg_color={ticket?.status?.bg_color}
+                status={ticket?.status?.name}
+                created_by={ticket?.created_by?.name}
+                assignees={ticket?.assignees || []}
+                checked={checkedTickets[ticket?.id] || false}
+                onCheckChange={(isChecked) =>
+                  handleCheckChange(ticket?.id, isChecked)
+                }
+              />
+            </div>
           ))
         )}
       </div>
@@ -173,6 +242,45 @@ export default function CardView() {
         onConfirm={handleConfirmDelete}
         onCancel={closeDeleteModal}
         icon={''}
+      />
+
+      {/* Assign Modal */}
+      <ReusableAssignModal
+        open={isAssignModalOpen}
+        onOpenChange={setIsAssignModalOpen}
+        selectedItems={selectedTickets}
+        control={f.control}
+        onSubmit={handleAssign}
+        disabled={selectedCountInCurrentTab > 1}
+        fields={[
+          {
+            type: 'select',
+            name: 'department_id',
+            label: 'Teams',
+            placeholder: 'Select Team',
+            options: f.teams.map((team) => ({
+              label: team.name,
+              value: team.id.toString(),
+            })),
+            required: true,
+          },
+          {
+            type: 'multiselect',
+            name: 'assignees',
+            label: 'Assignees',
+            placeholder: f.membersLoading
+              ? 'Loading members...'
+              : 'Select Members',
+            options: f.teamMembers.map((member: any) => ({
+              label: member.user?.name || 'Unknown',
+              value: (
+                member.user?.id ||
+                member.user_id ||
+                member.id
+              ).toString(),
+            })),
+          },
+        ]}
       />
     </div>
   );

@@ -119,7 +119,7 @@ export default function TicketStatus() {
           onSubmit={logic.handleSubmit(logic.handleAddStatus)}
           className="mt-6 mb-5"
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-start gap-4">
             <div className="font-outfit text-disabled-foreground h-9 flex-1 text-sm font-medium">
               <InputField
                 control={logic.control}
@@ -163,9 +163,12 @@ export default function TicketStatus() {
       <DeleteModal
         open={logic.deleteModalOpen}
         onOpenChange={logic.setDeleteModalOpen}
-        title="Delete Status"
-        description={`Are you sure you want to delete "${logic.statusToDelete?.name || ''}"?`}
+        title="Are you sure?"
+        TitleclassName="font-outfit font-medium text-base text-black"
+        description={`Deleting this ticket is a permanent action and cannot be undone. This may result in the loss of important information and context related to the issue.`}
+        descriptionColor="text-alert-prominent font-outfit text-xs font-normal"
         onConfirm={logic.handleConfirmDelete}
+        icon={''}
       />
     </TooltipProvider>
   );

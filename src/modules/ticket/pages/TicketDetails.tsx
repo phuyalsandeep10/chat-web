@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import Conversation, { Ticket } from './components/Conversation';
 
 const TicketDetails = () => {
-  const router = useRouter();
   const [ticket, setTicket] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
