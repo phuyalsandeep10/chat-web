@@ -1,4 +1,4 @@
-import AccountInformation from '@/components/custom-components/Settings/Accouints/AccountInformation/AccountInformation';
+import AccountInformation from '@/components/custom-components/Settings/Accounts/AccountInformation/AccountInformation';
 import Settings from '@/components/custom-components/Settings/Settings';
 
 import React from 'react';

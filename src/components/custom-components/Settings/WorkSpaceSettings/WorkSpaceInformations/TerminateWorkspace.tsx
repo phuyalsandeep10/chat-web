@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import React, { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { InputField } from '@/components/common/hook-form/InputField';
-import { showToast } from '@/shared/toast';
+import useDeleteOrganization from '@/hooks/organizations/useDeleteOrganization';
 
 type FormData = {
   workspaceId: string;
@@ -23,21 +23,16 @@ const TerminateWorkspace = () => {
     },
   });
 
+  const { mutate: deleteOrganization } = useDeleteOrganization();
+
   const handleDeleteClick = () => {
     dialogRef.current?.open();
   };
 
   // This function runs when user clicks "Yes, Delete" in modal
-  const handleConfirmDelete = handleSubmit((data) => {
+  const handleConfirmDelete = handleSubmit(async (data) => {
     console.log('Typed confirmation:', data.workspaceId);
-
-    // Show toast success message
-    showToast({
-      title: 'Deleted Successfully',
-      description: 'Workspace has been deleted',
-      variant: 'success',
-      position: 'top-right',
-    });
+    deleteOrganization(data.workspaceId);
 
     dialogRef.current?.close();
   });
@@ -84,13 +79,14 @@ const TerminateWorkspace = () => {
                     className={cn(
                       'mt-2.5 h-9 w-1/2 rounded border border-gray-300 px-2',
                     )}
+                    {...control.register('workspaceId')}
                   />
                 </div>
 
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={handleDeleteClick}
+                  onClick={() => handleDeleteClick()}
                   className={cn(
                     'font-outfit mb-5 cursor-pointer text-xs leading-[16px] font-semibold',
                   )}

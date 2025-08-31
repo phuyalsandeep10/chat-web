@@ -14,7 +14,7 @@ export const useVisitor = () => {
     console.log('create customer');
     setLoading(true);
     try {
-      const res = await axiosInstance.post(`/customers`);
+      const res = await axiosInstance.post(`/customers/create`);
 
       setVisitor(res.data?.data);
       localStorage.setItem('visitor', JSON.stringify(res.data?.data));
