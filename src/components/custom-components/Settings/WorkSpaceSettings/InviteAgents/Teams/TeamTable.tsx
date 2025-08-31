@@ -14,52 +14,16 @@ import { useInvitesMembers } from '@/hooks/staffmanagment/teams/useInvitesMember
 import { useDeleteTeam } from '@/hooks/staffmanagment/teams/useDeleteTeam';
 import { useGetTeams } from '@/hooks/staffmanagment/teams/useGetTeams';
 import TeamEdit from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamEdit';
-// import { OrderRow, Column, TeamTableProps, FormValues } from './types';
 import { useGetTeamMembersById } from '@/hooks/staffmanagment/teams/useGetTeamMembersById';
 import { useUpdateTeamMembersById } from '@/hooks/staffmanagment/teams/useUpdateTeamMemberById';
-
-interface OrderRow {
-  id: string;
-  TeamName: string;
-  Lead: string;
-  Status: string;
-  Actions: string;
-}
-
-interface Column<T> {
-  key: keyof T | 'actions';
-  label: string;
-  render?: (row: T) => React.ReactNode;
-}
-
-interface TeamTableProps {
-  handleOpenDialog: (options: {
-    heading: string;
-    subheading: string;
-    onAction: () => void;
-    headericon: React.ReactNode;
-  }) => void;
-}
-
-type FormValues = {
-  newteam: string;
-  email: string;
-  fullName: string;
-  role: string;
-  // description: string;
-};
-
-// member_id -> access_level
-type EditTeamMemberFormValues = {
-  members: Record<number, string>;
-};
-
-type MemberAccess = {
-  member_id: number;
-  access_level: string;
-};
-
-type EditTeamMemberHandler = (data: EditTeamMemberFormValues) => void;
+import {
+  TeamTableOrderRow,
+  TeamTableColumn,
+  TeamTableProps,
+  TeamFormValues,
+  MemberAccess,
+  EditTeamMemberHandler,
+} from './types';
 
 const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
   // states to toggle modal
@@ -103,7 +67,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
   const { mutate: updateTeamMemberById } = useUpdateTeamMembersById();
 
   // onsubit functions
-  const handleSubmit = (formData?: FormValues) => {
+  const handleSubmit = (formData?: TeamFormValues) => {
     const payload = {
       name: formData?.newteam,
       // description: 'New team created',
@@ -122,7 +86,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
   };
 
   //invie new member
-  const handleInviteMember = (InviteData: FormValues) => {
+  const handleInviteMember = (InviteData: TeamFormValues) => {
     const payload = {
       email: InviteData.email,
       name: InviteData.fullName,
@@ -179,7 +143,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
     setOpenEdit(false);
   };
 
-  const orders: OrderRow[] = React.useMemo(() => {
+  const orders: TeamTableOrderRow[] = React.useMemo(() => {
     return (
       teamsData?.data?.map((teamsDataItems: any) => ({
         id: teamsDataItems.id,
@@ -191,7 +155,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
     );
   }, [teamsData]);
 
-  const columns: Column<OrderRow>[] = [
+  const columns: TeamTableColumn<TeamTableOrderRow>[] = [
     { key: 'TeamName', label: 'Team Name' },
     {
       key: 'Lead',

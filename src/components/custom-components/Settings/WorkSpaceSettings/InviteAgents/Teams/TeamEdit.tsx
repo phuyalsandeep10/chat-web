@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { InputField } from '@/components/common/hook-form/InputField';
@@ -19,25 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-// import { FormValues, TeamEditProps } from './types';
-
-export type FormValues = {
-  teamname: string;
-  members: Record<number, string>; // memberId -> access_level
-};
-
-export interface TeamEditProps {
-  defaultValues?: Partial<FormValues>;
-  onSubmit: SubmitHandler<FormValues>;
-  data?: {
-    data: {
-      member_id: number;
-      username: string;
-      access_levels: string;
-    }[];
-  };
-  teamId?: number;
-}
+import { EditTeamFormValues, TeamEditProps } from './types';
 
 const TeamEdit: React.FC<TeamEditProps> = ({
   defaultValues = {},
@@ -45,7 +27,7 @@ const TeamEdit: React.FC<TeamEditProps> = ({
   data,
   teamId,
 }) => {
-  const form = useForm<FormValues>({
+  const form = useForm<EditTeamFormValues>({
     defaultValues: {
       teamname: '',
       members: {},

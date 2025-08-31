@@ -5,7 +5,6 @@ import { InputField } from '@/components/common/hook-form/InputField';
 import Label from '@/components/common/hook-form/Label';
 import { Form } from '@/components/ui/form';
 import { useCreateTeams } from '@/hooks/staffmanagment/teams/useCreateTeams';
-// import { FormValues, CreateTeamProps } from './types';
 
 import {
   Card,
@@ -15,24 +14,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
-export type FormValues = {
-  newteam: string;
-};
-
-export interface CreateTeamProps {
-  defaultValues?: Partial<FormValues>;
-  // onSubmit: Subm  // onSubmit: SubmitHandler<FormValues>;
-  onSubmit: () => void;
-  onCancel?: () => void;
-}
+import { CreateTeamFormValues, CreateTeamProps } from './types';
 
 const CreateTeam: React.FC<CreateTeamProps> = ({
   defaultValues = {},
   onSubmit,
   onCancel,
 }) => {
-  const form = useForm<FormValues>({
+  const form = useForm<CreateTeamFormValues>({
     defaultValues: {
       newteam: '',
       ...defaultValues,

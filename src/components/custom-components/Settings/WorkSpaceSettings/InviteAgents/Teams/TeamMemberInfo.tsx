@@ -2,20 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import TeamProfile from '@/assets/images/team_profile.svg';
 import { Icons } from '@/components/ui/Icons';
-
-interface TeamMember {
-  member_id: number;
-  username: string;
-  access_levels?: string;
-  email?: string;
-  mobile?: string;
-  is_active?: boolean;
-}
-
-interface TeamMemberInfoProps {
-  memberInfo?: { data: TeamMember[] }; // optional because `data` can be undefined
-  memberId: number | null;
-}
+import { TeamMember, TeamMemberInfoProps } from './types';
 
 const TeamMemberInfo: React.FC<TeamMemberInfoProps> = ({
   memberInfo,

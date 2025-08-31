@@ -14,31 +14,7 @@ import TeamProfile from '@/assets/images/team_profile.svg';
 // import AddAgentDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgentDialog';
 import TeamMemberInfo from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamMemberInfo';
 import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
-
-// Define a type for each team member
-type TeamMember = {
-  member_id: number;
-  username: string;
-  // add other fields if they exist in your data
-};
-
-// Define the structure of the API response
-type TeamMembersResponse = {
-  data: TeamMember[];
-  // add other response fields if they exist
-};
-
-// interface TeamViewProps {
-//   teamId: number;
-//   data?: {
-//     data: TeamMember[];
-//   };
-// }
-
-interface TeamViewProps {
-  teamId: number;
-  data?: TeamMembersResponse; // use the same type from the API
-}
+import { TeamMemberView, TeamMembersResponse, TeamViewProps } from './types';
 
 const TeamView: React.FC<TeamViewProps> = ({ teamId, data }) => {
   const [openTeamInfo, setOpenTeamInfo] = useState(false);
@@ -59,7 +35,7 @@ const TeamView: React.FC<TeamViewProps> = ({ teamId, data }) => {
         </CardTitle>
       </CardHeader>
 
-      {data?.data?.map((temviewItems: TeamMember, temViewIndex: number) => {
+      {data?.data?.map((temviewItems: TeamMemberView, temViewIndex: number) => {
         return (
           <CardContent
             key={temViewIndex}

@@ -15,30 +15,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-// import { FormValues, RolePermission, AddMemberProps } from './types';
+import { TeamsFormValues, AddTeamsMemberProps } from './types';
 
-export type FormValues = {
-  email: string;
-  fullName: string;
-  role: string;
-};
-
-// added role permission
-export type RolePermission = {
-  role_id: string;
-  role_name: string;
-};
-
-export interface AddMemberProps {
-  defaultValues?: Partial<FormValues>;
-  onSubmit: (data: any) => void;
-}
-
-const AddMember: React.FC<AddMemberProps> = ({
+const AddMember: React.FC<AddTeamsMemberProps> = ({
   defaultValues = {},
   onSubmit,
 }) => {
-  const form = useForm<FormValues>({
+  const form = useForm<TeamsFormValues>({
     defaultValues: {
       email: '',
       fullName: '',
