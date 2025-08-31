@@ -11,6 +11,7 @@ import SocialMedia from './Informations/SocialMedia';
 import TitleReasonInfo from './Informations/TitleReasonInfo';
 import { Icons } from '@/components/ui/Icons';
 import { useUiStore } from '@/store/UiStore/useUiStore';
+import Participants from './Informations/Participants';
 
 const InboxChatInfo: React.FC = () => {
   const { closeChatInfo } = useUiStore();
@@ -50,6 +51,9 @@ const InboxChatInfo: React.FC = () => {
             title="Related Conversations/Tickets"
             content="Investigating file upload issue. Might be a network problem."
           />
+
+          {/* participants */}
+          <Participants />
 
           {/* Recent Activity */}
           <RecentActivityInfo />
