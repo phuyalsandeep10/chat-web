@@ -16,8 +16,8 @@ export type Organization = {
   identifier?: string;
   created_at?: string;
   contact_dial_code?: string;
-  workspace_owner_image?: string;
-  workspace_owner_name?: string;
+  owner_image?: string;
+  owner_name?: string;
   timezone_id?: number;
 };
 

@@ -17,11 +17,12 @@ type FormData = {
 const TerminateWorkspace = () => {
   const dialogRef = useRef<AlertDialogDemoRef>(null);
 
-  const { control, handleSubmit, getValues } = useForm<FormData>({
+  const { control, handleSubmit, getValues, watch } = useForm<FormData>({
     defaultValues: {
       workspaceId: '',
     },
   });
+  const workspaceId = watch('workspaceId');
 
   const { mutate: deleteOrganization } = useDeleteOrganization();
 
@@ -90,6 +91,7 @@ const TerminateWorkspace = () => {
                   className={cn(
                     'font-outfit mb-5 cursor-pointer text-xs leading-[16px] font-semibold',
                   )}
+                  disabled={!workspaceId?.trim()}
                 >
                   Delete workspace
                 </Button>
@@ -101,7 +103,7 @@ const TerminateWorkspace = () => {
       <AlertDialogDemo
         ref={dialogRef}
         heading="Are you sure?"
-        subheading="You are going to delete “Bramhabytelab” workspace. This action is irreversible"
+        subheading={`You are going to delete “${workspaceId}” workspace. This action is irreversible`}
         icon={<Icons.alert className="text-alert-prominent mt-0.5" size={20} />}
         cancelText="Cancel"
         actionText="Yes, Delete"

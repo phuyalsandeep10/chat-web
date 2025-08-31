@@ -35,10 +35,12 @@ const ContactForm: React.FC<ContactFormProps> = ({
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isValid },
     reset,
+    trigger,
   } = useForm<ContactFormSchema>({
     resolver: zodResolver(contactFormSchema),
+    mode: 'onChange',
     defaultValues: {
       email: '',
       phoneNumber: '',
@@ -97,10 +99,17 @@ const ContactForm: React.FC<ContactFormProps> = ({
             <Input
               id="email"
               type="email"
-              {...register('email')}
               placeholder="anything@gmail.com"
               className="h-9 text-sm font-medium"
-              onChange={(e) => setData({ email: e.target.value })}
+              {...register('email', {
+                onChange: async (e) => {
+                  const value = e.target.value;
+                  const valid = await trigger('email');
+                  if (valid) {
+                    setData({ email: value });
+                  }
+                },
+              })}
             />
             {errors.email && (
               <p className="text-alert-prominent text-xs">
