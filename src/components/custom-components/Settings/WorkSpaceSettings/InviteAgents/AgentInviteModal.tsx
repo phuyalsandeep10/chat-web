@@ -11,16 +11,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 // import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
-
-type AgentInviteModalProps = {
-  open?: boolean; // allow controlled use
-  onOpenChange?: (open: boolean) => void;
-  children?: any;
-  dialogClass?: string;
-  dialogTitle?: string;
-  dialogDescription?: string;
-};
-
+import { AgentInviteModalProps } from './types';
 const AgentInviteModal: React.FC<AgentInviteModalProps> = ({
   children,
   dialogClass = '',

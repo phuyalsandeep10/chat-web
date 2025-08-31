@@ -11,21 +11,7 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import React from 'react';
-
-type Column<T> = {
-  key: string;
-  label: string;
-  render?: (row: T) => React.ReactNode;
-  headerClassName?: string;
-  cellClassName?: string;
-};
-
-type GenericTableProps<T> = {
-  columns: Column<T>[];
-  data: T[];
-  tableClassName?: string;
-  headerClassName?: string;
-};
+import { GenericTableProps } from './types';
 
 export function ReuseableTable<T extends Record<string, any>>({
   columns,

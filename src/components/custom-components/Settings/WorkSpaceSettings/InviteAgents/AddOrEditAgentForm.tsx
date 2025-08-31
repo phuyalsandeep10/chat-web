@@ -30,35 +30,13 @@ import { useGetTeams } from '@/hooks/staffmanagment/teams/useGetTeams';
 import { useGetAllRolePermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllRolePermissionGroup';
 import { parse, format } from 'date-fns';
 
-type FormValues = {
-  role_ids: number;
-  email: string;
-  fullName: string;
-  role: string | string[];
-  clientHandled: string;
-  day: string | null;
-  shift: string;
-  startTime: string;
-  endTime: string;
-  totalHours: string;
-  team: string;
-};
-
-type Team = { value: string; label: string };
-type Role = { role_id: number; role_name: string };
-
-// to remove from this file
-type RolePermission = {
-  role_id: number; // add this
-  role_name: string;
-};
-
-interface AddOrEditAgentFormProps {
-  defaultValues?: Partial<FormValues> & { id?: number };
-  onSubmit?: (data: FormValues) => void;
-  submitButton?: string;
-  onClose?: () => void;
-}
+import {
+  AddorEditFormValues,
+  Team,
+  Role,
+  RolePermission,
+  AddOrEditAgentFormProps,
+} from './types';
 
 const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   defaultValues,
@@ -66,7 +44,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   submitButton = 'Add Agent',
   onClose,
 }) => {
-  const form = useForm<FormValues>({
+  const form = useForm<AddorEditFormValues>({
     defaultValues: {
       day: 'Select Day',
       shift: 'Select Shift',
@@ -139,7 +117,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
     return Math.round((end.getTime() - start.getTime()) / (1000 * 60));
   }; //place in another function
 
-  const handleSubmit = (data: FormValues) => {
+  const handleSubmit = (data: AddorEditFormValues) => {
     // capitalize first letter of days
     const capitalize = (s: string | string[]) => {
       if (Array.isArray(s)) {

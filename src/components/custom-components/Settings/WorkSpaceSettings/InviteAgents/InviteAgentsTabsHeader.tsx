@@ -7,14 +7,7 @@ import { AlertDialogDemoRef } from '@/components/modal/AlertModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InviteTable from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Invites/InviteTable';
 import FilterComponent from '@/components/custom-components/Visitors/FilterComponent';
-
-// Define the modalProps type
-type ModalProps = {
-  heading: string;
-  subheading: string;
-  onAction: () => void;
-  headericon?: React.ReactNode; // Use ReactNode for components, strings, etc.
-};
+import { ModalProps } from './types';
 
 const InviteAgentsTabsHeader = () => {
   // dynamically pass props to alert dialog

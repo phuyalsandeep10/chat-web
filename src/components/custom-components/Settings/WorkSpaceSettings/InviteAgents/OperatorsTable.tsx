@@ -11,31 +11,11 @@ import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpac
 import { useGetOperator } from '@/hooks/staffmanagment/operators/useGetOperator';
 import { useDeleteMember } from '@/hooks/staffmanagment/operators/useDeleteMembers';
 import { format } from 'date-fns';
-
-export interface OrderRow {
-  id: string;
-  FullName: string;
-  Roles: string;
-  Shift: string;
-  OperatingHours: string;
-  Invitedon: string;
-  Actions: string;
-}
-
-interface Column<T> {
-  key: keyof T | 'actions';
-  label: string;
-  render?: (row: T) => React.ReactNode;
-}
-
-interface OperatorsTableProps {
-  handleOpenDialog: (props: {
-    heading: string;
-    subheading: string;
-    onAction: () => void;
-    headericon?: React.ReactNode;
-  }) => void;
-}
+import {
+  OperatorsOrderRow,
+  OperatorColumn,
+  OperatorsTableProps,
+} from './types';
 
 export default function OperatorsTable({
   handleOpenDialog,
@@ -55,7 +35,7 @@ export default function OperatorsTable({
   );
 
   // table columbe header field and row data
-  const columns: Column<OrderRow>[] = [
+  const columns: OperatorColumn<OperatorsOrderRow>[] = [
     { key: 'FullName', label: 'Full Name' },
     {
       key: 'Roles',
@@ -154,7 +134,7 @@ export default function OperatorsTable({
   } = useDeleteMember();
 
   // row data of operators table
-  const orders: OrderRow[] = React.useMemo(() => {
+  const orders: OperatorsOrderRow[] = React.useMemo(() => {
     return (
       allOperators?.data?.map((allOperators: any) => ({
         id: allOperators.id,

@@ -19,39 +19,7 @@ import { Input } from '@/components/ui/input';
 import { InputField } from '@/components/common/hook-form/InputField';
 import Label from '@/components/common/hook-form/Label';
 import { Form } from '@/components/ui/form';
-
-type Role = {
-  role_name: string;
-};
-
-type FormValues = {
-  role: string;
-};
-
-interface Operator {
-  id: number;
-  user_name: string;
-  email?: string;
-  shift?: string;
-  startTime?: string;
-  endTime?: string;
-  client_handled?: string;
-  totalHours?: string;
-  team?: string;
-  day?: string;
-  roles?: Role[];
-}
-
-interface AgenChatHistoryCardProps {
-  headerIconClass?: string;
-  headericon?: React.ReactNode;
-  iconClass?: string;
-  defaultValues?: Partial<FormValues>;
-  onSubmit?: (data: FormValues) => void;
-  submitButton?: string;
-  operatorsData?: Operator[];
-  selectedOperator?: Operator | null;
-}
+import { AgentChatHistoryFormValues, AgenChatHistoryCardProps } from './types';
 
 export function AgenChatHistoryCard({
   headerIconClass,
@@ -63,7 +31,7 @@ export function AgenChatHistoryCard({
   operatorsData,
   selectedOperator,
 }: AgenChatHistoryCardProps) {
-  const form = useForm<FormValues>({
+  const form = useForm<AgentChatHistoryFormValues>({
     defaultValues: {
       role: selectedOperator?.roles?.map((r) => r.role_name).join(', ') || '',
     },
@@ -78,7 +46,7 @@ export function AgenChatHistoryCard({
     client_handled,
   } = selectedOperator || {};
 
-  const handleSubmit = (data: FormValues) => {
+  const handleSubmit = (data: AgentChatHistoryFormValues) => {
     if (onSubmit) {
       onSubmit(data);
     }
