@@ -111,7 +111,6 @@ export default function PersonalInformation() {
           name="address"
           label="Address"
           placeholder="Enter your address"
-          required
           inputClassName="w-[80%]"
           labelClassName="mt-6 text-[16px] font-medium"
         />

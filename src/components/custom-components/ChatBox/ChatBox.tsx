@@ -19,6 +19,7 @@ import {
   MicIcon,
   SendIcon,
 } from './ChatBoxIcons';
+import EmailInput from './EmailInput';
 
 interface Message {
   content: string;
@@ -433,6 +434,9 @@ export default function ChatBox() {
                   ))}
                 </div>
               ))}
+
+              {/* email input here */}
+              {/* <EmailInput /> */}
               {otherTyping && (
                 <div className="mt-4 flex items-center space-x-1">
                   <div className="flex space-x-1">
@@ -581,7 +585,9 @@ const MessageItem = ({ socket, message }: any) => {
                 />
               </div>
             </div>
-            <div className="font-inter rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
+            <div className="font-inter space-y-2 rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
+              {/* input email field */}
+
               <div
                 dangerouslySetInnerHTML={{
                   __html: message?.content,
