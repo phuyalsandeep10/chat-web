@@ -4,18 +4,7 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
 import { useTimeStore } from '@/components/store/timeStore';
-// import { TimeType, TimePickerProps } from './types';
-
-export type TimeType = {
-  hours: number;
-  minutes: number;
-  period: 'AM' | 'PM';
-};
-
-export interface TimePickerProps {
-  onClose: () => void;
-  setFieldValue: (value: string) => void;
-}
+import { TimeType, TimePickerProps } from './types';
 
 export default function TimePicker({
   onClose,

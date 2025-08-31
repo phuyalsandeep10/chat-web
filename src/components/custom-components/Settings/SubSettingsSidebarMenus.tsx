@@ -80,6 +80,11 @@ const sidebarSectionsData: {
         href: ROUTES.SETTINGS.ADVANCE_CONFIGURATION,
         icon: <Icons.rocket className="h-5 w-5" />,
       },
+      {
+        label: 'Invite Agents',
+        href: ROUTES.SETTINGS.INVITE_AGENTS,
+        icon: <Icons.screen className="h-5 w-5" />,
+      },
     ],
   },
   {

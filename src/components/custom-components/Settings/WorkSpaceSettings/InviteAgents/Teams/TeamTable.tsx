@@ -185,7 +185,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
         id: teamsDataItems.id,
         TeamName: teamsDataItems.name,
         Lead: teamsDataItems.lead_name,
-        Status: teamsDataItems.Status,
+        Status: teamsDataItems.status,
         Actions: '',
       })) || []
     );

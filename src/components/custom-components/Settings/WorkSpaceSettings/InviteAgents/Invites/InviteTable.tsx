@@ -13,33 +13,7 @@ import { useInvites } from '@/hooks/staffmanagment/invites/useInvites';
 import { useDeleteInvite } from '@/hooks/staffmanagment/invites/useDeleteInvite';
 import { format } from 'date-fns';
 
-// import { OrderRow, Column, InviteAgentProps } from './types';
-
-export interface OrderRow {
-  id: string;
-  invite: string;
-  invite_Sent: string;
-  status: string;
-  Roles: string;
-  OperatingHours: string;
-  Actions: string;
-}
-
-export interface Column<T> {
-  key: keyof T | 'actions';
-  label: string;
-  render?: (row: T) => React.ReactNode;
-}
-
-export interface InviteAgentProps {
-  handleOpenDialog: (props: {
-    heading: string;
-    subheading: string;
-    onAction: () => void;
-    headericon?: React.ReactNode;
-    submitButton?: string;
-  }) => void;
-}
+import { OrderRow, Column, InviteAgentProps } from './types';
 
 export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
   const [open, setOpen] = useState<boolean>(false);
