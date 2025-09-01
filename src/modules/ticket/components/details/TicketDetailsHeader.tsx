@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { parseISO, addMinutes, format } from 'date-fns';
+import { Icons } from '@/components/ui/Icons';
 import {
   Select,
   SelectContent,
@@ -8,8 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronRight } from 'lucide-react';
-import { getTicketDetails } from '@/services/ticket/services';
+import { useTicketHeaderLogic } from './logic/useTicketDetailsHeaderLogic';
 
 interface TicketDetailsHeaderProps {
   sidebarOpen: boolean;
@@ -22,46 +22,29 @@ export default function TicketDetailsHeader({
   toggleSidebar,
   ticketId,
 }: TicketDetailsHeaderProps) {
-  const [ticket, setTicket] = useState<any>(null);
-  const [status, setStatus] = useState('');
-  const [priority, setPriority] = useState('');
-  const [agent, setAgent] = useState('');
-  const [assignees, setAssignees] = useState<{ name: string }[]>([]);
-
-  useEffect(() => {
-    if (!ticketId) return;
-
-    const fetchTicket = async () => {
-      try {
-        const response = await getTicketDetails(ticketId);
-        const data = response.data;
-        setTicket(data);
-
-        // Set status, priority
-        setStatus(data.status?.name || '');
-        setPriority(data.priority?.name || '');
-
-        // Set assignees
-        setAssignees(data.assignees || []);
-        if (data.assignees && data.assignees.length > 0) {
-          setAgent(data.assignees[0].name); // default first assignee
-        } else if (data.created_by) {
-          setAgent(data.created_by.name); // fallback to creator
-        }
-      } catch (error) {
-        console.error('Failed to fetch ticket details', error);
-      }
-    };
-
-    fetchTicket();
-  }, [ticketId]);
+  const {
+    ticket,
+    priorityId,
+    statusId,
+    agent,
+    assignees,
+    priorities,
+    statuses,
+    setAgent,
+    handlePriorityChange,
+    handleStatusChange,
+  } = useTicketHeaderLogic(ticketId);
 
   if (!ticket) return <p>Loading ticket details...</p>;
 
+  const formattedDateNepal = format(
+    addMinutes(parseISO(ticket.created_at), 345),
+    'EEEE, dd MMMM yyyy, hh:mm:ss a',
+  );
+
   return (
-    <div className="border-theme-text-light flex items-center justify-between border-b px-4 py-3">
-      {/* Left Side */}
-      <div>
+    <div className="border-theme-text-light flex items-center justify-between border-b py-3">
+      <div className="pl-5">
         <h3 className="font-outfit text-brand-dark text-xl font-semibold">
           {ticket.title || 'Untitled Ticket'}
         </h3>
@@ -70,78 +53,49 @@ export default function TicketDetailsHeader({
           <span className="text-brand-primary cursor-pointer font-medium hover:underline">
             #{ticket.id}
           </span>{' '}
-          created by {ticket.customer_name} on{' '}
-          {new Date(ticket.created_at).toLocaleString(undefined, {
-            weekday: 'long', // Monday, Tuesday, etc.
-            year: 'numeric',
-            month: 'long', // January, February, etc.
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true, // 12-hour format
-          })}
+          created from {ticket.customer_name} on {formattedDateNepal}
         </p>
       </div>
 
-      {/* Right Side */}
       <div className="flex items-center gap-3">
         {/* Status */}
-        <Select value={status} onValueChange={setStatus}>
-          {' '}
-          <SelectTrigger className="w-[100px] font-medium text-purple-900">
-            {' '}
-            <SelectValue placeholder="Status" />{' '}
-          </SelectTrigger>{' '}
+        <Select value={statusId} onValueChange={handleStatusChange}>
+          <SelectTrigger className="text-brand-dark font-outfit w-auto min-w-fit px-1 text-xs font-semibold">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
           <SelectContent>
-            {' '}
-            <SelectItem value="Open">Open</SelectItem>{' '}
-            <SelectItem value="Closed">Closed</SelectItem>{' '}
-            <SelectItem value="Pending">Pending</SelectItem>{' '}
-            {/* If API returns 'Unassigned', include it */}{' '}
-            {ticket.status?.name &&
-              !['Open', 'Closed', 'Pending'].includes(ticket.status.name) && (
-                <SelectItem value={ticket.status.name}>
-                  {' '}
-                  {ticket.status.name}{' '}
-                </SelectItem>
-              )}{' '}
-          </SelectContent>{' '}
+            {statuses?.map((s) => (
+              <SelectItem key={s.id} value={s.id.toString()}>
+                {s.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
 
         {/* Priority */}
-        <Select value={priority} onValueChange={setPriority}>
-          {' '}
-          <SelectTrigger className="w-[100px] font-medium text-purple-900">
-            {' '}
-            <SelectValue placeholder="Priority" />{' '}
-          </SelectTrigger>{' '}
+        <Select value={priorityId} onValueChange={handlePriorityChange}>
+          <SelectTrigger className="text-brand-dark font-outfit w-auto min-w-fit px-1 text-xs font-semibold">
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
           <SelectContent>
-            {' '}
-            <SelectItem value="Low">Low</SelectItem>{' '}
-            <SelectItem value="Medium">Medium</SelectItem>{' '}
-            <SelectItem value="Urgent">Urgent</SelectItem>{' '}
-            {/* Show API priority if not in default list */}{' '}
-            {ticket.priority?.name &&
-              !['Low', 'Medium', 'Urgent'].includes(ticket.priority.name) && (
-                <SelectItem value={ticket.priority.name}>
-                  {' '}
-                  {ticket.priority.name}{' '}
-                </SelectItem>
-              )}{' '}
-          </SelectContent>{' '}
+            {priorities?.map((p: any) => (
+              <SelectItem key={p.id} value={p.id.toString()}>
+                {p.name.charAt(0).toUpperCase() + p.name.slice(1)}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
 
         {/* Agent */}
         <Select value={agent} onValueChange={setAgent}>
-          <SelectTrigger className="w-[140px] font-medium text-purple-900">
+          <SelectTrigger className="text-brand-dark font-outfit w-auto min-w-fit px-1 text-xs font-semibold">
             <SelectValue placeholder="Agent" />
           </SelectTrigger>
           <SelectContent>
             {assignees.length > 0 ? (
-              assignees.map((assignee) => (
-                <SelectItem key={assignee.name} value={assignee.name}>
-                  {assignee.name}
+              assignees.map((a) => (
+                <SelectItem key={a.name} value={a.name}>
+                  {a.name}
                 </SelectItem>
               ))
             ) : (
@@ -152,11 +106,10 @@ export default function TicketDetailsHeader({
           </SelectContent>
         </Select>
 
+        {/* Sidebar Toggle */}
         <button onClick={toggleSidebar} className="pr-6">
-          <ChevronRight
-            className={`h-6 w-6 text-purple-800 transition-transform duration-200 ${
-              sidebarOpen ? 'rotate-180' : ''
-            }`}
+          <Icons.chevron_right
+            className={`h-6 w-6 text-purple-800 transition-transform duration-200 ${sidebarOpen ? 'rotate-180' : ''}`}
           />
         </button>
       </div>

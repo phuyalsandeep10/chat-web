@@ -79,11 +79,13 @@ export const useCreateTicketForm = () => {
   const { data: teamMembers = [], isLoading: membersLoading } =
     useTeamMembers(selectedTeamId);
 
-  const customerOptions = customers.map((customer: any) => ({
-    label: customer.email || customer.name || 'No Email',
-    value: customer.email || customer.name || 'No Email',
-    id: customer.id,
-  }));
+  const customerOptions = customers
+    .filter((customer: any) => !!customer.email)
+    .map((customer: any) => ({
+      label: customer.email,
+      value: customer.email,
+      id: customer.id,
+    }));
 
   const priorityColorMap =
     priorities?.reduce<Record<string, { bg: string; fg: string }>>(

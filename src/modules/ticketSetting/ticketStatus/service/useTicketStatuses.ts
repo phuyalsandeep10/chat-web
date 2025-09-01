@@ -2,7 +2,6 @@ import axiosInstance from '@/apiConfigs/axiosInstance';
 import { create } from 'zustand';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { showToast } from '@/shared/toast'; // ✅ use your custom toast
 
 // Types
 export type TicketStatus = {
