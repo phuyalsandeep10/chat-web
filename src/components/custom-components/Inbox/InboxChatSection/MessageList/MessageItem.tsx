@@ -127,7 +127,7 @@ const MessageItem = ({
                 } ${message?.reply_to && message?.reply_to_id && 'mt-1'}`}
               >
                 <div
-                  className="message__content"
+                  className="message__content prose prose-sm max-w-none [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
                   dangerouslySetInnerHTML={{ __html: message?.content }}
                 />
               </div>

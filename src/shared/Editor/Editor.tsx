@@ -41,14 +41,10 @@ const SubmitOnEnter = Extension.create({
   addKeyboardShortcuts() {
     return {
       Enter: () => {
-        // Safely call onSubmit
-        if (typeof this.options.onSubmit === 'function') {
-          Promise.resolve(this.options.onSubmit(this.editor)).then(() => {
-            // this.editor.commands.clearContent();
-          });
-          console.log('inside if');
+        const text = this.editor.getText().trim(); // plain text without tags
+        if (text.length > 0 && typeof this.options.onSubmit === 'function') {
+          Promise.resolve(this.options.onSubmit(this.editor));
         }
-
         return true;
       },
       'Shift-Enter': () => false,
@@ -270,7 +266,10 @@ const Tiptap = ({
 
           <button
             onClick={() => {
-              onSubmit(editor);
+              const text = editor.getText().trim(); // plain text only
+              if (text.length > 0) {
+                onSubmit(editor);
+              }
               // editor.commands.clearContent();
             }}
             className="flex items-center gap-1 rounded-[8px] border bg-[#7914ca] px-4 py-2 text-base font-semibold text-white"
