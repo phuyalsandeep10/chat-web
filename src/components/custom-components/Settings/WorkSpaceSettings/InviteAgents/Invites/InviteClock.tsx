@@ -1,30 +1,76 @@
 // components/TimePicker.tsx
 'use client';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
 import { useTimeStore } from '@/components/store/timeStore';
 import { TimeType, TimePickerProps } from './types';
+import { DialogClose } from '@/components/ui/dialog';
+import { AddorEditFormValues } from '../types';
+import { Control } from 'react-hook-form';
+
+type TimeFieldProps = {
+  name: keyof AddorEditFormValues;
+  label: string;
+  placeholder?: string;
+  control: Control<AddorEditFormValues>;
+  onChange: (value: string) => void;
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  defaultValue?: string;
+};
 
 export default function TimePicker({
   onClose,
   setFieldValue,
+  time: parentTime,
 }: TimePickerProps) {
-  const [time, setTime] = useState<TimeType>({
-    hours: 7,
-    minutes: 0,
-    period: 'AM',
-  });
+  const parseTime = (val?: string | Date | TimeType): TimeType => {
+    if (!val) return { hours: 7, minutes: 0, period: 'AM' }; // default
+
+    // Check if val is TimeType
+    if (
+      typeof val === 'object' &&
+      'hours' in val &&
+      'minutes' in val &&
+      'period' in val
+    ) {
+      return val as TimeType;
+    }
+
+    // Check if val is Date
+    if (val instanceof Date) {
+      let hours = val.getHours();
+      const period = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 === 0 ? 12 : hours % 12;
+      const minutes = val.getMinutes();
+      return { hours, minutes, period };
+    }
+
+    // Otherwise assume string like "08:30 AM"
+    const [timeStr, periodStr] = (val as string).split(' ');
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return { hours, minutes, period: periodStr as 'AM' | 'PM' };
+  };
+
+  const [localTime, setLocalTime] = useState<TimeType>(() =>
+    parseTime(parentTime),
+  );
+
+  // Sync with parent
+  useEffect(() => {
+    if (parentTime !== undefined) setLocalTime(parseTime(parentTime));
+  }, [parentTime]);
 
   const setSavedTime = useTimeStore((state) => state.setSavedTime);
 
   const handleOk = () => {
-    setSavedTime(time);
-    const hours = time.hours.toString().padStart(2, '0');
-    const minutes = time.minutes.toString().padStart(2, '0');
-    const formatted = `${hours}:${minutes} ${time.period}`;
+    setSavedTime(localTime);
+    const hours = localTime.hours.toString().padStart(2, '0');
+    const minutes = localTime.minutes.toString().padStart(2, '0');
+    const formatted = `${hours}:${minutes} ${localTime.period}`;
 
-    setFieldValue(formatted);
+    setFieldValue(localTime);
     onClose();
   };
 
@@ -69,10 +115,10 @@ export default function TimePicker({
 
       if (type === 'hour') {
         const hours = calculateTimeFromAngle(angle, 'hour');
-        setTime((prev) => ({ ...prev, hours }));
+        setLocalTime((prev) => ({ ...prev, hours }));
       } else {
         const minutes = calculateTimeFromAngle(angle, 'minute');
-        setTime((prev) => ({ ...prev, minutes }));
+        setLocalTime((prev) => ({ ...prev, minutes }));
       }
     };
 
@@ -87,14 +133,14 @@ export default function TimePicker({
   };
 
   const togglePeriod = () => {
-    setTime((prev) => ({
+    setLocalTime((prev) => ({
       ...prev,
       period: prev.period === 'AM' ? 'PM' : 'AM',
     }));
   };
 
-  const hourAngle = (time.hours % 12) * 30 + (time.minutes / 60) * 30;
-  const minuteAngle = time.minutes * 6;
+  const hourAngle = (localTime.hours % 12) * 30 + (localTime.minutes / 60) * 30;
+  const minuteAngle = localTime.minutes * 6;
 
   {
     /* handle number click */
@@ -122,10 +168,10 @@ export default function TimePicker({
 
     if (isDragging === 'minute') {
       const minutes = calculateTimeFromAngle(angle, 'minute');
-      setTime((prev) => ({ ...prev, minutes }));
+      setLocalTime((prev) => ({ ...prev, minutes }));
     } else {
       const hours = calculateTimeFromAngle(angle, 'hour');
-      setTime((prev) => ({ ...prev, hours }));
+      setLocalTime((prev) => ({ ...prev, hours }));
     }
   };
 
@@ -141,9 +187,9 @@ export default function TimePicker({
           type="number"
           min="1"
           max="12"
-          value={time.hours.toString().padStart(2, '0')}
+          value={localTime.hours.toString().padStart(2, '0')}
           onChange={(e) =>
-            setTime((prev) => ({
+            setLocalTime((prev) => ({
               ...prev,
               hours: Math.max(0, Math.min(12, +e.target.value || 0)),
             }))
@@ -155,9 +201,9 @@ export default function TimePicker({
           type="number"
           min="0"
           max="59"
-          value={time.minutes.toString().padStart(2, '0')}
+          value={localTime.minutes.toString().padStart(2, '0')}
           onChange={(e) =>
-            setTime((prev) => ({
+            setLocalTime((prev) => ({
               ...prev,
               minutes: Math.max(0, Math.min(59, +e.target.value || 0)),
             }))
@@ -167,7 +213,7 @@ export default function TimePicker({
         <div className="ml-2 flex flex-col rounded-[2.69px]">
           <button
             className={`rounded-[2.69px] px-3 py-1 text-xs leading-[17px] font-normal ${
-              time.period === 'AM'
+              localTime.period === 'AM'
                 ? 'bg-brand-dark text-white'
                 : 'bg-light-blue text-black'
             }`}
@@ -177,7 +223,7 @@ export default function TimePicker({
           </button>
           <button
             className={`rounded-[2.69px] px-3 py-1 text-xs leading-[17px] font-normal ${
-              time.period === 'PM'
+              localTime.period === 'PM'
                 ? 'bg-brand-dark text-white'
                 : 'bg-light-blue text-black'
             }`}
@@ -260,9 +306,11 @@ export default function TimePicker({
       </div>
 
       <div className="flex items-center gap-[10px] pt-[22px]">
-        <Button variant="secondary" size="sm">
-          Cancel
-        </Button>
+        <DialogClose asChild>
+          <Button variant="secondary" size="sm">
+            Cancel
+          </Button>
+        </DialogClose>
         <Button variant="default" size="sm" onClick={handleOk}>
           Ok
         </Button>

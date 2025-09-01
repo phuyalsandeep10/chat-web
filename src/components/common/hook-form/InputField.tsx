@@ -18,6 +18,8 @@ type InputFieldProps<T extends FieldValues> = {
   labelClassName?: string;
   readOnly?: boolean;
   disabled?: boolean;
+  value?: string;
+  onChange?: (val: string) => void;
 };
 
 export function InputField<T extends FieldValues>({

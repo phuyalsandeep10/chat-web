@@ -1,3 +1,5 @@
+import { Control } from 'react-hook-form';
+
 // ADD OR EDIT AGENT FORM
 
 export type AddorEditFormValues = {
@@ -128,4 +130,18 @@ export type GenericTableProps<T> = {
   data: T[];
   tableClassName?: string;
   headerClassName?: string;
+};
+
+// from here
+
+type RolePermissionGroupResponse = {
+  roles: Role[];
+  status: string;
+};
+
+export type FieldProps = {
+  control: Control<AddorEditFormValues>;
+  roleTableData?: {
+    data?: RolePermission[]; // <- allow undefined
+  };
 };

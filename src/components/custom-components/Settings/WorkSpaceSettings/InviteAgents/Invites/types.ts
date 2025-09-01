@@ -33,5 +33,6 @@ export type TimeType = {
 
 export interface TimePickerProps {
   onClose: () => void;
-  setFieldValue: (value: string) => void;
+  setFieldValue: (value: TimeType) => void;
+  time?: Date | string;
 }

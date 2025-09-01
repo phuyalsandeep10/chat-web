@@ -17,6 +17,7 @@ export default function RejectInvitation() {
       return acceptInvitaion(id, token);
     },
     onSuccess: (data) => {
+      console.log('Mutation response:', data); //
       showToast({
         title: 'Success',
         description: data.message || 'Invitation confirmed successfully!',
