@@ -149,7 +149,6 @@ const Inbox = () => {
     fetchMessages,
     joinConversation,
     setConversationData,
-    typingTimeout,
   ]);
 
   // 🔹 Typing helpers
