@@ -35,3 +35,25 @@ export const postTicketDetails = async (payload: SendMessagePayload) => {
     );
   }
 };
+
+export interface UpdateMessage {
+  content: string;
+  message_id: number;
+}
+export const updateTicketMessage = async (payload: UpdateMessage) => {
+  try {
+    const response = await axiosInstance.patch(
+      `/tickets/conversation/${payload.message_id}`,
+      { content: payload.content },
+    );
+    if (!response?.data) {
+      throw new Error('Failed to update ticket message.');
+    }
+
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || 'Error updating ticket message',
+    );
+  }
+};

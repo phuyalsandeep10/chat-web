@@ -1,6 +1,7 @@
 'use client';
 import React, { useRef, useEffect, useCallback } from 'react';
 import { parseISO, isToday, isYesterday } from 'date-fns';
+import Dropdown from './Dropdown';
 
 export interface Ticket {
   id?: number;
@@ -9,6 +10,7 @@ export interface Ticket {
   content: string;
   direction: 'incoming' | 'outgoing';
   created_at: string;
+  isEdited?: boolean;
 }
 
 interface ConversationProps {
@@ -16,6 +18,7 @@ interface ConversationProps {
   onLoadMore: () => Promise<void>;
   hasMore: boolean;
   isLoading: boolean;
+  onEditMessage: (msg: Ticket) => void;
 }
 
 const Conversation: React.FC<ConversationProps> = ({
@@ -23,6 +26,7 @@ const Conversation: React.FC<ConversationProps> = ({
   onLoadMore,
   hasMore,
   isLoading,
+  onEditMessage,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const prevMessageCountRef = useRef(conversationData.length);
@@ -148,11 +152,34 @@ const Conversation: React.FC<ConversationProps> = ({
               >
                 {msg.direction === 'outgoing' ? (
                   <>
-                    <div className="bg-brand-primary relative rounded-xl px-7 py-2.5 break-words text-white">
-                      <p className="text-lg">{msg.content}</p>
-                      <p className="text-theme-text-light text-right text-base font-normal">
-                        {formatTime(msg.created_at)}
-                      </p>
+                    <div className="group relative max-w-[60%]">
+                      <div className="bg-brand-primary relative rounded-xl px-7 py-2.5 break-words text-white">
+                        <p className="text-lg">{msg.content}</p>
+                        <p className="text-theme-text-light text-right text-base font-normal">
+                          {formatTime(msg.created_at)}
+                        </p>
+                      </div>
+
+                      {/* 3-dot dropdown */}
+                      <div
+                        className={`absolute top-2 ${
+                          msg.direction === 'outgoing' ? '-left-8' : '-right-8'
+                        } opacity-0 transition-opacity group-hover:opacity-100`}
+                      >
+                        <Dropdown
+                          items={[
+                            {
+                              label: 'Edit Message',
+                              onClick: () => onEditMessage(msg),
+                            },
+                            {
+                              label: 'Delete',
+                              onClick: () => console.log('Delete', msg.id),
+                              className: 'text-error focus:text-error',
+                            },
+                          ]}
+                        />
+                      </div>
                     </div>
                     <div className="bg-brand-primary flex h-12.5 w-12.5 items-center justify-center rounded-full border font-semibold text-white">
                       {getInitials(msg.sender)}
@@ -163,11 +190,29 @@ const Conversation: React.FC<ConversationProps> = ({
                     <div className="flex h-12.5 w-12.5 items-center justify-center rounded-full border bg-[#C9C9F7] font-semibold text-black">
                       {getInitials(msg.sender)}
                     </div>
-                    <div className="bg-light-blue relative rounded-xl px-7 py-2.5 break-words text-black">
-                      <p className="text-lg">{msg.content}</p>
-                      <p className="text-theme-text-primary text-right text-base font-normal">
-                        {formatTime(msg.created_at)}
-                      </p>
+                    <div className="group relative max-w-[60%]">
+                      <div className="bg-light-blue relative rounded-xl px-7 py-2.5 break-words text-black">
+                        <p className="text-lg">{msg.content}</p>
+                        <p className="text-theme-text-primary text-right text-base font-normal">
+                          {formatTime(msg.created_at)}
+                        </p>
+                      </div>
+                      {/* 3-dot dropdown */}
+                      <div className="absolute top-2 -right-8 opacity-0 transition-opacity group-hover:opacity-100">
+                        <Dropdown
+                          items={[
+                            {
+                              label: 'Edit Message',
+                              onClick: () => onEditMessage(msg),
+                            },
+                            {
+                              label: 'Delete',
+                              onClick: () => console.log('Delete', msg.id),
+                              className: 'text-error focus:text-error',
+                            },
+                          ]}
+                        />
+                      </div>
                     </div>
                   </>
                 )}

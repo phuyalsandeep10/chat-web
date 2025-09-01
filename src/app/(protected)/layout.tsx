@@ -22,15 +22,6 @@ export default function ProtectedDashboardLayout({
   const authTokens = AuthService.getAuthTokens();
   const { socket: TicketSlaSocket } = useTickectSlaSocket();
   const [slaData, setSlaData] = useState<any | null>(null);
-  // const [slaData, setSlaData] = useState<any | null>({
-  //   message: '100% of the response time has elapsed',
-  //   level: 75,
-  //   payload: {
-  //     id: 2,
-  //     title: 'Demo not working',
-  //     description: 'test_ticket_description',
-  //   },
-  // });
 
   const showTicketSlaAlert = (data: any) => {
     console.log('showTicketSlaAlert data', data);
@@ -49,13 +40,6 @@ export default function ProtectedDashboardLayout({
       }
     }
   }, [authData, isLoading, router, authTokens]);
-
-  //  useEffect(() => {
-  //     TicketSlaSocket?.on('ticket_sla_alert', showTicketSlaAlert);
-  //     return () => {
-  //       TicketSlaSocket?.off('ticket_sla_alert', showTicketSlaAlert);
-  //     };
-  //   }, [TicketSlaSocket]);
 
   if (isLoading || !authData)
     return (
