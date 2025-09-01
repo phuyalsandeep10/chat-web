@@ -13,6 +13,7 @@ import { AuthService } from '@/services/auth/auth';
 import WorkspaceData, {
   useWorkspaceStore,
 } from '@/store/WorkspaceStore/useWorkspaceStore';
+import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWorkspaceInformation';
 
 function dataURLtoFile(dataurl: string, filename: string): File {
   const arr = dataurl.split(',');
@@ -32,8 +33,7 @@ const WorkspaceImage = ({ organization }: any) => {
   const [showChangePhotoModal, setShowChangePhotoModal] = useState(false);
 
   const { setData } = useWorkspaceStore();
-
-  const token = AuthService.getAuthTokens();
+  console.log(organization);
 
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
     x: number;
@@ -71,7 +71,7 @@ const WorkspaceImage = ({ organization }: any) => {
 
         if (uploadedUrl) {
           setImageUrl(uploadedUrl);
-          setData({ profile_picture: uploadedUrl });
+          setData({ owner_image: uploadedUrl });
         }
         setShowChangePhotoModal(false);
       } catch (error) {
@@ -86,14 +86,14 @@ const WorkspaceImage = ({ organization }: any) => {
   const handleRemovePhoto = () => {
     setImageUrl(null);
     setShowProfileModal(false);
-    setData({ profile_picture: null });
+    setData({ owner_image: null });
   };
 
   const logoSrc =
     imageUrl ||
-    (organization?.workspace_owner_image?.startsWith('https')
-      ? organization.workspace_owner_image
-      : '/profile.jpg');
+    (organization?.owner_image?.startsWith('https')
+      ? organization.owner_image
+      : '/profile-placeholder.jpeg');
 
   return (
     <>

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export default interface WorkspaceData {
-  profile_picture: string | null;
+  owner_image: string | null;
   workspace_owner: string;
   name: string;
   domain: string;
@@ -14,10 +14,10 @@ export default interface WorkspaceData {
   whatsapp: string;
   timezone_id?: number;
   contact_phone: string;
-  workspace_owner_id?: number;
+  owner_id?: number;
 }
 const defaultValues: Partial<WorkspaceData> = {
-  profile_picture: '',
+  owner_image: '',
   workspace_owner: '',
   name: '',
   domain: '',
