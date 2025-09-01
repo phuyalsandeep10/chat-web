@@ -5,6 +5,7 @@ import {
   getTicketDetails,
   postTicketDetails,
   SendMessagePayload,
+  updateTicketMessage,
 } from '@/services/ticket/services';
 import { getConversation } from '@/services/ticket/conversation';
 import { useTicketSocket } from '@/context/ticket.context';
@@ -27,6 +28,9 @@ const TicketDetails = () => {
   const [hasMore, setHasMore] = useState(true);
   const [oldestMessageId, setOldestMessageId] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // New states for editing
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const params: any = useParams();
   const ticketId = params?.ticketId;
@@ -110,28 +114,50 @@ const TicketDetails = () => {
     };
   }, [socket, ticket?.created_by?.email, ticketId]);
 
+  // Handle Send / Update
   const handleSendMessage = async () => {
     if (!message.trim()) return;
 
-    const payload: SendMessagePayload = {
-      ticket_id: ticketId,
-      receiver: receiver,
-      content: message,
-    };
-
-    try {
-      await postTicketDetails(payload);
-      const newMessage: Ticket = {
-        sender: ticket?.created_by?.email || 'You',
+    if (editingId) {
+      try {
+        await updateTicketMessage({ message_id: editingId, content: message });
+        setConversationData((prev) =>
+          prev.map((m) =>
+            m.id === editingId ? { ...m, content: message } : m,
+          ),
+        );
+        setEditingId(null);
+        setMessage('');
+      } catch (err: any) {
+        console.error('Error updating message:', err.message);
+      }
+    } else {
+      const payload: SendMessagePayload = {
+        ticket_id: ticketId,
+        receiver: receiver,
         content: message,
-        created_at: new Date().toISOString(),
-        direction: 'outgoing',
       };
-      setConversationData((prev) => [...prev, newMessage]);
-      setMessage('');
-    } catch (err: any) {
-      console.error(err.message);
+
+      try {
+        await postTicketDetails(payload);
+        const newMessage: Ticket = {
+          sender: ticket?.created_by?.email || 'You',
+          content: message,
+          created_at: new Date().toISOString(),
+          direction: 'outgoing',
+        };
+        setConversationData((prev) => [...prev, newMessage]);
+        setMessage('');
+      } catch (err: any) {
+        console.error(err.message);
+      }
     }
+  };
+
+  //  Callback passed to Conversation
+  const handleEditMessage = (msg: Ticket) => {
+    setEditingId(msg.id!);
+    setMessage(msg.content); // prefill textarea
   };
 
   if (!socket || !ticketId) return null;
@@ -157,6 +183,7 @@ const TicketDetails = () => {
           onLoadMore={loadMoreMessages}
           hasMore={hasMore}
           isLoading={isLoadingMore}
+          onEditMessage={handleEditMessage}
         />
 
         <div className="mt-4">
@@ -167,7 +194,7 @@ const TicketDetails = () => {
           />
           <div className="mt-3 flex justify-end">
             <Button type="button" onClick={handleSendMessage}>
-              Send
+              {editingId ? 'Update' : 'Send'}
             </Button>
           </div>
         </div>
