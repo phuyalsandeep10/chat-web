@@ -19,16 +19,12 @@ interface MessageItemProps {
   message: any;
   onReply: (messageText: string) => void;
   handleEditMessage: (messageText: string) => void;
-  showTyping: boolean;
-  typingmessage: string;
 }
 
 const MessageItem = ({
   message,
   onReply,
   handleEditMessage,
-  showTyping,
-  typingmessage,
 }: MessageItemProps) => {
   const handleReplyClick = () => {
     onReply(message);
@@ -65,7 +61,7 @@ const MessageItem = ({
       <div className={`flex`}>
         <div className={`flex ${isUserId ? 'flex-col' : ''}`}>
           {message?.edited_content && (
-            <div className="group relative mr-12 flex justify-end">
+            <div className="group relative mr-16 flex justify-end">
               <span className="text-info text-xs font-medium">Edited</span>
               <div className="text-info bg-info-light absolute top-[-30px] hidden rounded-lg px-3 py-1.5 text-xs group-hover:block">
                 <div
@@ -89,9 +85,9 @@ const MessageItem = ({
                     >
                       Edit Message
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-error focus:text-error flex cursor-pointer items-center gap-2">
+                    {/* <DropdownMenuItem className="text-error focus:text-error flex cursor-pointer items-center gap-2">
                       Delete
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

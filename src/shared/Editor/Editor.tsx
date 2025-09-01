@@ -28,16 +28,14 @@ import {
 import Image from 'next/image';
 import { useEffect, useImperativeHandle, useRef, useState } from 'react';
 
-// submission on enter pressed
+// Submission on Enter pressed
 const SubmitOnEnter = Extension.create({
   name: 'submitOnEnter',
-
   addOptions() {
     return {
       onSubmit: async () => {}, // Default no-op
     };
   },
-
   addKeyboardShortcuts() {
     return {
       Enter: () => {
@@ -93,7 +91,6 @@ const Tiptap = ({
         bulletList: false,
         listItem: false,
       }),
-      // DisableEnter, // <-- Remove this line
       Underline,
       Document,
       Paragraph,
@@ -103,31 +100,63 @@ const Tiptap = ({
         placeholder: 'Write your thought here....',
       }),
       SubmitOnEnter.configure({
-        onSubmit: onSubmit, // Pass the editor instance
+        onSubmit: onSubmit,
       }),
       BulletList,
       ListItem,
     ],
-    // content: '<p></p>',
     immediatelyRender: false,
     autofocus: true,
     editable: true,
     injectCSS: true,
-    content: value || undefined,
-
+    content: value || '<p></p>',
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       onChange(html);
     },
   });
 
-  useImperativeHandle(ref, () => {
-    return {
+  // Sync editor content with value prop (only if not focused)
+  useEffect(() => {
+    if (
+      editor &&
+      value !== undefined &&
+      value !== editor.getHTML() &&
+      !editor.isFocused
+    ) {
+      console.log('Updating editor content:', value);
+      editor.commands.setContent(value || '<p></p>');
+    }
+  }, [value, editor]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
       onClear: () => {
-        editor?.commands.clearContent();
+        if (editor) {
+          console.log('Clearing editor content');
+          editor.commands.clearContent();
+          onChange('<p></p>');
+        }
       },
+    }),
+    [editor, onChange],
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        emojiRef.current &&
+        !emojiRef.current.contains(event.target as Node) &&
+        emojiBtnRef.current &&
+        !emojiBtnRef.current.contains(event.target as Node)
+      ) {
+        setIsEmojiOpen(false);
+      }
     };
-  }, [editor?.commands]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (!editor) {
     return <div>Loading editor...</div>;
@@ -136,13 +165,11 @@ const Tiptap = ({
   const removeEmptyListItems = () => {
     const doc = editor.state.doc;
     const tr = editor.state.tr;
-
     doc.descendants((node, pos) => {
       if (node.type.name === 'listItem' && node.content.size === 0) {
         tr.delete(pos, pos + node.nodeSize);
       }
     });
-
     if (tr.docChanged) {
       editor.view.dispatch(tr);
     }
@@ -160,7 +187,6 @@ const Tiptap = ({
       />
 
       <div className="flex justify-between">
-        {/* Left Controls */}
         <div className="flex gap-[6px]">
           <button
             className="rounded-md p-1 transition-all hover:scale-105 active:scale-90"
@@ -168,21 +194,18 @@ const Tiptap = ({
           >
             <Bold />
           </button>
-
           <button
             className="rounded-md p-1 transition-all hover:scale-105 active:scale-90"
             onClick={() => editor.chain().focus().toggleItalic().run()}
           >
             <Italic />
           </button>
-
           <button
             className="rounded-md p-1 transition-all hover:scale-105 active:scale-90"
             onClick={() => editor.chain().focus().toggleUnderline().run()}
           >
             <UnderlineIcon />
           </button>
-
           <button
             onClick={() => {
               const isInBulletList = editor.isActive('bulletList');
@@ -199,7 +222,6 @@ const Tiptap = ({
           >
             <List />
           </button>
-
           <button
             onClick={() => {
               const isInOrderedList = editor.isActive('orderedList');
@@ -216,27 +238,22 @@ const Tiptap = ({
           >
             <ListOrdered />
           </button>
-
           <button
             className="rounded-md p-1 transition-all hover:scale-105 active:scale-90"
             onClick={() => {
               const { state, view } = editor;
               const { from, to } = state.selection;
               const selectedText = state.doc.textBetween(from, to, ' ');
-
               if (!selectedText) return;
-
               let newText = selectedText;
               const isQuoted =
                 (selectedText.startsWith('"') && selectedText.endsWith('"')) ||
                 (selectedText.startsWith('“') && selectedText.endsWith('”'));
-
               if (isQuoted) {
                 newText = selectedText.slice(1, -1);
               } else {
                 newText = `"${selectedText}"`;
               }
-
               view.dispatch(state.tr.insertText(newText, from, to));
               view.focus();
             }}
@@ -244,9 +261,7 @@ const Tiptap = ({
             <Quote />
           </button>
         </div>
-
         <div className="flex items-center gap-3">
-          {/* emoji picker */}
           <DropdownMenu>
             <DropdownMenuTrigger>
               <div ref={emojiBtnRef} onClick={handleEmojiBtn}>
@@ -263,7 +278,6 @@ const Tiptap = ({
               />
             </DropdownMenuContent>
           </DropdownMenu>
-
           <button
             onClick={() => {
               const text = editor.getText().trim(); // plain text only

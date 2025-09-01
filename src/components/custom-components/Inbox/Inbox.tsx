@@ -3,7 +3,7 @@ import { useSocket } from '@/context/socket.context';
 import { useMessageAudio } from '@/hooks/useMessageAudio.hook';
 import { useUiStore } from '@/store/UiStore/useUiStore';
 import { useParams } from 'next/navigation';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SubSidebarContentWrapper from '../CustomSidebar/SubSidebarContentWrapper';
 import ChatEmptyScreen from './ChatEmptyScreen/ChatEmptyScreen';
 import InboxChatInfo from './InboxChatInfo/InboxChatInfo';
@@ -16,16 +16,14 @@ import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 
 const Inbox = () => {
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<any>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [replyingTo, setReplyingTo] = useState<any>(null);
-  const [editedMessage, setEditedMessage] = useState<any>({});
+  const [editedMessage, setEditedMessage] = useState<any>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [showTyping, setShowTyping] = useState(false);
-  const [typingMessage, setTypingMessage] = useState<string>('');
-  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
-    null,
-  );
-  const editorRef = useRef<any>(null);
+  const [typingMessage, setTypingMessage] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
 
@@ -47,42 +45,31 @@ const Inbox = () => {
   const chatId = params?.userId;
   const userId = authData?.data?.user?.id;
 
-  // 🔹 Define event handlers
-  const handleReceiveMessage = useCallback(
-    (data: any) => {
-      const isSenderMessage = data?.user_id === userId;
-      setTypingMessage('');
-      setShowTyping(false); // Reset typing when a message is received
-      if (!isSenderMessage) {
-        addMessageToStore(data);
-        playSound();
-      }
-    },
-    [userId, addMessageToStore, playSound],
-  );
+  const handleReceiveMessage = (data: any) => {
+    const isSenderMessage = data?.user_id === userId;
+    setTypingMessage('');
+    setShowTyping(false);
+    if (!isSenderMessage) {
+      addMessageToStore(data);
+      playSound();
+    }
+  };
 
-  const handleTyping = useCallback((data: any) => {
-    console.log('typing ... server emit the receive event', data);
+  const handleTyping = (data: any) => {
     setShowTyping(true);
     setTypingMessage(data?.message || '');
-  }, []);
+  };
 
-  const handleStopTyping = useCallback(() => {
-    console.log('Stopping...');
+  const handleStopTyping = () => {
     setShowTyping(false);
     setTypingMessage('');
-  }, []);
+  };
 
-  const handleMessageSeen = useCallback(
-    (data: any) => {
-      console.log('message seen', data);
-      updateMessageSeen(data?.message_id);
-    },
-    [updateMessageSeen],
-  );
+  const handleMessageSeen = (data: any) => {
+    updateMessageSeen(data?.message_id);
+  };
 
-  // 🔹 Common cleanup function
-  const cleanupSocketListeners = useCallback(() => {
+  const cleanupSocketListeners = () => {
     if (!socket) return;
     socket.off(CHAT_EVENTS.receive_message, handleReceiveMessage);
     socket.off(CHAT_EVENTS.receive_typing, handleTyping);
@@ -91,32 +78,12 @@ const Inbox = () => {
     socket.emit(CHAT_EVENTS.leave_conversation, {
       conversation_id: Number(chatId),
     });
-  }, [
-    socket,
-    handleReceiveMessage,
-    handleTyping,
-    handleMessageSeen,
-    handleStopTyping,
-    chatId,
-  ]);
+  };
 
-  // 🔹 Reset typing state and cleanup on chatId change
   useEffect(() => {
     if (!chatId || !socket || !userId) return;
 
-    // Reset states when chatId changes
-    setShowTyping(false);
-    setTypingMessage('');
-    setIsTyping(false);
-    setMessage(null);
-    setReplyingTo(null);
-    setEditedMessage({});
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-      setTypingTimeout(null);
-    }
-
-    // Fetch messages and conversation details
+    // Fetch data
     fetchMessages(Number(chatId));
     const getAgentChatConversationDetails = async () => {
       const data: any = await ConversationService.getConversationDetailsById(
@@ -128,136 +95,111 @@ const Inbox = () => {
     joinConversation(Number(chatId));
     getAgentChatConversationDetails();
 
-    // Attach listeners
+    // Attach socket listeners
     socket.on(CHAT_EVENTS.receive_message, handleReceiveMessage);
     socket.on(CHAT_EVENTS.receive_typing, handleTyping);
     socket.on(CHAT_EVENTS.message_seen, handleMessageSeen);
     socket.on(CHAT_EVENTS.stop_typing, handleStopTyping);
 
-    return () => {
-      cleanupSocketListeners();
-    };
-  }, [
-    chatId,
-    socket,
-    userId,
-    handleReceiveMessage,
-    handleTyping,
-    handleMessageSeen,
-    handleStopTyping,
-    cleanupSocketListeners,
-    fetchMessages,
-    joinConversation,
-    setConversationData,
-  ]);
+    return () => cleanupSocketListeners();
+  }, [chatId, socket, userId]);
 
-  // 🔹 Typing helpers
-  const emitTyping = useCallback(
-    (message: string) => {
-      if (!socket || isSending || !chatId) return;
-      socket.emit('typing', {
-        message,
-        mode: 'typing',
-        conversation_id: Number(chatId),
-        organization_id: authData?.data?.user?.attributes?.organization_id,
-      });
-    },
-    [socket, chatId, authData, isSending],
-  );
+  const emitTyping = (msg: string) => {
+    if (!socket || isSending || !chatId) return;
+    socket.emit('typing', {
+      message: msg,
+      mode: 'typing',
+      conversation_id: Number(chatId),
+      organization_id: authData?.data?.user?.attributes?.organization_id,
+    });
+  };
 
-  const emitStopTyping = useCallback(async () => {
+  const emitStopTyping = () => {
     if (!socket || !chatId) return;
-    await socket.emit(CHAT_EVENTS.stop_typing, {
+    socket.emit(CHAT_EVENTS.stop_typing, {
       conversation_id: Number(chatId),
     });
-  }, [socket, chatId]);
+  };
 
-  const onSend = useCallback(
-    async (editorInstance?: any) => {
-      const latestMessage = editorInstance?.getHTML?.();
-      if (!latestMessage || latestMessage === '<p></p>') return;
+  const onSend = async (editorInstance?: any) => {
+    const latestMessage = editorInstance?.getHTML?.();
+    console.log({ editedMessage, replyingTo });
+    if (!latestMessage || latestMessage === '<p></p>') {
+      console.warn('Empty message, not sending');
+      return;
+    }
 
-      setIsSending(true);
-      setIsTyping(false);
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
-        setTypingTimeout(null);
-      }
+    setIsSending(true);
+    setIsTyping(false);
 
-      await emitStopTyping();
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
 
-      if (editedMessage && editedMessage.id) {
+    emitStopTyping();
+
+    try {
+      if (editedMessage?.id) {
         await editMessage(editedMessage.id, latestMessage);
         setEditedMessage(null);
       } else {
-        await sendMessageToDB(
-          Number(chatId),
-          latestMessage,
-          replyingTo?.id || null,
-        );
+        await sendMessageToDB(Number(chatId), latestMessage, replyingTo?.id);
+        setReplyingTo(null);
       }
-
       setMessage(null);
       editorRef.current?.onClear();
-      if (inputRef.current) inputRef.current.value = '';
-      setReplyingTo(null);
+    } catch (error) {
+    } finally {
       setIsSending(false);
-    },
-    [
-      chatId,
-      editedMessage,
-      replyingTo,
-      sendMessageToDB,
-      editMessage,
-      emitStopTyping,
-      typingTimeout,
-    ],
-  );
+    }
+  };
 
-  const handleReply = useCallback((replyToMessage: any) => {
-    setReplyingTo(replyToMessage);
-    setEditedMessage({});
-  }, []);
+  const handleReply = (replyToMessage: any) => {
+    if (!replyToMessage || !replyToMessage.id || !replyToMessage.content) {
+      console.warn('Invalid replyToMessage:', replyToMessage);
+      return;
+    }
+    console.log('Setting replyingTo:', replyToMessage);
+    setReplyingTo({ ...replyToMessage });
+    setEditedMessage(null);
+  };
 
-  const handleEditMessage = useCallback((messageToEdit: any) => {
+  const handleEditMessage = (messageToEdit: any) => {
+    if (!messageToEdit || !messageToEdit.id || !messageToEdit.content) {
+      console.warn('Invalid messageToEdit:', messageToEdit);
+      return;
+    }
+    console.log('Setting editedMessage:', messageToEdit);
     setEditedMessage(messageToEdit);
-    setMessage(messageToEdit?.content);
+    setMessage(messageToEdit.content);
     setReplyingTo(null);
-  }, []);
 
-  const clearReply = useCallback(() => setReplyingTo(null), []);
+    if (editorRef.current) {
+      editorRef?.current?.commands?.setContent(messageToEdit.content);
+    }
+  };
 
-  const handleEditorChange = useCallback(
-    (value: string) => {
-      if (isSending) return;
-      setMessage(value);
+  const clearReply = () => setReplyingTo(null);
 
-      if (!socket || !chatId) return;
+  const handleEditorChange = (value: string) => {
+    if (isSending) return;
+    setMessage(value);
 
-      if (!isTyping) {
-        setIsTyping(true);
-        emitTyping(value);
-      }
+    if (!socket || !chatId) return;
 
-      if (typingTimeout) clearTimeout(typingTimeout);
+    if (!isTyping) {
+      setIsTyping(true);
+      emitTyping(value);
+    }
 
-      const timeout = setTimeout(() => {
-        setIsTyping(false);
-        emitStopTyping();
-      }, 500);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
-      setTypingTimeout(timeout);
-    },
-    [
-      socket,
-      isTyping,
-      typingTimeout,
-      emitTyping,
-      emitStopTyping,
-      isSending,
-      chatId,
-    ],
-  );
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      emitStopTyping();
+    }, 1000);
+  };
 
   return (
     <div className="flex">
@@ -294,16 +236,15 @@ const Inbox = () => {
               </div>
             )}
             <div className="relative m-4">
-              <div className="relative">
-                <Editor
-                  value={message}
-                  ref={editorRef}
-                  onSubmit={onSend}
-                  onChange={handleEditorChange}
-                />
-              </div>
+              <Editor
+                value={message}
+                ref={editorRef}
+                onSubmit={onSend}
+                onChange={handleEditorChange}
+              />
             </div>
           </div>
+
           {showChatInfo && (
             <div className="w-[400px]">
               <InboxChatInfo />
