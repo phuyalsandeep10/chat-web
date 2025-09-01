@@ -25,6 +25,7 @@ export default function PersonalInformation() {
       country: authData?.data?.user?.country,
       language: authData?.data?.user?.language,
       email: authData?.data?.user?.email,
+      phone_code: authData?.data?.user?.phone_code,
     },
   });
   const { setAuthData } = useAuthStore();
@@ -51,6 +52,7 @@ export default function PersonalInformation() {
       country: data.country,
       image: data.image,
       language: data.language,
+      phone_code: data.phone_code,
     };
     mutation.mutate(updateProfileData);
   };
@@ -104,7 +106,10 @@ export default function PersonalInformation() {
           labelClassName="mt-6 text-[16px] font-medium"
         />
 
-        <ContactNumberSection control={control} />
+        <ContactNumberSection
+          control={control}
+          dialCode={authData?.data?.user?.phone_code}
+        />
 
         <InputField
           control={control}
@@ -114,7 +119,6 @@ export default function PersonalInformation() {
           inputClassName="w-[80%]"
           labelClassName="mt-6 text-[16px] font-medium"
         />
-
         <CountrySection control={control} name="country" />
         <LanguageSection control={control} name="language" />
       </form>

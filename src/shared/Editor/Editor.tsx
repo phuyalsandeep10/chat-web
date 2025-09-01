@@ -65,7 +65,7 @@ const Tiptap = ({
 }) => {
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const emojiRef = useRef<HTMLDivElement>(null);
-  const emojiBtnRef = useRef<HTMLButtonElement>(null);
+  const emojiBtnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -249,9 +249,9 @@ const Tiptap = ({
           {/* emoji picker */}
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <button ref={emojiBtnRef} onClick={handleEmojiBtn}>
+              <div ref={emojiBtnRef} onClick={handleEmojiBtn}>
                 <Smile />
-              </button>
+              </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <EmojiPicker
