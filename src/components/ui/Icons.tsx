@@ -113,6 +113,7 @@ import {
   RiStackFill,
   RiPieChart2Fill,
   RiDragMoveFill,
+  RiFileListLine,
 } from '@remixicon/react';
 
 // register your icons here as your requirements
@@ -230,4 +231,5 @@ export const Icons = {
   ri_stack_fill: RiStackFill,
   ri_pie_chart_2_fill: RiPieChart2Fill,
   drag_move_fill: RiDragMoveFill,
+  vector: RiFileListLine,
 };

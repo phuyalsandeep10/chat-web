@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, Copy, Edit2 } from 'lucide-react';
 import { getTicketDetails } from '@/services/ticket/services';
 import { Icons } from '@/components/ui/Icons';
+import { parseISO, addMinutes, format, formatDistanceToNow } from 'date-fns';
+
+import { TicketGeneralInfo } from './TicketGeneralInformation';
+import TicketDetailsSla from './TicketDetailsSla';
 
 interface TicketRightSidebarProps {
   isOpen: boolean;
@@ -35,92 +38,43 @@ export default function TicketRightSidebar({
 
   if (!ticket) return <p className="p-4">Loading ticket details...</p>;
 
-  const formatDate = (utcString: string | null) =>
-    utcString
-      ? new Date(utcString).toLocaleString(undefined, {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true,
-        })
-      : 'N/A';
+  //  Convert UTC string → Nepal Time + add "time ago"
+  const formatDate = (
+    utcString: string | null,
+    mode: 'full' | 'ago' = 'full',
+  ) => {
+    if (!utcString) return 'N/A';
+    const nepalDate = addMinutes(parseISO(utcString), 345);
 
-  // Editable Field Component
-  const EditableField = ({
-    label,
-    value,
-    type = 'text',
-  }: {
-    label: string;
-    value: string;
-    type?: string;
-  }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [fieldValue, setFieldValue] = useState(value);
+    if (mode === 'ago') {
+      // remove "about " if present
+      return formatDistanceToNow(nepalDate, { addSuffix: true }).replace(
+        /^about\s/,
+        '',
+      );
+    }
 
-    const handleCopy = () => {
-      navigator.clipboard.writeText(fieldValue);
-      alert(`${label} copied to clipboard!`);
-    };
-
-    const handleEditToggle = () => setIsEditing(!isEditing);
-
-    return (
-      <div className="flex w-full items-center gap-2">
-        <p className="w-[80px] font-medium">{label}:</p>
-        {isEditing ? (
-          <input
-            type={type}
-            value={fieldValue}
-            onChange={(e) => setFieldValue(e.target.value)}
-            className="flex-1 rounded border border-gray-300 px-2 py-1"
-          />
-        ) : (
-          <p
-            className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
-            title={fieldValue}
-          >
-            {fieldValue || 'N/A'}
-          </p>
-        )}
-        <div className="flex flex-shrink-0 gap-1">
-          <button
-            onClick={handleEditToggle}
-            className="rounded bg-blue-100 p-1 text-blue-700 hover:bg-blue-200"
-          >
-            <Edit2 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={handleCopy}
-            className="rounded bg-green-100 p-1 text-green-700 hover:bg-green-200"
-          >
-            <Copy className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-    );
+    return format(nepalDate, 'EEEE, dd MMMM yyyy, hh:mm:ss a');
   };
 
   return (
     <div
-      className={`fixed top-0 right-0 z-50 h-full w-[400px] flex-col bg-white shadow-lg transition-transform duration-300 ${
+      className={`fixed top-0 right-0 z-50 flex h-full w-full max-w-[400px] flex-col transition-transform duration-300 ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
-      {/* Header */}
-      <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-4 py-5">
-        <h3 className="text-lg font-semibold">Ticket Information</h3>
+      {/* Header (sticky) */}
+      <div className="border-gray-light px- sticky top-0 z-10 flex flex-shrink-0 items-center justify-between border-b bg-white py-7">
+        <h3 className="font-outfit text-xl font-semibold">
+          Ticket Information
+        </h3>
         <button onClick={onClose}>
-          <X className="h-6 w-6 text-gray-700" />
+          <Icons.x className="text-gray-primary h-6 w-6" />
         </button>
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 space-y-6 overflow-y-auto p-4 pl-6">
+      <div className="flex-1 space-y-8 overflow-y-auto px-10 pt-4">
         {/* Priority, Status, Created At */}
         <div className="flex gap-4">
           <div>
@@ -146,35 +100,16 @@ export default function TicketRightSidebar({
             </span>
           </div>
           <div>
-            <p>{formatDate(ticket.created_at)}</p>
+            <p>Created {formatDate(ticket.created_at, 'ago')}</p>
           </div>
         </div>
 
         {/* General Information */}
-        <div className="border-0.5 border-gray-primary flex flex-col gap-2 border p-2">
-          <h4 className="font-outfit text-brand-dark flex items-center gap-2 text-xl font-semibold">
-            <Icons.client className="h-5 w-5" />
-            General Information
-          </h4>
-          <EditableField label="Name" value={ticket.customer_name} />
-          <EditableField
-            label="Email"
-            value={ticket.customer_email}
-            type="email"
-          />
-          <EditableField
-            label="Phone"
-            value={ticket.customer_phone}
-            type="tel"
-          />
-          <EditableField label="Location" value={ticket.customer_location} />
-        </div>
+        <TicketGeneralInfo ticketId={ticket.id} data={ticket} />
 
         {/* SLA */}
-        <div>
-          <h4 className="font-semibold">SLA</h4>
-          <p>{ticket.sla?.name || 'N/A'}</p>
-        </div>
+
+        <TicketDetailsSla ticket={ticket} />
 
         {/* Department */}
         <div>
@@ -188,20 +123,6 @@ export default function TicketRightSidebar({
           <p>
             {ticket.created_by?.name} ({ticket.created_by?.email})
           </p>
-        </div>
-
-        {/* Assignees */}
-        <div>
-          <h4 className="font-semibold">Assignees</h4>
-          {ticket.assignees.length > 0 ? (
-            <ul className="list-disc pl-5">
-              {ticket.assignees.map((assignee: any) => (
-                <li key={assignee.name}>{assignee.name}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>None</p>
-          )}
         </div>
 
         {/* Dates */}

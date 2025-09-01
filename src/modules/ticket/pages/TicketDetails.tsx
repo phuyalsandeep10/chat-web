@@ -1,17 +1,19 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import {
   getTicketDetails,
   postTicketDetails,
   SendMessagePayload,
 } from '@/services/ticket/services';
 import { getConversation } from '@/services/ticket/conversation';
-import { TicketProvider, useTicketSocket } from '@/context/ticket.context';
+import { useTicketSocket } from '@/context/ticket.context';
 import { Textarea } from '@/components/ui/textarea';
 import LanguageSelector from '@/components/custom-components/Inbox/InboxChatSection/LanguageSelector';
 import { Button } from '@/components/ui/button';
 import Conversation, { Ticket } from './components/Conversation';
+import TicketDetailsHeader from '../components/details/TicketDetailsHeader';
+import TicketRightSidebar from '../components/details/TicketDetailsSidebar';
 
 const TicketDetails = () => {
   const [ticket, setTicket] = useState<any>(null);
@@ -20,6 +22,7 @@ const TicketDetails = () => {
   const [conversationData, setConversationData] = useState<Ticket[]>([]);
   const [receiver, setReceiver] = useState<string>('');
   const [message, setMessage] = useState<string>('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const params: any = useParams();
   const ticketId = params?.ticketId;
@@ -51,7 +54,6 @@ const TicketDetails = () => {
 
   useEffect(() => {
     const handleIncomingMessage = (data: any) => {
-      console.log('hey there');
       const normalized: Ticket = {
         sender: data.user,
         content: data.message,
@@ -63,7 +65,11 @@ const TicketDetails = () => {
     };
 
     socket?.on('ticket_broadcast', handleIncomingMessage);
-  }, [ticketId]);
+
+    return () => {
+      socket?.off('ticket_broadcast', handleIncomingMessage);
+    };
+  }, [ticketId, ticket?.created_by?.email, socket]);
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
@@ -96,22 +102,46 @@ const TicketDetails = () => {
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Ticket Details</h2>
-      <LanguageSelector />
-      <Conversation conversationData={conversationData} />
-
-      <div className="mt-4">
-        <Textarea
-          placeholder="Send your message to Chatboq Team in chat..."
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
+    <div className="flex h-screen overflow-hidden">
+      {/* Main Content */}
+      <div
+        className={`flex-1 py-4 transition-all duration-300 ${
+          sidebarOpen ? 'mr-[400px]' : ''
+        }`}
+      >
+        <TicketDetailsHeader
+          sidebarOpen={sidebarOpen}
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          ticketId={Number(ticketId)}
         />
-        <div className="mt-3 flex justify-end">
-          <Button type="button" onClick={handleSendMessage}>
-            Send
-          </Button>
+        <LanguageSelector />
+        <Conversation conversationData={conversationData} />
+
+        <div className="mt-4">
+          <Textarea
+            placeholder="Send your message to Chatboq Team in chat..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <div className="mt-3 flex justify-end">
+            <Button type="button" onClick={handleSendMessage}>
+              Send
+            </Button>
+          </div>
         </div>
+      </div>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 right-0 z-50 h-full w-[400px] bg-white shadow-lg transition-transform duration-300 ${
+          sidebarOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <TicketRightSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          ticketId={Number(ticketId)}
+        />
       </div>
     </div>
   );
