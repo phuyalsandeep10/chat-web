@@ -125,6 +125,16 @@ export default function ChatBox() {
       newSocket.on('disconnect', handleDisconnect);
       newSocket.on('receive_message', handleMessage);
       newSocket.on('message_seen', (data) => console.log('message_seen', data));
+      newSocket.on(CHAT_EVENTS.edit_message, (data) => {
+        console.log('Edited event Data', data);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === data.id
+              ? { ...msg, content: data.content, updated_at: data.updated_at }
+              : msg,
+          ),
+        );
+      });
       newSocket.on('receive_typing', () => {
         console.log('typing...');
         setOtherTyping(true);

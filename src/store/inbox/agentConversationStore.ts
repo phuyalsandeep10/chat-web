@@ -154,7 +154,11 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
       set((state) => {
         const updatedMessages = state.messages.map((msg: Message) =>
           msg.id === messageId
-            ? { ...msg, content: response.data.content }
+            ? {
+                ...msg,
+                content: response.data.content,
+                edited_content: response?.data?.edited_content,
+              }
             : msg,
         );
 
@@ -231,6 +235,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
       },
     });
     try {
+      // console.log("reply_to_id",replyToId)
       const response = await ConversationService.createMessage(chatId, {
         content,
         reply_to_id: replyToId,

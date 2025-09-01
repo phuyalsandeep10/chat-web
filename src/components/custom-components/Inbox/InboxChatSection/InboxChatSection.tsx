@@ -83,8 +83,6 @@ const InboxChatSection = ({
                 message={message}
                 onReply={onReply}
                 handleEditMessage={handleEditMessage}
-                showTyping={showTyping}
-                typingmessage={typingmessage}
               />
             ))}
           </div>
