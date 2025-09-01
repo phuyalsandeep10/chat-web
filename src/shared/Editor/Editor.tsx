@@ -25,18 +25,8 @@ import {
   Smile,
   UnderlineIcon,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useImperativeHandle, useRef, useState } from 'react';
-
-// to disable the default enter behaivor from entering new line
-// while shift+enter will still do the tricks😊
-const DisableEnter = Extension.create({
-  name: 'disableEnter',
-  addKeyboardShortcuts() {
-    return {
-      Enter: () => true,
-    };
-  },
-});
 
 // submission on enter pressed
 const SubmitOnEnter = Extension.create({
@@ -58,11 +48,6 @@ const SubmitOnEnter = Extension.create({
           });
           console.log('inside if');
         }
-
-        // Clear content after submit
-        // setTimeout(() => {
-        //   this.editor.commands.clearContent();
-        // }, 0);
 
         return true;
       },
@@ -292,7 +277,7 @@ const Tiptap = ({
             type="button"
           >
             Send{' '}
-            <img
+            <Image
               src="/inbox/send-plane-line.svg"
               alt="send icon"
               width={18}

@@ -59,6 +59,8 @@ export default function ChatBox() {
   const [isOpen, setIsOpen] = useState(false);
   const [expand, setExpand] = useState(false);
 
+  const [isOnline, setIsOnline] = useState(false);
+
   // Use refs for independent timeouts
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const stopTypingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -134,9 +136,11 @@ export default function ChatBox() {
       newSocket.on(CHAT_EVENTS.agent_disconnected, (data) => {
         console.log('agent disconnected');
         console.log({ data });
+        setIsOnline(false);
       });
       newSocket.on(CHAT_EVENTS.agent_connected, (data) => {
         console.log('agent connected', { data });
+        setIsOnline(true);
       });
 
       // Store cleanup function
@@ -259,7 +263,7 @@ export default function ChatBox() {
 
   const emitTyping = (message: string) => {
     if (!socket || !isConnected || !visitor?.conversation?.id) return;
-    console.log('typing....');
+    console.log('typing.... chat widget');
     socket.emit('typing', {
       mode: 'typing',
       conversation_id: visitor.conversation.id,
@@ -375,9 +379,11 @@ export default function ChatBox() {
                   <h3 className="font-sans text-[20px] leading-6 font-medium text-white">
                     ChatBoq
                   </h3>
-                  <p className="font-inter text-[11px] leading-[16.5px] font-normal text-white">
-                    Online
-                  </p>
+                  {isOnline && (
+                    <p className="font-inter text-[11px] leading-[16.5px] font-normal text-white">
+                      Online
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-[14px] text-white">

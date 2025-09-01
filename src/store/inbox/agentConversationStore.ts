@@ -34,7 +34,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
     edit_message: false,
   },
   setConversationData: (data: ConversationResponse) => {
-    console.log('data', data);
+    // console.log('data', data);
     set({
       conversation: data.data.conversation,
       customer: data.data.customer,
@@ -310,6 +310,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
     try {
       const data: ConversationResponse =
         await ConversationService.getConversationDetailsById(chatId);
+      console.log('data', data);
       set({
         conversation: data.data.conversation,
         customer: data.data.customer,
@@ -320,6 +321,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
           fetch_all_conversations: false,
           resolve_conversation: false,
         },
+        members: data?.data?.members,
       });
     } catch (error) {
       console.error('Error fetching conversation details:', error);

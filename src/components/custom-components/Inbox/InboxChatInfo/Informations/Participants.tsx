@@ -2,32 +2,11 @@ import React from 'react';
 import InformationsWrapper from './InformationsWrapper';
 import { User } from 'lucide-react';
 import { Icons } from '@/components/ui/Icons';
-import Image from 'next/image';
-import { Parisienne, Patrick_Hand } from 'next/font/google';
+import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-const participants = [
-  {
-    id: 1,
-    name: 'Alison',
-    photo: '/inbox/participants.png',
-  },
-  {
-    id: 2,
-    name: 'Alison',
-    photo: '/inbox/participants.png',
-  },
-  {
-    id: 3,
-    name: 'Alison',
-    photo: '/inbox/participants.png',
-  },
-  {
-    id: 4,
-    name: 'Alison',
-    photo: '/inbox/participants.png',
-  },
-];
 const Participants = () => {
+  const { members } = useAgentConversationStore();
   return (
     <InformationsWrapper>
       <div>
@@ -40,15 +19,16 @@ const Participants = () => {
         </div>
 
         <div className="mt-3 flex gap-4 px-2">
-          {participants.map((participant) => (
-            <Image
-              key={participant.id}
-              src={participant.photo}
-              alt={participant.name}
-              className="h-10 w-10"
-              height={1000}
-              width={1000}
-            />
+          {members?.map((memb) => (
+            <Avatar key={memb.id} className="h-10 w-10">
+              <AvatarImage
+                src={memb?.user?.image ?? ''}
+                alt={memb?.user?.name ?? 'User'}
+              />
+              <AvatarFallback>
+                {memb?.user?.name?.charAt(0).toUpperCase() ?? 'U'}
+              </AvatarFallback>
+            </Avatar>
           ))}
         </div>
       </div>

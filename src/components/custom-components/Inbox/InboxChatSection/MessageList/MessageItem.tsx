@@ -126,7 +126,10 @@ const MessageItem = ({
                   isUserId ? 'text-sm font-normal break-all' : ''
                 } ${message?.reply_to && message?.reply_to_id && 'mt-1'}`}
               >
-                <div dangerouslySetInnerHTML={{ __html: message?.content }} />
+                <div
+                  className="message__content"
+                  dangerouslySetInnerHTML={{ __html: message?.content }}
+                />
               </div>
               <div
                 className={`mt-1 flex items-center text-xs font-normal ${isUserId ? 'justify-start text-left text-white' : 'text-theme-text-primary justify-end'}`}
