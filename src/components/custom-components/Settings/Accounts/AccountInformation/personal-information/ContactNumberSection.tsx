@@ -6,10 +6,12 @@ import { Label } from '@/components/ui/label';
 
 type ContactNumberSectionProps = {
   control: Control<any>;
+  dialCode?: string;
 };
 
 export const ContactNumberSection = ({
   control,
+  dialCode,
 }: ContactNumberSectionProps) => {
   return (
     <div className="mt-[18px]">
@@ -21,7 +23,9 @@ export const ContactNumberSection = ({
         <Controller
           name="mobile"
           control={control}
-          render={({ field }) => <PhoneInput field={field} />}
+          render={({ field }) => (
+            <PhoneInput field={field} storeDialCode={dialCode} />
+          )}
         />
       </div>
     </div>

@@ -6,4 +6,5 @@ export type UpdateProfileFormValues = {
   country: string;
   language?: string;
   email?: string;
+  phone_code?: string;
 };

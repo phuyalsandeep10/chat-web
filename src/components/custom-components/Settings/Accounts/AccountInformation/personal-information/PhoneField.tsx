@@ -1,10 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 import Image from 'next/image';
 import { Icons } from '@/components/ui/Icons';
 import { allCountries } from 'country-telephone-data';
+import { useAuthStore } from '@/store/AuthStore/useAuthStore';
+import { UpdateProfileFormValues } from '../types';
+import { AuthService } from '@/services/auth/auth';
+import { toast } from 'sonner';
 
 interface Country {
   name: string;
@@ -21,25 +25,66 @@ const countries: Country[] = allCountries.map((c) => ({
 }));
 
 type PhoneInputProps = {
-  field: ControllerRenderProps<any, any>; // from react-hook-form
+  field: ControllerRenderProps<any, any>;
+  storeDialCode?: string;
 };
 
-const PhoneInput: React.FC<PhoneInputProps> = ({ field }) => {
-  const [selectedCountry, setSelectedCountry] = useState<Country | undefined>(
-    countries.find((c) => c.code === 'US'),
-  );
+const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
+  const authData = useAuthStore((state) => state.authData);
+  const [selectedCountry, setSelectedCountry] = useState<Country | undefined>();
+  const [dialCode, setDialCode] = useState<string | undefined>(storeDialCode);
 
   const [searchTerm, setSearchTerm] = useState('');
 
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
 
+  // udpate flags
+  useEffect(() => {
+    let country = countries.find((c) => c.dialCode === storeDialCode);
+    if (!country) {
+      country = countries.find((c) => c.code === 'US');
+    }
+    if (country) {
+      setSelectedCountry(country);
+      setDialCode(country.dialCode);
+    }
+  }, [storeDialCode]);
+
+  const handleDialCode = useCallback(async () => {
+    if (!dialCode) return;
+
+    const phoneDialUpdate: UpdateProfileFormValues = {
+      name: authData?.data?.user?.name || '',
+      country: authData?.data?.user?.country || '',
+      image: authData?.data?.user?.image || '',
+      language: authData?.data?.user?.language || '',
+      mobile: authData?.data?.user?.mobile || '',
+      email: authData?.data?.user?.email || '',
+      address: authData?.data?.user?.address || '',
+      phone_code: dialCode || '',
+    };
+
+    // this is done to to prevent the default update.. cause due to how the useEffect() tiggers
+    if (dialCode !== storeDialCode) {
+      const res = await AuthService.updatePersonalInformation(phoneDialUpdate);
+      if (res) toast.success('Dial Code Updated!');
+      else toast.error('Dial Code Update Failed');
+    }
+  }, [dialCode, authData]);
+
   const handleCountrySelect = (countryCode: string) => {
     const country = countries.find((c) => c.code === countryCode);
     if (country) {
       setSelectedCountry(country);
+      setDialCode(country.dialCode);
       setShowDropdown(false);
     }
   };
+
+  //trigger the dial code change
+  useEffect(() => {
+    handleDialCode();
+  }, [dialCode]);
 
   return (
     <div className="relative h-9 w-full rounded-[4px]">
@@ -58,7 +103,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field }) => {
                 alt={selectedCountry.code}
                 className="h-4 w-6 object-cover"
               />
-              <span className="text-sm">{selectedCountry.dialCode}</span>
+              <span className="text-sm">{dialCode}</span>
               <Icons.chevron_down className="mt-0.5 text-xs text-gray-500" />
             </>
           )}
@@ -81,15 +126,12 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field }) => {
               e.preventDefault();
             }
           }}
-          value={
-            field.value?.replace(selectedCountry?.dialCode || '', '') || ''
-          }
-          onChange={(e) =>
-            field.onChange(`${selectedCountry?.dialCode}${e.target.value}`)
-          }
+          // value={
+          //   field.value?.replace(selectedCountry?.dialCode || '', '') || ''
+          // }
+          onChange={(e) => field.onChange(`${e.target.value}`)}
         />
       </div>
-
       {/* Dropdown */}
       {showDropdown && (
         <div className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded border bg-white shadow">
@@ -105,6 +147,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field }) => {
           </div>
 
           {/* Filtered Country List */}
+
           <ul>
             {countries
               .filter(
