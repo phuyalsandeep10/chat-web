@@ -126,7 +126,10 @@ const MessageItem = ({
                   isUserId ? 'text-sm font-normal break-all' : ''
                 } ${message?.reply_to && message?.reply_to_id && 'mt-1'}`}
               >
-                <div dangerouslySetInnerHTML={{ __html: message?.content }} />
+                <div
+                  className="message__content"
+                  dangerouslySetInnerHTML={{ __html: message?.content }}
+                />
               </div>
               <div
                 className={`mt-1 flex items-center text-xs font-normal ${isUserId ? 'justify-start text-left text-white' : 'text-theme-text-primary justify-end'}`}
@@ -137,15 +140,15 @@ const MessageItem = ({
 
             <div className="">
               {isUserId && (
-                <Avatar>
+                <Avatar className="min-h-12 min-w-12 overflow-hidden">
                   {message?.user && message?.user?.image ? (
                     <AvatarImage
                       src={message?.user?.image}
                       alt="user image"
-                      className="ml-2 flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full"
+                      className="ml-2 flex h-full w-full rounded-full object-center"
                     />
                   ) : (
-                    <AvatarFallback className="text-theme-text-dark text-xs font-medium">
+                    <AvatarFallback className="text-theme-text-dark h-full w-full text-xs font-medium">
                       {message?.user?.name
                         ?.substring(0, 2)
                         ?.toLocaleUpperCase()}
