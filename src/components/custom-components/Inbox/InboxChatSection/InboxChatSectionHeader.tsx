@@ -10,7 +10,6 @@ import { Icons } from '@/components/ui/Icons';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import { useUiStore } from '@/store/UiStore/useUiStore';
 import { ChevronDown, Languages, Ticket } from 'lucide-react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
