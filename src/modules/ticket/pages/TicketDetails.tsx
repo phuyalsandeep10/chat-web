@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   getTicketDetails,
@@ -21,6 +21,10 @@ const TicketDetails = () => {
   const [receiver, setReceiver] = useState<string>('');
   const [message, setMessage] = useState<string>('');
 
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [oldestMessageId, setOldestMessageId] = useState<number | null>(null);
+
   const params: any = useParams();
   const ticketId = params?.ticketId;
   const { socket } = useTicketSocket();
@@ -28,7 +32,7 @@ const TicketDetails = () => {
   useEffect(() => {
     if (!socket || !ticketId) return;
 
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
         setLoading(true);
         const ticketResponse = await getTicketDetails(ticketId);
@@ -37,8 +41,16 @@ const TicketDetails = () => {
         const receiverEmail = ticketResponse.data.customer_email || '';
         setReceiver(receiverEmail);
 
-        const conversationResponse = await getConversation(ticketId);
-        setConversationData(conversationResponse?.data || []);
+        const conversationResponse = await getConversation(ticketId, 10);
+        const messages = conversationResponse?.data || [];
+        setConversationData(messages);
+
+        if (messages.length > 0) {
+          setOldestMessageId(messages[0].id || null);
+          setHasMore(messages.length === 10);
+        } else {
+          setHasMore(false);
+        }
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -46,13 +58,36 @@ const TicketDetails = () => {
       }
     };
 
-    fetchData();
-  }, [socket, ticketId, ticket?.sender]);
+    fetchInitialData();
+  }, [socket, ticketId]);
+
+  const loadMoreMessages = useCallback(async () => {
+    if (isLoadingMore || !hasMore || !oldestMessageId) return;
+
+    try {
+      setIsLoadingMore(true);
+      const response = await getConversation(ticketId, 10, oldestMessageId);
+      const olderMessages = response?.data || [];
+
+      if (olderMessages.length > 0) {
+        setConversationData((prev) => [...olderMessages, ...prev]);
+        setOldestMessageId(olderMessages[0].id || null);
+        setHasMore(olderMessages.length === 10);
+      } else {
+        setHasMore(false);
+      }
+    } catch (err: any) {
+      console.error('Error loading more messages:', err.message);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [ticketId, isLoadingMore, hasMore, oldestMessageId]);
 
   useEffect(() => {
     const handleIncomingMessage = (data: any) => {
       console.log('hey there');
       const normalized: Ticket = {
+        id: data.id,
         sender: data.user,
         content: data.message,
         created_at: data.created_at,
@@ -63,7 +98,11 @@ const TicketDetails = () => {
     };
 
     socket?.on('ticket_broadcast', handleIncomingMessage);
-  }, [ticketId]);
+
+    return () => {
+      socket?.off('ticket_broadcast', handleIncomingMessage);
+    };
+  }, [socket, ticket?.created_by?.email]);
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
@@ -76,15 +115,13 @@ const TicketDetails = () => {
 
     try {
       await postTicketDetails(payload);
-      setConversationData((prev) => [
-        ...prev,
-        {
-          sender: ticket?.created_by?.email || 'You',
-          content: message,
-          created_at: new Date().toISOString(),
-          direction: 'outgoing',
-        },
-      ]);
+      const newMessage: Ticket = {
+        sender: ticket?.created_by?.email || 'You',
+        content: message,
+        created_at: new Date().toISOString(),
+        direction: 'outgoing',
+      };
+      setConversationData((prev) => [...prev, newMessage]);
       setMessage('');
     } catch (err: any) {
       console.error(err.message);
@@ -99,7 +136,12 @@ const TicketDetails = () => {
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Ticket Details</h2>
       <LanguageSelector />
-      <Conversation conversationData={conversationData} />
+      <Conversation
+        conversationData={conversationData}
+        onLoadMore={loadMoreMessages}
+        hasMore={hasMore}
+        isLoading={isLoadingMore}
+      />
 
       <div className="mt-4">
         <Textarea
