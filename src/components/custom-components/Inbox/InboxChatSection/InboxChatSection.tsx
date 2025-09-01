@@ -104,7 +104,7 @@ const InboxChatSection = ({
                   <DottedAnimation size="sm" color="gray" />
                 </div>
                 <div className="text-theme-text-primary mt-2 box-border max-h-[119px] min-h-[119px] w-full overflow-y-auto rounded-xl border border-[#D4D4D4] px-5 py-[15px] text-sm leading-[21px] font-medium md:w-[462px]">
-                  {typingmessage}
+                  <div dangerouslySetInnerHTML={{ __html: typingmessage }} />
                 </div>
               </div>
             </div>
