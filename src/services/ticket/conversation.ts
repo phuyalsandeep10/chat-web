@@ -1,15 +1,20 @@
 import axiosInstance, { baseURL } from '@/apiConfigs/axiosInstance';
 
-export const getConversation = async (ticket_id: any) => {
-  console.log('conversation', ticket_id);
+export const getConversation = async (
+  ticket_id: any,
+  limit: number = 10,
+  before?: number,
+) => {
+  console.log('conversation', ticket_id, { limit, before });
   try {
+    const params: any = { limit };
+    if (before) {
+      params.before = before;
+    }
+
     const response = await axiosInstance.get(
       `/tickets/conversation/${ticket_id}`,
-      {
-        params: {
-          limit: 50,
-        },
-      },
+      { params },
     );
 
     if (!response?.data?.success) {

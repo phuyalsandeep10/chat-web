@@ -21,9 +21,20 @@ export default function ProtectedDashboardLayout({
   const router = useRouter();
   const authTokens = AuthService.getAuthTokens();
   const { socket: TicketSlaSocket } = useTickectSlaSocket();
+  const [slaData, setSlaData] = useState<any | null>(null);
+  // const [slaData, setSlaData] = useState<any | null>({
+  //   message: '100% of the response time has elapsed',
+  //   level: 75,
+  //   payload: {
+  //     id: 2,
+  //     title: 'Demo not working',
+  //     description: 'test_ticket_description',
+  //   },
+  // });
 
   const showTicketSlaAlert = (data: any) => {
-    console.log('data', data);
+    console.log('showTicketSlaAlert data', data);
+    setSlaData(data);
     setOpenTicketBreachDialog(true);
   };
 
@@ -38,6 +49,13 @@ export default function ProtectedDashboardLayout({
       }
     }
   }, [authData, isLoading, router, authTokens]);
+
+  //  useEffect(() => {
+  //     TicketSlaSocket?.on('ticket_sla_alert', showTicketSlaAlert);
+  //     return () => {
+  //       TicketSlaSocket?.off('ticket_sla_alert', showTicketSlaAlert);
+  //     };
+  //   }, [TicketSlaSocket]);
 
   if (isLoading || !authData)
     return (
@@ -55,6 +73,7 @@ export default function ProtectedDashboardLayout({
           {/* <SidebarTrigger /> */}
           <div className="w-full">{children}</div>
           <TicketSLABreachDialog
+            data={slaData}
             open={openTicketSLABeachDialog}
             setOpen={setOpenTicketBreachDialog}
           />

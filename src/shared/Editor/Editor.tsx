@@ -25,18 +25,8 @@ import {
   Smile,
   UnderlineIcon,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useImperativeHandle, useRef, useState } from 'react';
-
-// to disable the default enter behaivor from entering new line
-// while shift+enter will still do the tricks😊
-const DisableEnter = Extension.create({
-  name: 'disableEnter',
-  addKeyboardShortcuts() {
-    return {
-      Enter: () => true,
-    };
-  },
-});
 
 // submission on enter pressed
 const SubmitOnEnter = Extension.create({
@@ -58,11 +48,6 @@ const SubmitOnEnter = Extension.create({
           });
           console.log('inside if');
         }
-
-        // Clear content after submit
-        // setTimeout(() => {
-        //   this.editor.commands.clearContent();
-        // }, 0);
 
         return true;
       },
@@ -174,7 +159,7 @@ const Tiptap = ({
   return (
     <div className="relative -mt-15 space-y-4 bg-white pt-2">
       <EditorContent
-        className="overflow-y-auto rounded-2xl border-2 p-4 [&_.ProseMirror]:h-[100px] [&_.ProseMirror]:min-w-[858px] [&_.ProseMirror]:break-words [&_.ProseMirror]:whitespace-pre-wrap [&_.ProseMirror]:caret-black [&_.ProseMirror]:outline-none [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror:focus]:outline-none [&_.ProseMirror>.placeholder]:text-gray-400"
+        className="overflow-y-auto rounded-2xl border-2 p-4 [&_.ProseMirror]:h-[70px] [&_.ProseMirror]:break-words [&_.ProseMirror]:whitespace-pre-wrap [&_.ProseMirror]:caret-black [&_.ProseMirror]:outline-none [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror:focus]:outline-none [&_.ProseMirror>.placeholder]:text-gray-400"
         editor={editor}
       />
 
@@ -292,7 +277,7 @@ const Tiptap = ({
             type="button"
           >
             Send{' '}
-            <img
+            <Image
               src="/inbox/send-plane-line.svg"
               alt="send icon"
               width={18}

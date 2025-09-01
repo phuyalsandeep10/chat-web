@@ -27,6 +27,11 @@ const InboxChatSection = ({
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+  useEffect(() => {
+    if (showTyping) {
+      endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [showTyping]);
 
   const groupedMessages = useMemo(() => {
     const groups: { [key: string]: Message[] } = {};

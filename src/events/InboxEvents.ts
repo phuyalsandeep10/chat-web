@@ -1,4 +1,5 @@
 export const CHAT_EVENTS = {
+  typing: 'typing',
   receive_message: 'receive_message',
   receive_typing: 'receive_typing',
   stop_typing: 'stop_typing',

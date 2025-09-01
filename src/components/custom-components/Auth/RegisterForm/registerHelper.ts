@@ -6,7 +6,11 @@ export const registerFormSchema = z.object({
     .regex(/[A-Z]/, {
       message: 'Password must include at least one uppercase letter',
     })
-    .regex(/[0-9]/, { message: 'Password must include at least one number' }),
+    .regex(/[0-9]/, { message: 'Password must include at least one number' })
+    .regex(/[!@#$%^&*(),.?":{}|<>_\-\\[\]\/+=~`|]/, {
+      message: 'Password must include at least one special character',
+    }),
+
   name: z
     .string()
     .min(3, { message: 'Username must be at least 3 characters long' })
