@@ -108,10 +108,6 @@ const TicketDetails = () => {
     return () => {
       socket?.off('ticket_broadcast', handleIncomingMessage);
     };
-
-    return () => {
-      socket?.off('ticket_broadcast', handleIncomingMessage);
-    };
   }, [socket, ticket?.created_by?.email, ticketId]);
 
   // Handle Send / Update
