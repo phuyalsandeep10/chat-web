@@ -179,20 +179,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
           </div>
 
           {/* Role Field */}
-          <RoleField
-            control={control}
-            roleTableData={
-              roleTableData
-                ? {
-                    data: roleTableData.roles.map((role) => ({
-                      role_id: role.role_id,
-                      role_name: role.role_name,
-                      permissions: role.permissions ?? [],
-                    })),
-                  }
-                : undefined
-            }
-          />
+          <RoleField control={control} roleTableData={roleTableData} />
 
           {/* Client Handled Field */}
           <ClientField control={control} />
