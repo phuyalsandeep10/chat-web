@@ -232,11 +232,11 @@ const Conversation: React.FC<ConversationProps> = ({
                                 onEditMessage(msg);
                               },
                             },
-                            {
-                              label: 'Delete',
-                              onClick: () => console.log('Delete', msg.id),
-                              className: 'text-error focus:text-error',
-                            },
+                            // {
+                            //   label: 'Delete',
+                            //   onClick: () => console.log('Delete', msg.id),
+                            //   className: 'text-error focus:text-error',
+                            // },
                           ]}
                         />
                       </div>
