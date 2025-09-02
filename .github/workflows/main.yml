@@ -44,7 +44,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/ubuntu/chatboq-web
+            cd /var/www/chatboq_portal/chatboq-web
             # Force sync with GitHub
             git fetch origin main
             git reset --hard origin/main
