@@ -9,7 +9,7 @@ import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useGetOrganizationById } from '@/hooks/organizations/useGetorganizations';
 import WorkspaceImage from './WorkspaceImage';
 import WorkspaceProfile from './WorkspaceProfile';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWorkspaceInformation';
 
 export default function WorkspaceInformation() {

@@ -37,6 +37,8 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
   const sendOwnershipInvitation = useUpdateOrganization();
 
   const handleInvite = (userId: number) => {
+    console.log(userId);
+
     sendOwnershipInvitation.mutate(
       {
         owner_id: userId,
