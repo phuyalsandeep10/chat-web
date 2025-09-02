@@ -241,7 +241,6 @@ const Inbox = () => {
                 ref={editorRef}
                 onSubmit={onSend}
                 onChange={handleEditorChange}
-                isSending={isSending}
               />
             </div>
           </div>
