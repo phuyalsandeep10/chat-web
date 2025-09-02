@@ -8,11 +8,15 @@ import TransferOwnershipModal from '@/components/modal/TransferOwnership';
 interface InformationProps {
   workspace_owner?: string | null;
   creation_date?: string | null;
+  currentOwnerId?: string | null;
+  setCurrentOwnerId?: any;
 }
 
 const Information: React.FC<InformationProps> = ({
   workspace_owner,
   creation_date,
+  currentOwnerId,
+  setCurrentOwnerId,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -130,6 +134,8 @@ const Information: React.FC<InformationProps> = ({
 
       {/* Modal */}
       <TransferOwnershipModal
+        currentOwnerId={currentOwnerId}
+        setCurrentOwnerId={setCurrentOwnerId}
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />

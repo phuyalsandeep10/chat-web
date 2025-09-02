@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       'lh3.googleusercontent.com',
       'res.cloudinary.com',
       'i.ibb.co',
+      'imgbb.com',
     ],
   },
   reactStrictMode: false,

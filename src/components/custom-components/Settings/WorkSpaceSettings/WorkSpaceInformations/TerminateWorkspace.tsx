@@ -9,12 +9,14 @@ import React, { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { InputField } from '@/components/common/hook-form/InputField';
 import useDeleteOrganization from '@/hooks/organizations/useDeleteOrganization';
+import { useAuthStore } from '@/store/AuthStore/useAuthStore';
+import { useGetMembers } from '@/hooks/organizations/useGetMembers';
 
 type FormData = {
   workspaceId: string;
 };
 
-const TerminateWorkspace = () => {
+const TerminateWorkspace = ({ currentOwnerId }: any) => {
   const dialogRef = useRef<AlertDialogDemoRef>(null);
 
   const { control, handleSubmit, getValues, watch } = useForm<FormData>({
@@ -26,6 +28,12 @@ const TerminateWorkspace = () => {
 
   const { mutate: deleteOrganization } = useDeleteOrganization();
 
+  const { authData } = useAuthStore();
+  const orgId = authData?.data.user.attributes.organization_id;
+  const { data: organizationMembers } = useGetMembers(orgId ?? 0, {
+    enabled: !!orgId,
+  });
+
   const handleDeleteClick = () => {
     dialogRef.current?.open();
   };
@@ -33,6 +41,7 @@ const TerminateWorkspace = () => {
   // This function runs when user clicks "Yes, Delete" in modal
   const handleConfirmDelete = handleSubmit(async (data) => {
     console.log('Typed confirmation:', data.workspaceId);
+
     deleteOrganization(data.workspaceId);
 
     dialogRef.current?.close();
