@@ -37,18 +37,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   onClose,
 }) => {
   const form = useForm<AddorEditFormValues>({
-    defaultValues: {
-      day: 'Select Day',
-      shift: 'Select Shift',
-      email: '',
-      fullName: '',
-      role: '',
-      clientHandled: '',
-      startTime: '',
-      endTime: '',
-      totalHours: '',
-      team: '',
-    },
+    defaultValues: { ...defaultValues },
   });
 
   // components states

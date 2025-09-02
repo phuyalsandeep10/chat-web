@@ -92,18 +92,20 @@ export function SelectField<T extends FieldValues>({
                         <div
                           key={val}
                           className="flex items-center rounded bg-gray-200 px-2 py-0.5 text-sm"
-                          onClick={(e) => e.stopPropagation()}
                         >
                           {options.find((opt) => opt.value === val)?.label ||
                             val}
                           {isMulti && (
-                            <button
-                              type="button"
+                            <span
                               className="ml-1 text-gray-600 hover:text-gray-800"
+                              onPointerDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
                               onClick={() => handleDeselect(val)}
                             >
                               ×
-                            </button>
+                            </span>
                           )}
                         </div>
                       ))}

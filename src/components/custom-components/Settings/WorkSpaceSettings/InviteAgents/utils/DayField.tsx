@@ -66,8 +66,7 @@ const DayField: React.FC<FieldProps> = ({ control }) => {
                             className="flex items-center gap-1 rounded bg-gray-100 px-2 py-0.5 text-xs"
                           >
                             {day?.substring(0, 3)}
-                            <button
-                              type="button"
+                            <span
                               onClick={(e) => {
                                 e.stopPropagation(); // prevent popover from opening
                                 removeDay(d);
@@ -75,7 +74,7 @@ const DayField: React.FC<FieldProps> = ({ control }) => {
                               className="text-gray-500 hover:text-red-500"
                             >
                               ✕
-                            </button>
+                            </span>
                           </span>
                         );
                       })}

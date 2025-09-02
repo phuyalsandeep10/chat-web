@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { TeamsService } from '@/services/staffmanagment/teams/teams.service';
 
@@ -13,15 +13,22 @@ interface UpdateTeamMembersPayload {
 }
 
 export const useUpdateTeamMembersById = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({ teamId, members }: UpdateTeamMembersPayload) =>
       TeamsService.updateTeamMembersById(teamId, members),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast.success('Team members updated successfully');
+      {
+        queryClient.invalidateQueries({
+          queryKey: ['teamMembersById', variables.teamId],
+        });
+      }
     },
     onError: (error: any) => {
       toast.error(
-        error?.response?.data?.message || 'Failed to update team members',
+        error?.response?.data?.data || 'Failed to update team members',
       );
     },
   });

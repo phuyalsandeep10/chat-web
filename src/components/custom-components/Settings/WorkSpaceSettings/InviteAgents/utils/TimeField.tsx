@@ -5,24 +5,7 @@ import { Icons } from '@/components/ui/Icons';
 import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
 import TimePicker from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Invites/InviteClock';
 import { Control } from 'react-hook-form';
-import { AddorEditFormValues } from '../types';
-
-type TimeType = {
-  hours: number;
-  minutes: number;
-  period: 'AM' | 'PM';
-};
-
-type TimeFieldProps = {
-  name: keyof AddorEditFormValues;
-  label: string;
-  placeholder?: string;
-  control: Control<AddorEditFormValues>;
-  onChange: (value: string) => void;
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  defaultValue?: string;
-};
+import { TimeType, TimeFieldProps } from './types';
 
 const TimeField: React.FC<TimeFieldProps> = ({
   name,
@@ -46,6 +29,12 @@ const TimeField: React.FC<TimeFieldProps> = ({
       ? parseTime(defaultValue)
       : { hours: 7, minutes: 0, period: 'AM' },
   );
+
+  useEffect(() => {
+    if (defaultValue) {
+      setTime(parseTime(defaultValue));
+    }
+  }, [defaultValue]);
 
   // Update react-hook-form when time changes
   useEffect(() => {
@@ -78,7 +67,7 @@ const TimeField: React.FC<TimeFieldProps> = ({
         <InputField
           name={name}
           control={control}
-          placeholder={placeholder}
+          placeholder={inputValue}
           inputClassName="!text-xs leading-[21px] font-normal"
           labelClassName="text-base leading-[26px] font-medium"
           label={label}

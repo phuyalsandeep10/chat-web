@@ -25,8 +25,6 @@ const TeamView: React.FC<TeamViewProps> = ({ teamId, data }) => {
     setSelectedMemberId(memberId);
     setOpenTeamInfo(true);
   };
-
-  console.log(data, 'data in team view');
   return (
     <Card className="w-full max-w-full border-0 p-0 px-5 shadow-none">
       <CardHeader className="inline-flex items-center gap-x-[17px] gap-y-[14px] p-0">

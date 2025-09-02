@@ -37,8 +37,6 @@ export function AgenChatHistoryCard({
     },
   });
 
-  console.log('form data', form);
-
   const {
     email,
     user_name,

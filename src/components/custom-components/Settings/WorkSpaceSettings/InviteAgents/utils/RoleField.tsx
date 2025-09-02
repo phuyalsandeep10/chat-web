@@ -9,24 +9,31 @@ const RoleField: React.FC<FieldProps> = ({ control, roleTableData }) => {
       <Controller
         name="role"
         control={control}
-        render={({ field }) => (
-          <SelectField
-            {...field}
-            required
-            placeholder="Admin"
-            className="font-outfit rounded-md p-0 py-1 text-sm leading-[16px] font-medium"
-            placeholderClassName="font-outfit rounded-md text-xs leading-[21px] font-normal text-black"
-            LabelClassName="text-base leading-[26px] font-medium"
-            label="Role"
-            isMulti={true}
-            options={
-              roleTableData?.data?.map((role: any) => ({
-                value: role.role_name, // keep name
-                label: role.role_name,
-              })) || []
-            }
-          />
-        )}
+        render={({ field }) => {
+          const value = Array.isArray(field.value)
+            ? field.value.map((v: any) =>
+                typeof v === 'string' ? { value: v, label: v } : v,
+              )
+            : [];
+          return (
+            <SelectField
+              {...field}
+              required
+              placeholder="Select Role"
+              className="font-outfit rounded-md p-0 py-1 text-sm leading-[16px] font-medium"
+              placeholderClassName="font-outfit rounded-md text-xs leading-[21px] font-normal text-black"
+              LabelClassName="text-base leading-[26px] font-medium"
+              label="Role"
+              isMulti={true}
+              options={
+                roleTableData?.data?.map((role: any) => ({
+                  value: role.role_name,
+                  label: role.role_name,
+                })) || []
+              }
+            />
+          );
+        }}
       />
     </div>
   );

@@ -123,7 +123,6 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
       },
     });
   };
-
   // handle edit team member by id
   const handleEditTeamMemberById: EditTeamMemberHandler = (formData) => {
     if (!teamId) return;
@@ -142,7 +141,6 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
     updateTeamMemberById({ teamId, members: membersPayload });
     setOpenEdit(false);
   };
-
   const orders: TeamTableOrderRow[] = React.useMemo(() => {
     return (
       teamsData?.data?.map((teamsDataItems: any) => ({

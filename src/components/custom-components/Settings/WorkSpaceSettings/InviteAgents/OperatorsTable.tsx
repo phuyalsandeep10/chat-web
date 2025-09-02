@@ -183,14 +183,19 @@ export default function OperatorsTable({
             id: selectedOperator?.id,
             email: selectedOperator?.email,
             fullName: selectedOperator?.user_name,
-            role: selectedOperator?.role_name,
-            shift: selectedOperator?.shift,
-            startTime: selectedOperator?.startTime,
-            endTime: selectedOperator?.endTime,
-            clientHandled: selectedOperator?.client_handled,
-            totalHours: selectedOperator?.totalHours,
-            team: selectedOperator?.team,
-            day: selectedOperator?.day,
+            role:
+              selectedOperator?.roles?.map(
+                (r: { role_name: string }) => r.role_name,
+              ) || [],
+            shift: selectedOperator?.shift || '',
+            startTime: selectedOperator?.start_time || '',
+            endTime: selectedOperator?.end_time || '',
+            clientHandled: selectedOperator?.client_handled || '',
+            totalHours: selectedOperator?.total_hours || '',
+            team: selectedOperator?.team?.name || '',
+            // day: selectedOperator?.day
+            //   ? [selectedOperator.day.toLowerCase()]
+            //   : '',
           }}
           onClose={() => setOpenEdit(false)}
         />

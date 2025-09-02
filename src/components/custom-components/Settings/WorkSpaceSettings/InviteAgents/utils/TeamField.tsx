@@ -1,6 +1,7 @@
 import React from 'react';
 import Label from '@/components/common/hook-form/Label';
-import { Controller, Control } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
+import { Team, TeamFieldProps } from './types';
 
 import {
   Select,
@@ -10,24 +11,14 @@ import {
   SelectItem,
   SelectGroup,
 } from '@/components/ui/select';
-import { AddorEditFormValues } from '../types';
-
-type Team = {
-  id: number;
-  name: string;
-};
-
-type TeamFieldProps = {
-  control: Control<AddorEditFormValues>;
-  teamsData: Team[]; // Team should be defined in types.ts
-  setOpenInviteMember: React.Dispatch<React.SetStateAction<boolean>>;
-};
 
 const TeamField: React.FC<TeamFieldProps> = ({
   control,
   teamsData,
   setOpenInviteMember,
 }) => {
+  const teamsArray = teamsData?.data || [];
+
   return (
     <div className="col-span-full">
       <Label
@@ -58,7 +49,7 @@ const TeamField: React.FC<TeamFieldProps> = ({
             <SelectContent>
               <SelectGroup>
                 {/* teamsData?.data?.map((teamsDataItems: any) => ({ */}
-                {teamsData?.map((team: Team) => (
+                {teamsArray.map((team: Team) => (
                   <SelectItem key={team.id} value={team.name}>
                     <span className="font-outfit rounded-md px-3 py-1 text-sm leading-[16px] font-medium">
                       {team.name}

@@ -32,13 +32,6 @@ export default function InviteTable({ handleOpenDialog }: InviteAgentProps) {
     isSuccess: deleteSuccess,
   } = useDeleteInvite();
 
-  useEffect(() => {
-    if (getInviteMember) {
-      console.log('Invite Data:', getInviteMember);
-      // no need to return here
-    }
-  }, [getInviteMember]);
-
   const orders: OrderRow[] = React.useMemo(() => {
     return (
       getInviteMember?.data?.map((inviteMemberItems: any) => ({

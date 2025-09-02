@@ -58,7 +58,6 @@ const PhoneInput: React.FC = () => {
 
   const onSubmit = (data: FormData) => {
     const fullPhone = `${selectedCountry?.dialCode}${data.phoneNumber}`;
-    console.log('Full Phone Number:', fullPhone);
   };
 
   return (
