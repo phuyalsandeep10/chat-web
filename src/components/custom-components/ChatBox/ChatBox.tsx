@@ -419,6 +419,9 @@ export default function ChatBox() {
               )}
             >
               {/* Date  */}
+              {/* email input here */}
+
+              <EmailInput />
 
               {!isConnected && (
                 <div className="mt-8 text-center text-gray-500">
@@ -451,8 +454,6 @@ export default function ChatBox() {
                 </div>
               ))}
 
-              {/* email input here */}
-              <EmailInput />
               {otherTyping && (
                 <div className="mt-4 flex items-center space-x-1">
                   <div className="flex space-x-1">
