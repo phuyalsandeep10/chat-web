@@ -21,9 +21,11 @@ export default function ProtectedDashboardLayout({
   const router = useRouter();
   const authTokens = AuthService.getAuthTokens();
   const { socket: TicketSlaSocket } = useTickectSlaSocket();
+  const [slaData, setSlaData] = useState<any | null>(null);
 
   const showTicketSlaAlert = (data: any) => {
-    console.log('data', data);
+    console.log('showTicketSlaAlert data', data);
+    setSlaData(data);
     setOpenTicketBreachDialog(true);
   };
 
@@ -55,6 +57,7 @@ export default function ProtectedDashboardLayout({
           {/* <SidebarTrigger /> */}
           <div className="w-full">{children}</div>
           <TicketSLABreachDialog
+            data={slaData}
             open={openTicketSLABeachDialog}
             setOpen={setOpenTicketBreachDialog}
           />

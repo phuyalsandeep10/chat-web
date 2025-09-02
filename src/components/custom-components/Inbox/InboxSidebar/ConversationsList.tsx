@@ -69,6 +69,8 @@ const ConversationsList = () => {
     return lastMessage && !lastMessage?.seen && lastMessage?.user_id === null;
   };
 
+  // console.log(all_conversations)
+
   return (
     <>
       <div className="mt-[26px]">
@@ -122,7 +124,7 @@ const ConversationsList = () => {
                 className=""
               >
                 <div
-                  className={`border-gray-light border-b-gray-light hover:bg-secondary-hover flex items-center rounded-lg border border-r-0 border-b border-l-0 py-4 pr-2.5 pl-3.5 ${
+                  className={`border-gray-light border-b-gray-light hover:bg-secondary-hover relative flex items-center rounded-lg border border-r-0 border-b border-l-0 py-4 pr-2.5 pl-3.5 ${
                     Number(params?.userId) === conversation?.id
                       ? 'bg-secondary-hover'
                       : ''
@@ -170,6 +172,9 @@ const ConversationsList = () => {
                       />
                     </div>
                   </div>
+                  {conversation?.customer?.is_online && (
+                    <div className="bg-brand-primary absolute top-[10px] left-[10px] min-h-2.5 min-w-2.5 rounded-full"></div>
+                  )}
                 </div>
               </Link>
             );

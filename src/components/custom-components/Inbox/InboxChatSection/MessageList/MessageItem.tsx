@@ -19,16 +19,12 @@ interface MessageItemProps {
   message: any;
   onReply: (messageText: string) => void;
   handleEditMessage: (messageText: string) => void;
-  showTyping: boolean;
-  typingmessage: string;
 }
 
 const MessageItem = ({
   message,
   onReply,
   handleEditMessage,
-  showTyping,
-  typingmessage,
 }: MessageItemProps) => {
   const handleReplyClick = () => {
     onReply(message);
@@ -53,7 +49,10 @@ const MessageItem = ({
   }, [message]);
 
   return (
-    <div className={`flex ${isUserId ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div
+      className={`flex ${isUserId ? 'justify-end' : 'justify-start'} mb-4`}
+      key={message?.id}
+    >
       {!isUserId && (
         <div className="bg-gray-light mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
           <span className="text-theme-text-dark text-xs font-medium">
@@ -65,7 +64,7 @@ const MessageItem = ({
       <div className={`flex`}>
         <div className={`flex ${isUserId ? 'flex-col' : ''}`}>
           {message?.edited_content && (
-            <div className="group relative mr-12 flex justify-end">
+            <div className="group relative mr-16 flex justify-end">
               <span className="text-info text-xs font-medium">Edited</span>
               <div className="text-info bg-info-light absolute top-[-30px] hidden rounded-lg px-3 py-1.5 text-xs group-hover:block">
                 <div
@@ -89,9 +88,9 @@ const MessageItem = ({
                     >
                       Edit Message
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-error focus:text-error flex cursor-pointer items-center gap-2">
+                    {/* <DropdownMenuItem className="text-error focus:text-error flex cursor-pointer items-center gap-2">
                       Delete
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -126,7 +125,10 @@ const MessageItem = ({
                   isUserId ? 'text-sm font-normal break-all' : ''
                 } ${message?.reply_to && message?.reply_to_id && 'mt-1'}`}
               >
-                <div dangerouslySetInnerHTML={{ __html: message?.content }} />
+                <div
+                  className="message__content prose prose-sm max-w-none [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
+                  dangerouslySetInnerHTML={{ __html: message?.content }}
+                />
               </div>
               <div
                 className={`mt-1 flex items-center text-xs font-normal ${isUserId ? 'justify-start text-left text-white' : 'text-theme-text-primary justify-end'}`}
@@ -137,15 +139,15 @@ const MessageItem = ({
 
             <div className="">
               {isUserId && (
-                <Avatar>
+                <Avatar className="min-h-12 min-w-12 overflow-hidden">
                   {message?.user && message?.user?.image ? (
                     <AvatarImage
                       src={message?.user?.image}
                       alt="user image"
-                      className="ml-2 flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full"
+                      className="ml-2 flex h-full w-full rounded-full object-center"
                     />
                   ) : (
-                    <AvatarFallback className="text-theme-text-dark text-xs font-medium">
+                    <AvatarFallback className="text-theme-text-dark h-full w-full text-xs font-medium">
                       {message?.user?.name
                         ?.substring(0, 2)
                         ?.toLocaleUpperCase()}
@@ -171,18 +173,18 @@ const MessageItem = ({
                 <MoreVertical size={16} />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
+                {/* <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
                   Create a ticket
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem
                   className="flex cursor-pointer items-center gap-2"
                   onClick={handleReplyClick}
                 >
                   Reply
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-error focus:text-error flex cursor-pointer items-center gap-2">
+                {/* <DropdownMenuItem className="text-error focus:text-error flex cursor-pointer items-center gap-2">
                   Delete
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

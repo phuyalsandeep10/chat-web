@@ -16,7 +16,7 @@ const Ticket = () => {
       />
       <CreateTicketForm />
       <TicketOverview />
-      <TicketDetails />
+      {/* <TicketDetails /> */}
     </div>
   );
 };

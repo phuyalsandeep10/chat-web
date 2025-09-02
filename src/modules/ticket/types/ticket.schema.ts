@@ -26,15 +26,15 @@ export const createTicketSchema = (isAddingNewEmail: boolean) =>
           .string()
           .min(1, 'Phone number is required')
           .refine(
-            (val) => /^[0-9+-]+$/.test(val),
-            'Phone number must contain only numbers, +, or -',
+            (val) => /^[0-9+() -]+$/.test(val),
+            'Phone number can only contain numbers, +, spaces, parentheses, and -',
           )
       : z
           .string()
           .optional()
           .refine(
-            (val) => !val || /^[0-9+-]+$/.test(val),
-            'Phone number must contain only numbers, +, or -',
+            (val) => !val || /^[0-9+() -]+$/.test(val),
+            'Phone number can only contain numbers, +, spaces, parentheses, and -',
           ),
     customer_location: isAddingNewEmail
       ? z.string().min(1, 'Location is required')

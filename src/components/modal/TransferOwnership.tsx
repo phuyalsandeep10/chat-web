@@ -39,7 +39,7 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
   const handleInvite = (userId: number) => {
     sendOwnershipInvitation.mutate(
       {
-        workspace_owner_id: userId,
+        owner_id: userId,
       },
       {
         onSuccess: (data) => {

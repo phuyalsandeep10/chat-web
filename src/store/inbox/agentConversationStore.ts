@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { ConversationService } from '@/services/inbox/agentCoversation.service';
-import { ConversationResponse, ConversationState } from './types';
+import { ConversationResponse, ConversationState, Message } from './types';
 import axiosInstance from '@/apiConfigs/axiosInstance';
 
 export const useAgentConversationStore = create<ConversationState>((set) => ({
   conversation: null,
   customer: null,
+  members: [],
   messages: [],
   all_conversations: [],
   visitorCount:
@@ -32,11 +33,49 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
     fetch_all_conversations: false,
     edit_message: false,
   },
-  setConversationData: (data: ConversationResponse) =>
+  setConversationData: (data: ConversationResponse) => {
+    // console.log('data', data);
     set({
       conversation: data.data.conversation,
       customer: data.data.customer,
+      members: data?.data?.members,
+    });
+  },
+  setCustomerIsOnlineOffline: (data) =>
+    set((state) => {
+      const updatedConversations = state.all_conversations.map((conv) =>
+        conv.customer_id === data?.customer?.id
+          ? {
+              ...conv,
+              customer: data?.customer,
+            }
+          : conv,
+      );
+      return {
+        all_conversations: updatedConversations,
+      };
     }),
+  setConversationUnresolved: ({
+    conversation_id,
+    is_resolved,
+  }: {
+    conversation_id: number;
+    is_resolved: boolean;
+  }) =>
+    set((state) => {
+      const updatedConversations = state.all_conversations.map((conv) =>
+        conv?.id === conversation_id
+          ? {
+              ...conv,
+              is_resolved: is_resolved,
+            }
+          : conv,
+      );
+      return {
+        all_conversations: updatedConversations,
+      };
+    }),
+
   setMessages: (messages) => set({ messages }),
   addMessageToStore: (message) =>
     set((state) => {
@@ -74,7 +113,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
     }),
   updateMessageSeen: (messageId) =>
     set((state) => ({
-      messages: state.messages.map((m) =>
+      messages: state.messages.map((m: Message) =>
         m.id === messageId ? { ...m, seen: true } : m,
       ),
     })),
@@ -148,9 +187,13 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
       });
       console.log(response);
       set((state) => {
-        const updatedMessages = state.messages.map((msg) =>
+        const updatedMessages = state.messages.map((msg: Message) =>
           msg.id === messageId
-            ? { ...msg, content: response.data.content }
+            ? {
+                ...msg,
+                content: response.data.content,
+                edited_content: response?.data?.edited_content,
+              }
             : msg,
         );
 
@@ -227,6 +270,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
       },
     });
     try {
+      // console.log("reply_to_id",replyToId)
       const response = await ConversationService.createMessage(chatId, {
         content,
         reply_to_id: replyToId,
@@ -306,6 +350,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
     try {
       const data: ConversationResponse =
         await ConversationService.getConversationDetailsById(chatId);
+      console.log('data', data);
       set({
         conversation: data.data.conversation,
         customer: data.data.customer,
@@ -316,6 +361,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
           fetch_all_conversations: false,
           resolve_conversation: false,
         },
+        members: data?.data?.members,
       });
     } catch (error) {
       console.error('Error fetching conversation details:', error);

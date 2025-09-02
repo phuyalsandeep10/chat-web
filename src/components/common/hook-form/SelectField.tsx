@@ -102,7 +102,7 @@ export function SelectField<T extends FieldValues>({
               </Select>
 
               {fieldState.error && (
-                <span className="text-error text-sm">
+                <span className="text-error text-xs">
                   {fieldState.error.message}
                 </span>
               )}

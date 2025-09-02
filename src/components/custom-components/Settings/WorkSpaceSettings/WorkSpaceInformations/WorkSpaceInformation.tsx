@@ -9,15 +9,18 @@ import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useGetOrganizationById } from '@/hooks/organizations/useGetorganizations';
 import WorkspaceImage from './WorkspaceImage';
 import WorkspaceProfile from './WorkspaceProfile';
+import { useEffect } from 'react';
+import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWorkspaceInformation';
 
 export default function WorkspaceInformation() {
+  const { workspace } = useWorkspaceInformationStore();
   const { authData } = useAuthStore();
   const orgId = authData?.data.user.attributes.organization_id;
   const { data: organizationDetails } = useGetOrganizationById(orgId ?? 0, {
     enabled: !!orgId,
   });
 
-  const organization = organizationDetails?.organization;
+  const organization = workspace;
 
   return (
     <>
@@ -35,7 +38,7 @@ export default function WorkspaceInformation() {
         {/* Workspace Information */}
         <div className={cn('mt-10 mb-9')}>
           <Information
-            workspace_owner={organization?.workspace_owner_name}
+            workspace_owner={organization?.owner_name}
             creation_date={organization?.created_at}
           />
         </div>

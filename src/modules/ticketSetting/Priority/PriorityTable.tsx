@@ -9,6 +9,20 @@ import { usePrioritiesTicket } from './hooks/usePriorityTicket';
 import { Icons } from '@/components/ui/Icons';
 import DeleteModal from '@/components/modal/DeleteModal';
 import { useState } from 'react';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+
+//  Zod Schema for validation
+const prioritySchema = z.object({
+  newPriorityName: z
+    .string()
+    .min(2, 'Priority name must be at least 2 characters long')
+    .max(50, 'Priority name must be under 50 characters'),
+  level: z.string().nonempty('Please select a level'),
+});
+
+type PriorityFormData = z.infer<typeof prioritySchema>;
 
 export default function TicketPriorityPage() {
   const {
@@ -34,6 +48,19 @@ export default function TicketPriorityPage() {
   const [selectedPriorityId, setSelectedPriorityId] = useState<number | null>(
     null,
   );
+
+  //  Setup React Hook Form with Zod Resolver
+  const {
+    control: formControl,
+    handleSubmit: formHandleSubmit,
+    formState: { errors },
+  } = useForm<PriorityFormData>({
+    resolver: zodResolver(prioritySchema),
+    defaultValues: {
+      newPriorityName: '',
+      level: '',
+    },
+  });
 
   const openDeleteModal = (priorityId: number) => {
     setSelectedPriorityId(priorityId);
@@ -129,22 +156,22 @@ export default function TicketPriorityPage() {
             ))}
           </div>
 
-          {/* Add New Priority */}
+          {/*  Add New Priority with Validation */}
           <div className="border-t pt-6">
             <form
-              onSubmit={handleSubmit(onAddPriority)}
-              className="flex items-center gap-4"
+              onSubmit={formHandleSubmit(onAddPriority)}
+              className="flex items-start gap-4"
             >
-              <div className="font-outfit text-disabled-foreground h-9 flex-1 text-sm font-medium">
+              <div className="flex-1">
                 <InputField
-                  control={control}
+                  control={formControl}
                   name="newPriorityName"
                   placeholder="New Priority Name"
                 />
               </div>
-              <div className="font-outfit text-disabled-foreground h-9 w-48 text-sm font-medium">
+              <div className="w-48">
                 <SelectField
-                  control={control}
+                  control={formControl}
                   name="level"
                   options={levelOptions}
                   placeholder="Level"
@@ -185,7 +212,6 @@ export default function TicketPriorityPage() {
       </TooltipProvider>
 
       {/* Delete Modal */}
-
       <DeleteModal
         open={isDeleteModalOpen}
         onOpenChange={setDeleteModalOpen}
@@ -194,7 +220,6 @@ export default function TicketPriorityPage() {
         description={`Deleting this ticket is a permanent action and cannot be undone. This may result in the loss of important information and context related to the issue.`}
         descriptionColor="text-alert-prominent font-outfit text-xs font-normal"
         onConfirm={handleConfirmDelete}
-        // onCancel={setDeleteModalOpen}
         icon={''}
       />
     </>

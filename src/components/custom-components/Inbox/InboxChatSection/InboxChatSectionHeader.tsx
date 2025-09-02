@@ -10,7 +10,6 @@ import { Icons } from '@/components/ui/Icons';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import { useUiStore } from '@/store/UiStore/useUiStore';
 import { ChevronDown, Languages, Ticket } from 'lucide-react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
@@ -91,15 +90,20 @@ const InboxChatSectionHeader = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-32">
-              <DropdownMenuItem
-                onClick={() => {
-                  resolveConversation(Number(conversation?.id));
-                  router.push('/inbox');
-                }}
-                className="text-brand-dark hover:bg-gray-50"
-              >
-                Resolve
-              </DropdownMenuItem>
+              {conversation?.is_resolved ? null : (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      resolveConversation(Number(conversation?.id));
+                      // router.push('/inbox');
+                    }}
+                    className="text-brand-dark hover:bg-gray-50"
+                  >
+                    Resolve
+                  </DropdownMenuItem>
+                </>
+              )}
+
               <DropdownMenuItem className="text-red-600 hover:bg-red-50">
                 Block
               </DropdownMenuItem>

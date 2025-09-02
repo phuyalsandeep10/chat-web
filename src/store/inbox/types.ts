@@ -30,12 +30,49 @@ export interface Conversation {
   attributes: Record<string, any>;
 }
 
+export interface MemberUser {
+  id: number;
+  name: string;
+  email: string | null;
+  mobile: string | null;
+  address: string | null;
+  country: string | null;
+  language: string | null;
+  last_seen: string | null;
+  email_verified_at: string | null;
+  is_superuser: boolean;
+  is_active: boolean;
+  is_staff: boolean;
+  two_fa_enabled: boolean;
+  two_fa_secret: string | null;
+  two_fa_auth_url: string | null;
+  image: string | null;
+  attributes: Record<string, any> | null;
+  created_at: string;
+  updated_at: string;
+  is_online: boolean;
+}
+
+export interface Member {
+  id: number;
+  conversation_id: number;
+  user_id: number;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  created_by_id: number | null;
+  updated_by_id: number | null;
+  user: MemberUser;
+}
+
 export interface ConversationResponse {
   success: boolean;
   message: string;
   data: {
     conversation: Conversation;
     customer: Customer;
+    members: Member[];
   };
 }
 
@@ -60,7 +97,8 @@ export interface Message {
 export interface ConversationState {
   conversation: Conversation | null;
   customer: Customer | null;
-  messages: Message[];
+  members: Member[];
+  messages: any;
   all_conversations: any[];
   visitorCount: number;
   messageNotificationCount: number;
@@ -101,4 +139,6 @@ export interface ConversationState {
   resetVisitorCount: () => void;
   incrementMessageNotificationCount: () => void;
   resetMessageNotificationCount: () => void;
+  setCustomerIsOnlineOffline: (data: any) => void;
+  setConversationUnresolved: (data: any) => void;
 }

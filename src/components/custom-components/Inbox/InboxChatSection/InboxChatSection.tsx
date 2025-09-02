@@ -27,6 +27,11 @@ const InboxChatSection = ({
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+  useEffect(() => {
+    if (showTyping) {
+      endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [showTyping]);
 
   const groupedMessages = useMemo(() => {
     const groups: { [key: string]: Message[] } = {};
@@ -72,14 +77,12 @@ const InboxChatSection = ({
               <div className="bg-gray-light h-[1px] flex-1"></div>
             </div>
 
-            {groupedMessages[day].map((message, index) => (
+            {groupedMessages[day].map((message) => (
               <MessageItem
-                key={`${day}-${message.id || index}`}
+                key={message.id}
                 message={message}
                 onReply={onReply}
                 handleEditMessage={handleEditMessage}
-                showTyping={showTyping}
-                typingmessage={typingmessage}
               />
             ))}
           </div>
@@ -99,7 +102,7 @@ const InboxChatSection = ({
                   <DottedAnimation size="sm" color="gray" />
                 </div>
                 <div className="text-theme-text-primary mt-2 box-border max-h-[119px] min-h-[119px] w-full overflow-y-auto rounded-xl border border-[#D4D4D4] px-5 py-[15px] text-sm leading-[21px] font-medium md:w-[462px]">
-                  {typingmessage}
+                  <div dangerouslySetInnerHTML={{ __html: typingmessage }} />
                 </div>
               </div>
             </div>
