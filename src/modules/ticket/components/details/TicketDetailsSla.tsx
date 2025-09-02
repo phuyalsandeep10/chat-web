@@ -1,49 +1,43 @@
 'use client';
+
 import { Icons } from '@/components/ui/Icons';
 import React, { useEffect, useState } from 'react';
 import { parseISO, addMinutes, formatDistanceToNow } from 'date-fns';
 import { getConversation } from '@/services/ticket/conversation';
 
 interface TicketDetailsSlaProps {
-  ticket: any; // Replace with proper type if available
+  ticket: any;
 }
 
-// ✅ Format SLA time from seconds → human-readable (Xd Xh Xm)
 const formatSlaTime = (seconds: number | undefined | null) => {
   if (seconds == null) return 'N/A';
-
   const days = Math.floor(seconds / 86400);
   const hours = Math.floor((seconds % 86400) / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
-
   const parts = [];
   if (days > 0) parts.push(`${days}d`);
   if (hours > 0) parts.push(`${hours}h`);
   if (minutes > 0) parts.push(`${minutes}m`);
   if (parts.length === 0) parts.push(`${seconds}s`);
-
   return parts.join(' ');
 };
 
-// ✅ Convert UTC → Nepal time Date object
-const toNepaliDate = (isoDate: string) => {
-  const date = parseISO(isoDate);
-  return addMinutes(date, 345); // +5:45 offset
-};
+const toNepaliDate = (isoDate: string) => addMinutes(parseISO(isoDate), 345);
 
-const TicketDetailsSla: React.FC<TicketDetailsSlaProps> = ({ ticket }) => {
+export const TicketDetailsSla: React.FC<TicketDetailsSlaProps> = ({
+  ticket,
+}) => {
   const [lastAgentDate, setLastAgentDate] = useState<Date | null>(null);
   const [lastCustomerDate, setLastCustomerDate] = useState<Date | null>(null);
   const [now, setNow] = useState<Date>(new Date());
 
-  // ⏱ keep updating current time every 30s for live "time ago"
+  // Live "time ago" every 3s
   useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(new Date());
-    }, 30000); // update every 30s
+    const interval = setInterval(() => setNow(new Date()), 3000);
     return () => clearInterval(interval);
   }, []);
 
+  // Refetch conversations whenever ticket changes
   useEffect(() => {
     if (!ticket?.id) return;
 
@@ -59,14 +53,18 @@ const TicketDetailsSla: React.FC<TicketDetailsSlaProps> = ({ ticket }) => {
           (msg: any) => msg.direction === 'incoming',
         );
 
-        const lastAgent = agentMessages[agentMessages.length - 1];
-        const lastCustomer = customerMessages[customerMessages.length - 1];
-
-        if (lastAgent) setLastAgentDate(toNepaliDate(lastAgent.created_at));
-        if (lastCustomer)
-          setLastCustomerDate(toNepaliDate(lastCustomer.created_at));
-      } catch (error) {
-        console.error('Failed to fetch conversation', error);
+        setLastAgentDate(
+          agentMessages.length
+            ? toNepaliDate(agentMessages.at(-1).created_at)
+            : null,
+        );
+        setLastCustomerDate(
+          customerMessages.length
+            ? toNepaliDate(customerMessages.at(-1).created_at)
+            : null,
+        );
+      } catch (err) {
+        console.error('Failed to fetch conversation', err);
       }
     };
 
@@ -83,42 +81,41 @@ const TicketDetailsSla: React.FC<TicketDetailsSlaProps> = ({ ticket }) => {
         </span>
         SLA Details
       </h1>
-
       <div className="mx-4 mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="font-outfit text-brand-dark border-gray-light flex-col justify-between rounded-md border p-2 text-sm font-medium">
           <h1 className="mb-3">Ticket ID</h1>
-          <p>#{ticket.id}</p>
+          <p className="text-black">#{ticket.id}</p>
         </div>
-
         <div className="font-outfit text-brand-dark border-gray-light flex-col justify-between rounded-md border p-2 text-sm font-medium">
           <h1 className="mb-3">SLA Policy</h1>
-          <p>{ticket.sla?.name || 'N/A'}</p>
+          <p className="text-black">{ticket.sla?.name || 'N/A'}</p>
         </div>
-
         <div className="font-outfit text-brand-dark border-gray-light flex-col justify-between rounded-md border p-2 text-sm font-medium">
           <h1 className="mb-3">Response Time</h1>
-          <p>{formatSlaTime(ticket.sla?.response_time)}</p>
+          <p className="text-black">
+            {formatSlaTime(ticket.sla?.response_time)}
+          </p>
         </div>
-
         <div className="font-outfit text-brand-dark border-gray-light flex-col justify-between rounded-md border p-2 text-sm font-medium">
           <h1 className="mb-3">Resolution Time</h1>
-          <p>{formatSlaTime(ticket.sla?.resolution_time)}</p>
+          <p className="text-black">
+            {formatSlaTime(ticket.sla?.resolution_time)}
+          </p>
         </div>
-
         <div className="font-outfit text-brand-dark border-gray-light flex-col justify-between rounded-md border p-2 text-sm font-medium">
           <h1 className="mb-3">Last Agent Reply</h1>
-          <p>
+          <p className="text-black">
             {lastAgentDate
-              ? formatDistanceToNow(lastAgentDate, {
-                  addSuffix: true,
-                }).replace(/^about\s/, '')
+              ? formatDistanceToNow(lastAgentDate, { addSuffix: true }).replace(
+                  /^about\s/,
+                  '',
+                )
               : 'N/A'}
           </p>
         </div>
-
         <div className="font-outfit text-brand-dark border-gray-light flex-col justify-between rounded-md border p-2 text-sm font-medium">
           <h1 className="mb-3">Last Customer Reply</h1>
-          <p>
+          <p className="text-black">
             {lastCustomerDate
               ? formatDistanceToNow(lastCustomerDate, {
                   addSuffix: true,
@@ -130,5 +127,3 @@ const TicketDetailsSla: React.FC<TicketDetailsSlaProps> = ({ ticket }) => {
     </div>
   );
 };
-
-export default TicketDetailsSla;

@@ -27,7 +27,7 @@ const TicketDetails = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [oldestMessageId, setOldestMessageId] = useState<number | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // New states for editing
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -68,6 +68,10 @@ const TicketDetails = () => {
 
     fetchInitialData();
   }, [socket, ticketId]);
+
+  const handleUpdateTicket = (updatedTicket: any) => {
+    setTicket((prev: any) => ({ ...prev, ...updatedTicket }));
+  };
 
   const loadMoreMessages = useCallback(async () => {
     if (isLoadingMore || !hasMore || !oldestMessageId) return;
@@ -192,7 +196,9 @@ const TicketDetails = () => {
         <TicketDetailsHeader
           sidebarOpen={sidebarOpen}
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          ticketId={Number(ticketId)}
+          ticketId={ticketId}
+          ticket={ticket}
+          onUpdateTicket={handleUpdateTicket}
         />
         <LanguageSelector />
         <Conversation
@@ -250,14 +256,14 @@ const TicketDetails = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-[400px] bg-white shadow-lg transition-transform duration-300 ${
+        className={`fixed top-0 right-0 h-full w-[400px] bg-white transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <TicketRightSidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          ticketId={Number(ticketId)}
+          ticket={ticket}
         />
       </div>
     </div>
