@@ -3,14 +3,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { getTicketDetails } from '@/services/ticket/services';
 import { usePriorities } from '@/modules/ticket/hooks/usePriorities';
-import {
-  useTicketStatuses,
-  TicketStatus,
-} from '@/modules/ticket/hooks/useTicketStatus';
+import { useTicketStatuses } from '@/modules/ticket/hooks/useTicketStatus';
 import axiosInstance from '@/apiConfigs/axiosInstance';
 import { showToast } from '@/shared/toast';
 
-// ---- DEBOUNCE HOOK ----
+export interface Note {
+  id: string;
+  author: string;
+  avatar?: string;
+  content: string;
+  timestamp: string;
+}
+
+// ------------------ DEBOUNCE HOOK ------------------
 function useDebounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debounced = (...args: Parameters<T>) => {
@@ -20,7 +25,7 @@ function useDebounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
   return debounced as T;
 }
 
-// ---- PATCH APIs ----
+// ------------------ PATCH APIs ------------------
 const updateTicketPriorityApi = async (
   ticketId: number,
   priorityId: string,
@@ -38,8 +43,11 @@ const updateTicketStatusApi = async (ticketId: number, statusId: string) => {
   return response.data;
 };
 
-// ---- HOOK ----
-export const useTicketHeaderLogic = (ticketId: number) => {
+// ------------------ HOOK ------------------
+export const useTicketHeaderLogic = (
+  ticketId: number,
+  onUpdateTicket?: (updated: any) => void,
+) => {
   const [ticket, setTicket] = useState<any>(null);
   const [priorityId, setPriorityId] = useState('');
   const [statusId, setStatusId] = useState('');
@@ -49,47 +57,47 @@ export const useTicketHeaderLogic = (ticketId: number) => {
   const { data: priorities } = usePriorities();
   const { data: statuses } = useTicketStatuses();
 
-  // Fetch ticket details
-  useEffect(() => {
+  // Fetch ticket
+  const fetchTicket = async () => {
     if (!ticketId) return;
+    try {
+      const response = await getTicketDetails(ticketId);
+      const data = response.data;
 
-    const fetchTicket = async () => {
-      try {
-        const response = await getTicketDetails(ticketId);
-        const data = response.data;
+      setTicket(data);
+      setPriorityId(data.priority?.id?.toString() || '');
+      setStatusId(data.status?.id?.toString() || '');
+      setAssignees(data.assignees || []);
+      setAgent(data.assignees?.[0]?.name || data.created_by?.name || '');
 
-        setTicket(data);
-        setPriorityId(data.priority?.id?.toString() || '');
-        setStatusId(data.status?.id?.toString() || '');
-        setAssignees(data.assignees || []);
+      onUpdateTicket?.(data);
+    } catch (err) {
+      console.error('Failed to fetch ticket', err);
+    }
+  };
 
-        if (data.assignees?.length > 0) setAgent(data.assignees[0].name);
-        else if (data.created_by) setAgent(data.created_by.name);
-      } catch (err) {
-        console.error('Failed to fetch ticket', err);
-      }
-    };
-
+  useEffect(() => {
     fetchTicket();
   }, [ticketId]);
 
-  // Debounced API calls
+  // Debounced PATCH functions
   const debouncedUpdatePriority = useDebounce(async (newPriorityId: string) => {
     if (!ticketId) return;
     try {
-      const data = await updateTicketPriorityApi(ticketId, newPriorityId);
+      await updateTicketPriorityApi(ticketId, newPriorityId);
+      const updated = await getTicketDetails(ticketId);
+      setTicket(updated.data);
+      setPriorityId(updated.data.priority?.id?.toString() || '');
+      onUpdateTicket?.(updated.data);
       showToast({
         title: 'Success',
-        description: data?.message || 'Priority updated successfully!',
+        description: 'Priority updated!',
         variant: 'success',
       });
     } catch (err: any) {
       showToast({
         title: 'Error',
-        description:
-          err.response?.data?.message ||
-          err.message ||
-          'Failed to update priority',
+        description: err?.response?.data?.message || err.message,
         variant: 'error',
       });
     }
@@ -98,25 +106,25 @@ export const useTicketHeaderLogic = (ticketId: number) => {
   const debouncedUpdateStatus = useDebounce(async (newStatusId: string) => {
     if (!ticketId) return;
     try {
-      const data = await updateTicketStatusApi(ticketId, newStatusId);
+      await updateTicketStatusApi(ticketId, newStatusId);
+      const updated = await getTicketDetails(ticketId);
+      setTicket(updated.data);
+      setStatusId(updated.data.status?.id?.toString() || '');
+      onUpdateTicket?.(updated.data);
       showToast({
         title: 'Success',
-        description: data?.message || 'Status updated successfully!',
+        description: 'Status updated!',
         variant: 'success',
       });
     } catch (err: any) {
       showToast({
         title: 'Error',
-        description:
-          err.response?.data?.message ||
-          err.message ||
-          'Failed to update status',
+        description: err?.response?.data?.message || err.message,
         variant: 'error',
       });
     }
   }, 1000);
 
-  // Handlers
   const handlePriorityChange = (value: string) => {
     setPriorityId(value);
     debouncedUpdatePriority(value);

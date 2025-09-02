@@ -1,7 +1,19 @@
 import React, { useState } from 'react';
 import { Icons } from '@/components/ui/Icons';
 import { Checkbox } from '@/components/ui/checkbox';
-import { FilterComponentProps } from './types';
+
+interface FilterComponentProps {
+  statusOptions: string[];
+  sortOptions: string[];
+  onStatusChange?: (filters: string[]) => void;
+  onSortChange?: (option: string) => void;
+  statusLabel: string;
+  sortLabel: string;
+  className?: string;
+  getSortIcon?: (option: string, isSelected: boolean) => React.ReactNode;
+  statusFilters: string[];
+  sortOption: string;
+}
 
 const FilterComponent: React.FC<FilterComponentProps> = ({
   statusOptions,
@@ -12,25 +24,21 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
   sortLabel,
   className,
   getSortIcon,
+  statusFilters,
+  sortOption,
 }) => {
-  const [statusFilters, setStatusFilters] = useState<string[]>([]);
-  const [sortOption, setSortOption] = useState<string>('');
-  const [isStatusOpen, setIsStatusOpen] = useState<boolean>(true);
-  const [isSortOpen, setIsSortOpen] = useState<boolean>(true);
+  const [isStatusOpen, setIsStatusOpen] = useState(true);
+  const [isSortOpen, setIsSortOpen] = useState(true);
 
   const toggleStatus = (status: string) => {
-    setStatusFilters((prev) => {
-      const updated = prev.includes(status)
-        ? prev.filter((s) => s !== status)
-        : [...prev, status];
-      onStatusChange?.(updated);
-      return updated;
-    });
+    const updated = statusFilters.includes(status)
+      ? statusFilters.filter((s) => s !== status)
+      : [...statusFilters, status];
+    onStatusChange?.(updated);
   };
 
   const handleSortSelect = (option: string) => {
     const updated = sortOption === option ? '' : option;
-    setSortOption(updated);
     onSortChange?.(updated);
   };
 
@@ -71,6 +79,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
       </div>
 
       <div className="bg-brand-light h-12 w-[1px]" />
+
       <div className="w-[178px]">
         <div
           className="border-grey-light text-theme-text-primary mb-2 flex cursor-pointer items-center justify-between rounded border px-3 py-2 text-xs font-semibold"

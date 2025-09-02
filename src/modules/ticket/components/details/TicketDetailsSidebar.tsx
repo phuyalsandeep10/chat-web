@@ -1,44 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getTicketDetails } from '@/services/ticket/services';
 import { Icons } from '@/components/ui/Icons';
 import { parseISO, addMinutes, format, formatDistanceToNow } from 'date-fns';
-
 import { TicketGeneralInfo } from './TicketGeneralInformation';
-import TicketDetailsSla from './TicketDetailsSla';
+import { TicketDetailsSla } from './TicketDetailsSla';
+import Notes from './Note';
 
 interface TicketRightSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  ticketId: number;
+  ticket: any;
 }
 
 export default function TicketRightSidebar({
   isOpen,
   onClose,
-  ticketId,
+  ticket,
 }: TicketRightSidebarProps) {
-  const [ticket, setTicket] = useState<any>(null);
-
-  useEffect(() => {
-    if (!ticketId) return;
-
-    const fetchTicket = async () => {
-      try {
-        const response = await getTicketDetails(ticketId);
-        setTicket(response.data);
-      } catch (error) {
-        console.error('Failed to fetch ticket details', error);
-      }
-    };
-
-    fetchTicket();
-  }, [ticketId]);
-
   if (!ticket) return <p className="p-4">Loading ticket details...</p>;
 
-  //  Convert UTC string → Nepal Time + add "time ago"
   const formatDate = (
     utcString: string | null,
     mode: 'full' | 'ago' = 'full',
@@ -47,7 +27,6 @@ export default function TicketRightSidebar({
     const nepalDate = addMinutes(parseISO(utcString), 345);
 
     if (mode === 'ago') {
-      // remove "about " if present
       return formatDistanceToNow(nepalDate, { addSuffix: true }).replace(
         /^about\s/,
         '',
@@ -59,12 +38,12 @@ export default function TicketRightSidebar({
 
   return (
     <div
-      className={`fixed top-0 right-0 z-50 flex h-full w-full max-w-[400px] flex-col transition-transform duration-300 ${
+      className={`fixed top-0 right-0 flex h-full w-full max-w-[400px] flex-col transition-transform duration-300 ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
-      {/* Header (sticky) */}
-      <div className="border-gray-light px- sticky top-0 z-10 flex flex-shrink-0 items-center justify-between border-b bg-white py-7">
+      {/* Header */}
+      <div className="border-gray-light sticky top-0 flex flex-shrink-0 items-center justify-between border-b bg-white px-10 py-7">
         <h3 className="font-outfit text-xl font-semibold">
           Ticket Information
         </h3>
@@ -73,8 +52,8 @@ export default function TicketRightSidebar({
         </button>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 space-y-8 overflow-y-auto px-10 pt-4">
+      {/* Content */}
+      <div className="mb-8 flex-1 space-y-8 overflow-y-auto border-l px-10 pt-4">
         {/* Priority, Status, Created At */}
         <div className="flex gap-4">
           <div>
@@ -104,38 +83,14 @@ export default function TicketRightSidebar({
           </div>
         </div>
 
-        {/* General Information */}
+        {/* General Info */}
         <TicketGeneralInfo ticketId={ticket.id} data={ticket} />
 
         {/* SLA */}
-
         <TicketDetailsSla ticket={ticket} />
+        <Notes ticketId={ticket.id} />
 
         {/* Department */}
-        <div>
-          <h4 className="font-semibold">Department</h4>
-          <p>{ticket.department?.name || 'N/A'}</p>
-        </div>
-
-        {/* Created By */}
-        <div>
-          <h4 className="font-semibold">Created By</h4>
-          <p>
-            {ticket.created_by?.name} ({ticket.created_by?.email})
-          </p>
-        </div>
-
-        {/* Dates */}
-        <div className="flex flex-col gap-2">
-          <div>
-            <h4 className="font-semibold">Created At</h4>
-            <p>{formatDate(ticket.created_at)}</p>
-          </div>
-          <div>
-            <h4 className="font-semibold">Opened At</h4>
-            <p>{formatDate(ticket.opened_at)}</p>
-          </div>
-        </div>
       </div>
     </div>
   );
