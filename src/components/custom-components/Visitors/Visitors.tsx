@@ -1,11 +1,12 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import VisitorTable from '@/components/custom-components/Visitors/VisitorTable';
 import Heading from '@/components/custom-components/Visitors/Heading';
 import CurrentVisitors from '@/components/custom-components/Visitors/CurrentVisitors';
 import { Icons } from '@/components/ui/Icons';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getVisitors } from '@/services/visitors/getVisitors';
 
 const LoadingMapSkeleton = () => (
   <div className="h-[541px] w-full">
@@ -22,6 +23,30 @@ const VisitorMap = dynamic(
 );
 
 const Visitors = () => {
+  const [visitorLocations, setVisitorLocations] = useState<
+    { lat: number; lng: number; count: number }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchVisitorLocations = async () => {
+      try {
+        const data = await getVisitors();
+        if (data?.data?.visitors_by_location) {
+          const locations = data.data.visitors_by_location.map((loc: any) => ({
+            lat: loc.latitude,
+            lng: loc.longitude,
+            count: loc.count,
+          }));
+          setVisitorLocations(locations);
+        }
+      } catch (err) {
+        console.error('Error fetching visitor locations:', err);
+      }
+    };
+
+    fetchVisitorLocations();
+  }, []);
+
   return (
     <div className="font-outfit mx-28">
       <div className="mb-8">
@@ -30,14 +55,7 @@ const Visitors = () => {
           description="Track and engage with visitors on your website in real-time."
           icon={<Icons.help className="text-theme-text-primary h-6 w-6" />}
         />
-        <VisitorMap
-          visitors={[
-            { lat: 27.7172, lng: 85.324, count: 15 },
-            { lat: 38.9072, lng: -77.0369, count: 40 },
-            { lat: -6.2088, lng: 106.8456, count: 7 },
-            { lat: 55.7558, lng: 37.6173, count: 22 },
-          ]}
-        />
+        <VisitorMap visitors={visitorLocations} />
       </div>
       <div>
         <div className="mb-10">

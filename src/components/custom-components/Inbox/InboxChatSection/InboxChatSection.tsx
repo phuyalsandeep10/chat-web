@@ -77,9 +77,9 @@ const InboxChatSection = ({
               <div className="bg-gray-light h-[1px] flex-1"></div>
             </div>
 
-            {groupedMessages[day].map((message, index) => (
+            {groupedMessages[day].map((message) => (
               <MessageItem
-                key={`${day}-${message.id || index}`}
+                key={message.id}
                 message={message}
                 onReply={onReply}
                 handleEditMessage={handleEditMessage}

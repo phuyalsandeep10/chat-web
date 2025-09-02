@@ -41,6 +41,41 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
       members: data?.data?.members,
     });
   },
+  setCustomerIsOnlineOffline: (data) =>
+    set((state) => {
+      const updatedConversations = state.all_conversations.map((conv) =>
+        conv.customer_id === data?.customer?.id
+          ? {
+              ...conv,
+              customer: data?.customer,
+            }
+          : conv,
+      );
+      return {
+        all_conversations: updatedConversations,
+      };
+    }),
+  setConversationUnresolved: ({
+    conversation_id,
+    is_resolved,
+  }: {
+    conversation_id: number;
+    is_resolved: boolean;
+  }) =>
+    set((state) => {
+      const updatedConversations = state.all_conversations.map((conv) =>
+        conv?.id === conversation_id
+          ? {
+              ...conv,
+              is_resolved: is_resolved,
+            }
+          : conv,
+      );
+      return {
+        all_conversations: updatedConversations,
+      };
+    }),
+
   setMessages: (messages) => set({ messages }),
   addMessageToStore: (message) =>
     set((state) => {

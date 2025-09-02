@@ -5,9 +5,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useMessageAudio } from '@/hooks/useMessageAudio.hook';
 import { TriangleAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface TicketSLABreachDialogProps {
   open: boolean;
@@ -30,6 +31,7 @@ const TicketSLABreachDialog = ({
   data,
 }: TicketSLABreachDialogProps) => {
   const router = useRouter();
+  const { playSound } = useMessageAudio();
 
   if (!data) return null;
   const { message, level, alert_type, payload } = data;
@@ -47,6 +49,7 @@ const TicketSLABreachDialog = ({
     setOpen(false);
     router.push(`/ticket/details/${payload?.id}`);
   };
+
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogContent
