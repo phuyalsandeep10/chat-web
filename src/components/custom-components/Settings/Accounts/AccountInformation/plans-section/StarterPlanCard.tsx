@@ -21,7 +21,7 @@ export default function StarterPlanCard() {
           variant="outline"
           className="border-brand-primary text-brand-primary mt-[19px] h-9 w-[130px] cursor-pointer rounded-[8px] text-xs leading-[17px] font-normal"
         >
-          DOWNGRACE
+          DOWNGRADE
         </Button>
       </CardContent>
     </Card>

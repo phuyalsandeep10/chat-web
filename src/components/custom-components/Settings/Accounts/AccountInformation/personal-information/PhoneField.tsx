@@ -61,7 +61,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
       mobile: authData?.data?.user?.mobile || '',
       email: authData?.data?.user?.email || '',
       address: authData?.data?.user?.address || '',
-      phone_code: dialCode || '',
+      phone_code: dialCode,
     };
 
     // this is done to to prevent the default update.. cause due to how the useEffect() tiggers
@@ -112,24 +112,35 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
         {/* Input Field */}
         <input
           type="text"
-          // name="contact"
           inputMode="numeric"
           placeholder="Enter phone number"
           {...field}
           className="ml-3 flex-1 rounded-md border-none text-[14px] leading-[21px] focus:ring-0 focus:outline-none"
           onKeyDown={(e) => {
-            if (
-              !/[0-9]/.test(e.key) &&
-              e.key !== 'Backspace' &&
-              e.key !== 'Delete'
-            ) {
+            const isDigit = /[0-9]/.test(e.key);
+            const isAllowedKey = [
+              'Backspace',
+              'Delete',
+              'ArrowLeft',
+              'ArrowRight',
+              'Tab',
+            ].includes(e.key);
+            const input = e.currentTarget;
+            const isSelection = input.selectionStart !== input.selectionEnd;
+
+            if (!isDigit && !isAllowedKey) {
+              e.preventDefault();
+            }
+
+            if (isDigit && input.value.length >= 16 && !isSelection) {
               e.preventDefault();
             }
           }}
-          // value={
-          //   field.value?.replace(selectedCountry?.dialCode || '', '') || ''
-          // }
-          onChange={(e) => field.onChange(`${e.target.value}`)}
+          onChange={(e) => {
+            // Strip non-digits and slice to 16 characters max
+            const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 16);
+            field.onChange(digitsOnly);
+          }}
         />
       </div>
       {/* Dropdown */}
