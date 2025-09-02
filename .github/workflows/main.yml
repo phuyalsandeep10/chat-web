@@ -1,4 +1,4 @@
-name: Chatboq total CI/CD
+name: Deploying chatboq-web on VPS
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "latest"
+          node-version: 'latest'
 
       - name: Install dependencies
         run: npm install
@@ -26,12 +26,11 @@ jobs:
 
       - name: Start the app in background
         run: |
-          npm start &
+          npm run start &
           sleep 10   # give the server time to boot
 
       - name: Check if site is running (health check)
-        run: |
-          curl -f http://localhost:3002 || exit 1
+        run: curl -f http://localhost:3000 || exit 1
 
   deploy:
     runs-on: ubuntu-latest
@@ -47,14 +46,19 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/chatboq_portal/chatboq-web
-            git pull origin main
-            pm2 stop chatboq-web
+            cd /home/ubuntu/chatboq-web
+            # Force sync with GitHub
+            git fetch origin main
+            git reset --hard origin/main
+            # Remove old dependencies and build
+            rm -rf node_modules .next
             npm install
             npm run build
-            pm2 restart npm --name chatboq-web -- run start
+            # Restart PM2 properly
+            pm2 delete chatboq-web || true
+            pm2 start npm --name "chatboq-web" -- run start
             pm2 list
-            echo "✅ Deployment completed successfully!"
+            echo "✅ Deployment completed successfully"
 
       - name: Verify production site
         run: curl -f https://portal.chatboq.com || exit 1
