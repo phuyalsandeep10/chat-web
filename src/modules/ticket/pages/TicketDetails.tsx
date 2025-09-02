@@ -200,7 +200,7 @@ const TicketDetails = () => {
           ticket={ticket}
           onUpdateTicket={handleUpdateTicket}
         />
-        <LanguageSelector />
+        {/* <LanguageSelector /> */}
         <Conversation
           conversationData={conversationData}
           onLoadMore={loadMoreMessages}
@@ -241,7 +241,7 @@ const TicketDetails = () => {
             <Button
               type="button"
               onClick={handleSendMessage}
-              disabled={!message.trim()}
+              // disabled={!message.trim()}
             >
               {editingId ? 'Update' : 'Send'}
             </Button>
