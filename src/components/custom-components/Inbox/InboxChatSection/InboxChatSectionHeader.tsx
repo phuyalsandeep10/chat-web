@@ -90,15 +90,20 @@ const InboxChatSectionHeader = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-32">
-              <DropdownMenuItem
-                onClick={() => {
-                  resolveConversation(Number(conversation?.id));
-                  router.push('/inbox');
-                }}
-                className="text-brand-dark hover:bg-gray-50"
-              >
-                Resolve
-              </DropdownMenuItem>
+              {conversation?.is_resolved ? null : (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      resolveConversation(Number(conversation?.id));
+                      // router.push('/inbox');
+                    }}
+                    className="text-brand-dark hover:bg-gray-50"
+                  >
+                    Resolve
+                  </DropdownMenuItem>
+                </>
+              )}
+
               <DropdownMenuItem className="text-red-600 hover:bg-red-50">
                 Block
               </DropdownMenuItem>

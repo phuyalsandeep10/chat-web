@@ -6,6 +6,7 @@ import { useMessageAudio } from '@/hooks/useMessageAudio.hook';
 import { AuthService } from '@/services/auth/auth';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
+import { useUiStore } from '@/store/UiStore/useUiStore';
 import {
   createContext,
   useCallback,
@@ -55,8 +56,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Use the new useAudio hook
   const { playSound } = useMessageAudio();
-
-  const { fetchAllConversations } = useAgentConversationStore();
+  const {
+    fetchAllConversations,
+    setCustomerIsOnlineOffline,
+    setConversationUnresolved,
+  } = useAgentConversationStore();
   const handleCustomerJoinConversation = (data: any) => {
     console.log('Customer join conversation', data);
   };
@@ -92,16 +96,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       newSocket.on('connect', () => {
         setSocketId(newSocket.id);
         setIsConnected(true);
-        console.log('Connected to:', socketUrl);
+        // console.log('Connected to:', socketUrl);
       });
 
       newSocket.on(CHAT_EVENTS.customer_land, (data: Message) => {
-        console.log('Customer land:', data);
+        // console.log('Customer land:', data);
         playSound();
+        setCustomerIsOnlineOffline(data);
         // fetchAllConversations();
       });
       newSocket.on(CHAT_EVENTS.resolved_conversation, (data: Message) => {
-        console.log('unresolved conversation:', data);
+        // console.log('unresolved conversation:', data);
         // playSound();
       });
       newSocket.on(
@@ -110,17 +115,26 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       );
 
       newSocket.on(CHAT_EVENTS.message_notification, (data: Message) => {
-        console.log('Message notification:', data);
+        // console.log('Message notification:', data);
         playSound();
         fetchAllConversations();
       });
       newSocket.on(CHAT_EVENTS.customer_disconnected, (data) => {
-        console.log('customer disconnected', { data });
+        // console.log('customer disconnected', data);
+        setCustomerIsOnlineOffline(data);
+      });
+
+      newSocket.on(CHAT_EVENTS.unresolve_conversation, (data) => {
+        // console.log('unresolved data', data);
+        setConversationUnresolved({
+          conversation_id: data?.id,
+          is_resolved: data?.is_resolved,
+        });
       });
 
       newSocket.on('disconnect', () => {
         setIsConnected(false);
-        console.log('Disconnected from:', socketUrl);
+        // console.log('Disconnected from:', socketUrl);
       });
 
       // typing: listen

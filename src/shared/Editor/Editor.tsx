@@ -1,6 +1,7 @@
 'use client';
 
 import { DropdownMenu } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenuContent,
   DropdownMenuTrigger,
@@ -55,11 +56,13 @@ const Tiptap = ({
   onChange,
   onSubmit,
   ref,
+  isSending,
 }: {
   value: string | null;
   onChange: (value: string) => void;
   onSubmit: (editor: any) => void;
   ref: any;
+  isSending: boolean;
 }) => {
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const emojiRef = useRef<HTMLDivElement>(null);
@@ -180,7 +183,12 @@ const Tiptap = ({
   };
 
   return (
-    <div className="relative -mt-15 space-y-4 bg-white pt-2">
+    <div
+      className={cn(
+        `relative -mt-15 space-y-4 bg-white pt-2`,
+        isSending && 'cursor-not-allowed',
+      )}
+    >
       <EditorContent
         className="overflow-y-auto rounded-2xl border-2 p-4 text-wrap [&_.ProseMirror]:h-[70px] [&_.ProseMirror]:break-all [&_.ProseMirror]:whitespace-pre-wrap [&_.ProseMirror]:caret-black [&_.ProseMirror]:outline-none [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror:focus]:outline-none [&_.ProseMirror>.placeholder]:text-gray-400"
         editor={editor}
@@ -279,14 +287,18 @@ const Tiptap = ({
             </DropdownMenuContent>
           </DropdownMenu>
           <button
+            disabled={isSending}
             onClick={() => {
-              const text = editor.getText().trim(); // plain text only
+              const text = editor.getText().trim();
               if (text.length > 0) {
                 onSubmit(editor);
               }
               // editor.commands.clearContent();
             }}
-            className="flex items-center gap-1 rounded-[8px] border bg-[#7914ca] px-4 py-2 text-base font-semibold text-white"
+            className={cn(
+              `flex items-center gap-1 rounded-[8px] border bg-[#7914ca] px-4 py-2 text-base font-semibold text-white`,
+              isSending && 'bg-secondary-disabled cursor-wait',
+            )}
             type="button"
           >
             Send{' '}
