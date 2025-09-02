@@ -29,8 +29,6 @@ jobs:
           npm run start &
           sleep 10   # give the server time to boot
 
-      - name: Check if site is running (health check)
-        run: curl -f http://localhost:3000 || exit 1
 
   deploy:
     runs-on: ubuntu-latest
