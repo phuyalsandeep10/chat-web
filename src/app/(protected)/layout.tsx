@@ -5,6 +5,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { SocketProvider } from '@/context/socket.context';
 import { useTickectSlaSocket } from '@/context/ticketsla.context';
 import { useAuthenticatedUser } from '@/hooks/auth/useAuthenticatedUser';
+import { useMessageAudio } from '@/hooks/useMessageAudio.hook';
 import { ROUTES } from '@/routes/routes';
 import { AuthService } from '@/services/auth/auth';
 import TicketSLABreachDialog from '@/shared/TicketSLABreachDialog';
@@ -22,11 +23,13 @@ export default function ProtectedDashboardLayout({
   const authTokens = AuthService.getAuthTokens();
   const { socket: TicketSlaSocket } = useTickectSlaSocket();
   const [slaData, setSlaData] = useState<any | null>(null);
+  const { playSound } = useMessageAudio();
 
   const showTicketSlaAlert = (data: any) => {
     console.log('showTicketSlaAlert data', data);
     setSlaData(data);
     setOpenTicketBreachDialog(true);
+    playSound();
   };
 
   useEffect(() => {
