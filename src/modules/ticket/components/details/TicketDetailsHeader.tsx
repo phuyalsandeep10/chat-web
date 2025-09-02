@@ -15,15 +15,18 @@ interface TicketDetailsHeaderProps {
   sidebarOpen: boolean;
   toggleSidebar: () => void;
   ticketId: number;
+  onUpdateTicket: (updatedTicket: any) => void;
+  ticket: any;
 }
 
 export default function TicketDetailsHeader({
   sidebarOpen,
   toggleSidebar,
   ticketId,
+  onUpdateTicket,
+  ticket,
 }: TicketDetailsHeaderProps) {
   const {
-    ticket,
     priorityId,
     statusId,
     agent,
@@ -33,7 +36,7 @@ export default function TicketDetailsHeader({
     setAgent,
     handlePriorityChange,
     handleStatusChange,
-  } = useTicketHeaderLogic(ticketId);
+  } = useTicketHeaderLogic(ticketId, onUpdateTicket);
 
   if (!ticket) return <p>Loading ticket details...</p>;
 
@@ -59,12 +62,21 @@ export default function TicketDetailsHeader({
 
       <div className="flex items-center gap-3">
         {/* Status */}
-        <Select value={statusId} onValueChange={handleStatusChange}>
-          <SelectTrigger className="text-brand-dark font-outfit w-auto min-w-fit px-1 text-xs font-semibold">
+        <Select
+          value={statusId}
+          onValueChange={(newId) => {
+            handleStatusChange(newId); // debounced PATCH API
+            const newStatus = (statuses || []).find(
+              (s) => s.id.toString() === newId,
+            );
+            if (newStatus) onUpdateTicket({ status: newStatus }); // UI update
+          }}
+        >
+          <SelectTrigger className="text-brand-dark font-outfit w-auto min-w-[104px] cursor-pointer px-2 text-xs font-semibold">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
-          <SelectContent>
-            {statuses?.map((s) => (
+          <SelectContent className="text-brand-dark font-outfit hover:text-brand-dark cursor-pointer text-xs font-normal">
+            {(statuses || []).map((s) => (
               <SelectItem key={s.id} value={s.id.toString()}>
                 {s.name}
               </SelectItem>
@@ -73,12 +85,21 @@ export default function TicketDetailsHeader({
         </Select>
 
         {/* Priority */}
-        <Select value={priorityId} onValueChange={handlePriorityChange}>
-          <SelectTrigger className="text-brand-dark font-outfit w-auto min-w-fit px-1 text-xs font-semibold">
+        <Select
+          value={priorityId}
+          onValueChange={(newId) => {
+            handlePriorityChange(newId); // debounced PATCH API
+            const newPriority = (priorities || []).find(
+              (p) => p.id.toString() === newId,
+            );
+            if (newPriority) onUpdateTicket({ priority: newPriority }); // UI update
+          }}
+        >
+          <SelectTrigger className="text-brand-dark font-outfit w-auto min-w-[104px] cursor-pointer px-2 text-xs font-semibold">
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
-          <SelectContent>
-            {priorities?.map((p: any) => (
+          <SelectContent className="text-brand-dark font-outfit hover:text-brand-dark cursor-pointer text-xs font-normal">
+            {(priorities || []).map((p: any) => (
               <SelectItem key={p.id} value={p.id.toString()}>
                 {p.name.charAt(0).toUpperCase() + p.name.slice(1)}
               </SelectItem>
@@ -88,10 +109,10 @@ export default function TicketDetailsHeader({
 
         {/* Agent */}
         <Select value={agent} onValueChange={setAgent}>
-          <SelectTrigger className="text-brand-dark font-outfit w-auto min-w-fit px-1 text-xs font-semibold">
+          <SelectTrigger className="text-brand-dark font-outfit w-auto min-w-[104px] cursor-pointer px-2 text-xs font-semibold">
             <SelectValue placeholder="Agent" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="text-brand-dark font-outfit hover:text-brand-dark cursor-pointer text-xs font-normal">
             {assignees.length > 0 ? (
               assignees.map((a) => (
                 <SelectItem key={a.name} value={a.name}>
@@ -108,8 +129,10 @@ export default function TicketDetailsHeader({
 
         {/* Sidebar Toggle */}
         <button onClick={toggleSidebar} className="pr-6">
-          <Icons.chevron_right
-            className={`h-6 w-6 text-purple-800 transition-transform duration-200 ${sidebarOpen ? 'rotate-180' : ''}`}
+          <Icons.chevron_left
+            className={`h-6 w-6 text-purple-800 transition-transform duration-200 ${
+              sidebarOpen ? 'rotate-180' : ''
+            }`}
           />
         </button>
       </div>
