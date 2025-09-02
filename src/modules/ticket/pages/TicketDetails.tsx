@@ -50,6 +50,7 @@ const TicketDetails = () => {
 
         const conversationResponse = await getConversation(ticketId, 10);
         const messages = conversationResponse?.data || [];
+        console.log('Initial conversation data:', messages);
         setConversationData(messages);
 
         if (messages.length > 0) {
@@ -79,14 +80,10 @@ const TicketDetails = () => {
       setIsLoadingMore(true);
       const response = await getConversation(ticketId, 10, oldestMessageId);
       const olderMessages = response?.data || [];
-
-      if (olderMessages.length > 0) {
-        setConversationData((prev) => [...olderMessages, ...prev]);
-        setOldestMessageId(olderMessages[0].id || null);
-        setHasMore(olderMessages.length === 10);
-      } else {
-        setHasMore(false);
-      }
+      console.log('Loaded more messages:', olderMessages);
+      setConversationData((prev) => [...olderMessages, ...prev]);
+      setOldestMessageId(olderMessages[0].id || null);
+      setHasMore(olderMessages.length === 10);
     } catch (err: any) {
       console.error('Error loading more messages:', err.message);
     } finally {
@@ -96,8 +93,9 @@ const TicketDetails = () => {
 
   useEffect(() => {
     const handleIncomingMessage = (data: any) => {
+      console.log('Socket message received:', data);
       const normalized: Ticket = {
-        id: data.id,
+        id: data.id, // Preserve the message ID
         sender: data.user,
         content: data.message,
         created_at: data.created_at,
@@ -118,12 +116,15 @@ const TicketDetails = () => {
   const handleSendMessage = async () => {
     if (!message.trim()) return;
 
+    console.log('handleSendMessage called - editingId:', editingId);
+
     if (editingId) {
+      console.log('Updating message with ID:', editingId);
       try {
         await updateTicketMessage({ message_id: editingId, content: message });
         setConversationData((prev) =>
           prev.map((m) =>
-            m.id === editingId ? { ...m, content: message } : m,
+            m.id === editingId ? { ...m, content: message, isEdited: true } : m,
           ),
         );
         setEditingId(null);
@@ -132,6 +133,7 @@ const TicketDetails = () => {
         console.error('Error updating message:', err.message);
       }
     } else {
+      console.log('Sending new message');
       const payload: SendMessagePayload = {
         ticket_id: ticketId,
         receiver: receiver,
@@ -139,13 +141,17 @@ const TicketDetails = () => {
       };
 
       try {
-        await postTicketDetails(payload);
+        const response = await postTicketDetails(payload);
+
+        // Use the actual message ID from the response
         const newMessage: Ticket = {
-          sender: ticket?.created_by?.email || 'You',
+          id: response.data.id, // This is crucial for editing
+          sender: response.data.sender || ticket?.created_by?.email || 'You',
           content: message,
-          created_at: new Date().toISOString(),
+          created_at: response.data.created_at || new Date().toISOString(),
           direction: 'outgoing',
         };
+
         setConversationData((prev) => [...prev, newMessage]);
         setMessage('');
       } catch (err: any) {
@@ -154,10 +160,25 @@ const TicketDetails = () => {
     }
   };
 
-  //  Callback passed to Conversation
+  // Callback passed to Conversation
   const handleEditMessage = (msg: Ticket) => {
-    setEditingId(msg.id!);
-    setMessage(msg.content); // prefill textarea
+    console.log(
+      'handleEditMessage received - Message ID:',
+      msg.id,
+      'Full message:',
+      msg,
+    );
+    if (msg.id) {
+      setEditingId(msg.id);
+      setMessage(msg.content); // prefill textarea
+    } else {
+      console.error('Cannot edit message without ID:', msg);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setMessage('');
   };
 
   if (!socket || !ticketId) return null;
@@ -188,17 +209,48 @@ const TicketDetails = () => {
           onEditMessage={handleEditMessage}
         />
 
-        <div className="mt-4">
+        <div className="px-10">
           <Textarea
-            placeholder="Send your message to Chatboq Team in chat..."
+            placeholder={
+              editingId
+                ? `Editing message...`
+                : 'Send your message to Chatboq Team in chat...'
+            }
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+              }
+              if (e.key === 'Escape' && editingId) {
+                handleCancelEdit();
+              }
+            }}
           />
-          <div className="mt-3 flex justify-end">
-            <Button type="button" onClick={handleSendMessage}>
+          <div className="flex justify-end gap-2 pt-3 pb-5">
+            {editingId && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </Button>
+            )}
+            <Button
+              type="button"
+              onClick={handleSendMessage}
+              disabled={!message.trim()}
+            >
               {editingId ? 'Update' : 'Send'}
             </Button>
           </div>
+          {editingId && (
+            <div className="text-sm text-gray-500">
+              Editing message ID: {editingId}
+            </div>
+          )}
         </div>
       </div>
 

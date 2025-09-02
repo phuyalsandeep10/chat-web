@@ -1,10 +1,11 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Dialog,
   DialogTrigger,
   DialogContent,
   DialogTitle,
+  DialogOverlay,
 } from '@/components/ui/dialog';
 import { Icons } from '../ui/Icons';
 import { Button, type ButtonProps } from '../ui/button';
@@ -37,7 +38,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
   title,
   description,
   cancelText = 'Cancel',
-  confirmText = 'Delete Ticket',
+  confirmText,
   cancelVariant = 'outline_gray',
   confirmVariant = 'destructive',
   cancelSize,
@@ -63,7 +64,8 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
-        className={cn(`${TitleclassName} flex w-[568px] flex-col`)}
+        transparent
+        className={cn(`${TitleclassName} z-[9999] flex w-[568px] flex-col`)}
       >
         <DialogTitle className="sr-only">{title}</DialogTitle>
 
