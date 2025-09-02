@@ -5,7 +5,7 @@ import { formatTime } from '@/lib/timeFormatUtils';
 import { cn } from '@/lib/utils';
 import { CustomerConversationService } from '@/services/inbox/customerConversation.service';
 import { RiMessage2Line } from '@remixicon/react';
-import { X } from 'lucide-react';
+import { Smile, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
@@ -20,6 +20,12 @@ import {
   SendIcon,
 } from './ChatBoxIcons';
 import EmailInput from './EmailInput';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import EmojiPicker from 'emoji-picker-react';
 
 interface Message {
   content: string;
@@ -341,6 +347,49 @@ export default function ChatBox() {
     });
   }, [groupedMessages]);
 
+  // emojis
+  const [isEmojiOpen, setIsEmojiOpen] = useState(false);
+  const emojiRef = useRef<HTMLDivElement>(null);
+  const emojiBtnRef = useRef<HTMLDivElement>(null);
+
+  const handleEmojiBtn = () => {
+    setIsEmojiOpen((prev) => !prev);
+  };
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      setTimeout(() => {
+        if (
+          emojiRef.current &&
+          !emojiRef.current.contains(event.target as Node) &&
+          emojiBtnRef.current &&
+          !emojiBtnRef.current.contains(event.target as Node)
+        ) {
+          setIsEmojiOpen(false);
+        }
+      }, 0);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        emojiRef.current &&
+        !emojiRef.current.contains(event.target as Node) &&
+        emojiBtnRef.current &&
+        !emojiBtnRef.current.contains(event.target as Node)
+      ) {
+        setIsEmojiOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // if (!visitor?.customer?.email) {
   //   return (
   //     <div className="mx-auto flex h-screen max-w-2xl flex-col items-center justify-center p-4">
@@ -513,16 +562,27 @@ export default function ChatBox() {
                   }}
                 />
                 <div className="flex items-center gap-[14px]">
-                  <button>
+                  {/* <button>
                     <AttachmentIcon />
                   </button>
                   <button>
                     <MicIcon />
-                  </button>
+                  </button> */}
 
-                  <button>
-                    <EmojiIcon />
-                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div ref={emojiBtnRef}>
+                        <Smile />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="mr-5 p-0" side="top">
+                      <EmojiPicker
+                        onEmojiClick={(emojiData) => {
+                          setMessage((prev) => prev + emojiData.emoji);
+                        }}
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
                   <button
                     disabled={!message.trim() || !isConnected}
