@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import DataTable from '@/components/common/table/table';
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
@@ -9,6 +9,12 @@ import VisitorDetailModal from '@/components/custom-components/Visitors/VisitorD
 import profile from '@/assets/images/profile.jpg';
 import FilterComponent from './FilterComponent';
 import DeleteModal from '@/components/modal/DeleteModal';
+import {
+  getVisitors,
+  getVisitorsDetails,
+} from '@/services/visitors/getVisitors';
+import { deleteVisitors } from '@/services/visitors/deleteVisitors'; // ✅ import delete service
+import { parseISO, format } from 'date-fns';
 
 type VisitorData = {
   id: number;
@@ -19,49 +25,14 @@ type VisitorData = {
   numOfVisits: number;
   engaged: string;
   ipAddress: string;
-  action: string;
 };
 
-const rawData: VisitorData[] = [
-  {
-    id: 1,
-    visitor: 'Guest 1',
-    status: 'Active',
-    lastActive: 'Currently Active',
-    activeDuration: '00:24:46',
-    numOfVisits: 12,
-    engaged: 'YES',
-    ipAddress: '192.147.761.255',
-    action: 'action',
-  },
-  {
-    id: 2,
-    visitor: 'Guest 2',
-    status: 'Inactive',
-    lastActive: '10 min ago',
-    activeDuration: '00:24:46',
-    numOfVisits: 12,
-    engaged: 'NO',
-    ipAddress: '192.147.761.255',
-    action: 'action',
-  },
-  {
-    id: 3,
-    visitor: 'Guest 3',
-    status: 'Active',
-    lastActive: 'Currently Active',
-    activeDuration: '00:24:46',
-    numOfVisits: 12,
-    engaged: 'YES',
-    ipAddress: '192.147.761.255',
-    action: 'action',
-  },
-];
-
 const VisitorTable = () => {
+  const [visitors, setVisitors] = useState<VisitorData[]>([]);
   const [selectedVisitor, setSelectedVisitor] = useState<VisitorData | null>(
     null,
   );
+  const [visitorDetails, setVisitorDetails] = useState<any>(null);
   const [modalPosition, setModalPosition] = useState<{
     top: number;
     left: number;
@@ -73,36 +44,12 @@ const VisitorTable = () => {
     left: number;
   } | null>(null);
 
-  const handleFilterClick = (e: React.MouseEvent) => {
-    const icon = e.currentTarget as HTMLElement;
-    const rect = icon.getBoundingClientRect();
-    setFilterPosition({
-      top: rect.bottom + window.scrollY + 12,
-      left: rect.left + window.scrollX + 12,
-    });
-    setIsFilterOpen((prev) => !prev);
-  };
-
-  const data = useMemo(() => rawData, []);
-
-  const handleViewDetails = (visitor: VisitorData, event: React.MouseEvent) => {
-    const eyeIcon = event.currentTarget as HTMLElement;
-    const rect = eyeIcon.getBoundingClientRect();
-    setModalPosition({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX - 330,
-    });
-    setSelectedVisitor(visitor);
-  };
-
-  const handleClose = () => {
-    setSelectedVisitor(null);
-    setModalPosition(null);
-  };
-
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteTargetVisitor, setDeleteTargetVisitor] =
     useState<VisitorData | null>(null);
+
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
+  const [sortOption, setSortOption] = useState<string>('');
 
   const statuses = [
     'Active',
@@ -119,46 +66,139 @@ const VisitorTable = () => {
     'Most Engaged',
   ];
 
+  const statusMap: Record<string, string> = {
+    Active: 'Active',
+    Inactive: 'Inactive',
+    Guest: 'Guest',
+    Engaged: 'Engaged',
+    'Registered Recently': 'recently_registered',
+  };
+
+  const sortMap: Record<string, string> = {
+    'Oldest First': 'Oldest',
+    'Newest First': 'Newest',
+    'A-Z (Name)': 'A-Z',
+    'Z-A (Name)': 'Z-A',
+    'Most Engaged': 'most_engaged',
+  };
+
+  const fetchVisitorsData = async () => {
+    try {
+      const mappedStatuses = statusFilters.map((status) => statusMap[status]);
+      const data = await getVisitors({
+        statusFilters: mappedStatuses,
+        sortBy: sortMap[sortOption] || '',
+      });
+
+      if (!data?.data?.visitors) return;
+
+      const visitorsData = data.data.visitors.map((v: any) => ({
+        id: v.customer_id,
+        visitor: v.visitor_name,
+        status: v.status,
+        lastActive: v.last_active,
+        activeDuration: v.active_duration,
+        numOfVisits: v.num_of_visits,
+        engaged: v.engagged,
+        ipAddress: v.ip_address,
+      }));
+
+      setVisitors(visitorsData);
+    } catch (err) {
+      console.error('Error fetching visitors:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchVisitorsData();
+  }, [statusFilters, sortOption]);
+
+  const handleFilterClick = (e: React.MouseEvent) => {
+    const icon = e.currentTarget as HTMLElement;
+    const rect = icon.getBoundingClientRect();
+    setFilterPosition({
+      top: rect.bottom + window.scrollY + 12,
+      left: rect.left + window.scrollX + 12,
+    });
+    setIsFilterOpen((prev) => !prev);
+  };
+
+  const handleViewDetails = async (
+    visitor: VisitorData,
+    event: React.MouseEvent,
+  ) => {
+    const eyeIcon = event.currentTarget as HTMLElement;
+    const rect = eyeIcon.getBoundingClientRect();
+    setModalPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX - 330,
+    });
+    setSelectedVisitor(visitor);
+
+    try {
+      const details = await getVisitorsDetails(visitor.id);
+      setVisitorDetails(details.data);
+    } catch (err) {
+      console.error('Error fetching visitor details:', err);
+    }
+  };
+
+  const handleClose = () => {
+    setSelectedVisitor(null);
+    setModalPosition(null);
+    setVisitorDetails(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetVisitor) return;
+    try {
+      await deleteVisitors(deleteTargetVisitor.id); // ✅ API call
+      setVisitors((prev) =>
+        prev.filter((v) => v.id !== deleteTargetVisitor.id),
+      ); // ✅ remove from table instantly
+      setDeleteTargetVisitor(null);
+      setIsDeleteModalOpen(false);
+    } catch (err) {
+      console.error('Error deleting visitor:', err);
+    }
+  };
+
   const columns: ColumnDef<VisitorData>[] = useMemo(
     () => [
-      {
-        accessorKey: 'visitor',
-        header: 'Visitor',
-      },
-      {
-        accessorKey: 'status',
-        header: 'Status',
-      },
+      { accessorKey: 'visitor', header: 'Visitor' },
+      { accessorKey: 'status', header: 'Status' },
       {
         accessorKey: 'lastActive',
         header: 'Last Active',
         cell: ({ row }) => {
           const value = row.getValue('lastActive') as string;
+
+          if (!value) return <span>-</span>;
+
+          const formatted = format(parseISO(value), 'MMM d, yyyy');
+
           return (
             <span
               className={value === 'Currently Active' ? 'text-success' : ''}
             >
-              {value}
+              {formatted}
             </span>
           );
         },
       },
-      {
-        accessorKey: 'activeDuration',
-        header: 'Active Duration',
-      },
-      {
-        accessorKey: 'numOfVisits',
-        header: 'Num of Visits',
-      },
+      { accessorKey: 'activeDuration', header: 'Active Duration' },
+      { accessorKey: 'numOfVisits', header: 'Num of Visits' },
       {
         accessorKey: 'engaged',
         header: 'Engaged',
         cell: ({ row }) => {
           const value = row.getValue('engaged') as string;
-          const isYes = value === 'YES';
           return (
-            <span className={isYes ? 'text-success' : 'text-alert-prominent'}>
+            <span
+              className={
+                value === 'YES' ? 'text-success' : 'text-alert-prominent'
+              }
+            >
               {value}
             </span>
           );
@@ -221,7 +261,7 @@ const VisitorTable = () => {
     <div>
       <DataTable
         columns={columns}
-        data={data}
+        data={visitors}
         onFilterClick={handleFilterClick}
         showFilterIcon
         showSearch
@@ -231,21 +271,18 @@ const VisitorTable = () => {
         <DeleteModal
           open={isDeleteModalOpen}
           onOpenChange={setIsDeleteModalOpen}
-          title="Delete Ticket"
-          description={`Are you sure you want to delete this ticket? This action cannot be undone.`}
+          title="Delete Visitor"
+          description={`Are you sure you want to delete ${deleteTargetVisitor.visitor}? This action cannot be undone.`}
           icon={<Icons.ri_delete_bin_7_fill className="text-alert-prominent" />}
           iconBgColor="bg-error-light"
           cancelText="Cancel"
-          confirmText="Delete Ticket"
+          confirmText="Delete Visitor"
           cancelVariant="outline_gray"
           confirmVariant="destructive"
           cancelSize="sm"
           confirmSize="sm"
-          onCancel={() => console.log('Cancel clicked')}
-          onConfirm={() => {
-            console.log(`Deleted!!`);
-            setDeleteTargetVisitor(null);
-          }}
+          onCancel={() => setDeleteTargetVisitor(null)}
+          onConfirm={handleDeleteConfirm}
         />
       )}
 
@@ -263,8 +300,10 @@ const VisitorTable = () => {
             sortOptions={sortOptions}
             statusLabel="Filter By Status"
             sortLabel="Filter By"
-            onStatusChange={(statuses) => console.log('Statuses:', statuses)}
-            onSortChange={(sort) => console.log('Sort Option:', sort)}
+            onStatusChange={setStatusFilters}
+            onSortChange={setSortOption}
+            statusFilters={statusFilters}
+            sortOption={sortOption}
             getSortIcon={(option, isSelected) => {
               if (option === 'A-Z (Name)' || option === 'Z-A (Name)') {
                 return isSelected ? (
@@ -278,57 +317,51 @@ const VisitorTable = () => {
           />
         </div>
       )}
-      {selectedVisitor && modalPosition && (
+
+      {selectedVisitor && modalPosition && visitorDetails && (
         <VisitorDetailModal
           name={selectedVisitor.visitor}
-          image={profile.src}
+          image={visitorDetails.picture || profile.src}
           details={[
-            { label: 'Email Address', value: 'Example123@gmail.com' },
+            { label: 'Email Address', value: visitorDetails.email },
             {
               label: 'Location',
-              value: 'Madrid, Spain',
+              value: visitorDetails.location,
               icon: (
                 <Icons.ri_map_pin_line className="text-theme-text-primary h-4 w-4" />
               ),
             },
-            { label: 'Engaged', value: selectedVisitor.engaged },
+            { label: 'Engaged', value: visitorDetails.engagged },
             {
               label: 'IP Address',
-              value: selectedVisitor.ipAddress,
+              value: visitorDetails.ip_address,
               icon: (
                 <Icons.ri_apple_line className="text-theme-text-primary h-4 w-4" />
               ),
             },
             {
               label: 'Browser',
-              value: 'Brave',
+              value: visitorDetails.browser,
               icon: (
                 <Icons.ri_window_line className="text-theme-text-primary h-4 w-4" />
               ),
             },
             {
               label: 'Log in time',
-              value: '10:22 AM',
+              value: new Date(visitorDetails.login_time).toLocaleTimeString(
+                [],
+                { hour: '2-digit', minute: '2-digit', hour12: true },
+              ),
               icon: (
                 <Icons.ri_login_box_line className="text-theme-text-primary h-4 w-4" />
               ),
             },
           ]}
-          activity={[
-            {
-              label: 'Visited: Dashboard',
-              timestamp: 'Jun 17, 2025, 03:43 PM',
-            },
-            {
-              label: 'Sent: Message',
-              subLabel: 'Can I get a demo',
-              timestamp: 'Jun 17, 2025, 03:43 PM',
-            },
-            {
-              label: 'Visited: Signup',
-              timestamp: 'Jun 17, 2025, 03:43 PM',
-            },
-          ]}
+          activity={visitorDetails.activities.map((act: any) => ({
+            label: act.action_type,
+            subLabel: act.details,
+            timestamp: new Date(act.activity_at).toLocaleString(),
+          }))}
           onClose={handleClose}
           onStartChat={() =>
             console.log(`Start chat with ${selectedVisitor.visitor}`)
