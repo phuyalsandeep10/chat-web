@@ -16,5 +16,6 @@ export const CHAT_EVENTS = {
   agent_conversation_leave: 'agent_conversation_leave',
   customer_disconnected: 'customer_disconnected',
   resolved_conversation: 'resolved_conversation',
+  unresolve_conversation: 'unresolve_conversation',
   leave_conversation: 'leave_conversation',
 };
