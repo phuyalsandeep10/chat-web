@@ -117,7 +117,7 @@ const Conversation: React.FC<ConversationProps> = ({
   return (
     <div
       ref={containerRef}
-      className="h-[70vh] space-y-3 overflow-y-auto scroll-smooth"
+      className="h-[60vh] space-y-3 overflow-y-auto scroll-smooth"
     >
       {isLoading && (
         <div className="flex justify-center py-4">
@@ -134,6 +134,9 @@ const Conversation: React.FC<ConversationProps> = ({
           if (showHeader) lastDateHeader = dateHeader;
           const uniqueKey = `${index}-${msg.id || 'no-id'}-${msg.created_at}-${msg.sender.replace(/[^a-zA-Z0-9]/g, '')}`;
 
+          // DEBUG: Log each message to check if id exists
+          console.log('Message object:', msg);
+
           return (
             <React.Fragment key={uniqueKey}>
               {showHeader && (
@@ -146,7 +149,7 @@ const Conversation: React.FC<ConversationProps> = ({
                 </div>
               )}
               <div
-                className={`flex w-full items-center gap-x-4 ${
+                className={`flex w-full items-center gap-x-4 px-10 ${
                   msg.direction === 'outgoing' ? 'justify-end' : 'justify-start'
                 }`}
               >
@@ -155,6 +158,7 @@ const Conversation: React.FC<ConversationProps> = ({
                     <div className="group relative max-w-[60%]">
                       <div className="bg-brand-primary relative rounded-xl px-7 py-2.5 break-words text-white">
                         <p className="text-lg">{msg.content}</p>
+                        <p className="text-lg">{msg.id}</p>
                         <p className="text-theme-text-light text-right text-base font-normal">
                           {formatTime(msg.created_at)}
                         </p>
@@ -170,7 +174,22 @@ const Conversation: React.FC<ConversationProps> = ({
                           items={[
                             {
                               label: 'Edit Message',
-                              onClick: () => onEditMessage(msg),
+                              onClick: () => {
+                                console.log(
+                                  'Edit clicked - Message ID:',
+                                  msg.id,
+                                  'Full message:',
+                                  msg,
+                                );
+                                if (msg.id) {
+                                  onEditMessage(msg);
+                                } else {
+                                  console.error(
+                                    'Cannot edit message without ID:',
+                                    msg,
+                                  );
+                                }
+                              },
                             },
                             {
                               label: 'Delete',
@@ -203,13 +222,21 @@ const Conversation: React.FC<ConversationProps> = ({
                           items={[
                             {
                               label: 'Edit Message',
-                              onClick: () => onEditMessage(msg),
+                              onClick: () => {
+                                console.log(
+                                  'Edit clicked - Message ID:',
+                                  msg.id,
+                                  'Full message:',
+                                  msg,
+                                );
+                                onEditMessage(msg);
+                              },
                             },
-                            {
-                              label: 'Delete',
-                              onClick: () => console.log('Delete', msg.id),
-                              className: 'text-error focus:text-error',
-                            },
+                            // {
+                            //   label: 'Delete',
+                            //   onClick: () => console.log('Delete', msg.id),
+                            //   className: 'text-error focus:text-error',
+                            // },
                           ]}
                         />
                       </div>
