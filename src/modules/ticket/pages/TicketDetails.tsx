@@ -45,7 +45,9 @@ const TicketDetails = () => {
         const ticketResponse = await getTicketDetails(ticketId);
         setTicket(ticketResponse.data);
 
-        const receiverEmail = ticketResponse.data.customer_email || '';
+        const receiverEmail =
+          ticketResponse.data?.customer?.email ||
+          ticketResponse.data?.customer_email;
         setReceiver(receiverEmail);
 
         const conversationResponse = await getConversation(ticketId, 10);
