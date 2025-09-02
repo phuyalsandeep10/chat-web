@@ -5,23 +5,28 @@ const EmailInput = () => {
   return (
     <div className="mt-4 flex gap-4">
       <div className="flex items-end">
-        <div className="flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full bg-[#5A189A]">
+        <div className="flex items-center justify-center rounded-full">
           <Image
-            src="/widget-logo.svg"
+            src="/widget-logo-bottom.svg"
             height={12}
             width={12}
-            className="h-4 w-4"
-            alt=""
+            className="-ml-5 h-18 w-18"
+            alt="bot icon"
           />
         </div>
       </div>
-      <div className="font-inter space-y-2 rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
+      <div className="font-inter -ml-6 w-full space-y-2 rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
+        <p className="text-[11px]">
+          Thank you for your message!😄 <br />
+          How can I help you today?
+        </p>
         {/* input email field */}
+
         <div className="flex w-full items-center">
           <input
             type="email"
             placeholder="Enter your Email"
-            className="rounded-md border p-2 text-xs outline-none placeholder:text-xs"
+            className="w-full rounded-md border p-2 text-xs outline-none placeholder:text-xs"
           />
         </div>
         <button

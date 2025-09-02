@@ -374,14 +374,14 @@ export default function ChatBox() {
               expand && 'w-[1024px] transition-all',
             )}
           >
-            <div className="flex items-center justify-between bg-gradient-to-b from-[#6D28D9] to-[#A77EE8] px-6 py-2">
-              <div className="left flex items-center gap-4">
-                <div className="flex min-h-[42px] min-w-[42px] items-center justify-center rounded-full bg-[#5A189A]">
+            <div className="flex items-center justify-between bg-gradient-to-b from-[#6D28D9] to-[#A77EE8] px-2 py-2">
+              <div className="left flex items-center">
+                <div className="flex items-center justify-center rounded-full">
                   <Image
-                    src="/widget-logo.svg"
-                    height={24}
+                    src="/widget-logo-bottom.svg"
+                    height={20}
                     width={20}
-                    className="h-6 w-6"
+                    className="h-full w-full"
                     alt=""
                   />
                 </div>
@@ -452,7 +452,7 @@ export default function ChatBox() {
               ))}
 
               {/* email input here */}
-              {/* <EmailInput /> */}
+              <EmailInput />
               {otherTyping && (
                 <div className="mt-4 flex items-center space-x-1">
                   <div className="flex space-x-1">
@@ -591,17 +591,17 @@ const MessageItem = ({ socket, message }: any) => {
           {/* Agent/Bot Message  */}
           <div className="mt-4 flex gap-4">
             <div className="flex items-end">
-              <div className="flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full bg-[#5A189A]">
+              <div className="flex items-center justify-center rounded-full">
                 <Image
-                  src="/widget-logo.svg"
-                  height={12}
-                  width={12}
-                  className="h-4 w-4"
-                  alt=""
+                  src="/widget-logo-bottom.svg"
+                  height={10}
+                  width={10}
+                  className="-ml-5 h-16 w-16"
+                  alt="bot icon"
                 />
               </div>
             </div>
-            <div className="font-inter space-y-2 rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
+            <div className="font-inter -ml-6 space-y-2 rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
               {/* input email field */}
 
               <div
