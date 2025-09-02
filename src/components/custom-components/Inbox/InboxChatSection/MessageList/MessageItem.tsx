@@ -49,7 +49,10 @@ const MessageItem = ({
   }, [message]);
 
   return (
-    <div className={`flex ${isUserId ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div
+      className={`flex ${isUserId ? 'justify-end' : 'justify-start'} mb-4`}
+      key={message?.id}
+    >
       {!isUserId && (
         <div className="bg-gray-light mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
           <span className="text-theme-text-dark text-xs font-medium">
@@ -170,18 +173,18 @@ const MessageItem = ({
                 <MoreVertical size={16} />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
+                {/* <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
                   Create a ticket
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem
                   className="flex cursor-pointer items-center gap-2"
                   onClick={handleReplyClick}
                 >
                   Reply
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-error focus:text-error flex cursor-pointer items-center gap-2">
+                {/* <DropdownMenuItem className="text-error focus:text-error flex cursor-pointer items-center gap-2">
                   Delete
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

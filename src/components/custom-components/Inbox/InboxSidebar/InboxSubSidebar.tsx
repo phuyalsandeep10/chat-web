@@ -11,9 +11,9 @@ const InboxSubSidebar = () => {
     <div className="font-outfit w-full">
       <div className="flex items-center justify-between">
         <p>Conversation</p>
-        <span>
+        {/* <span>
           <Icons.filter className="h-4 w-4" />
-        </span>
+        </span> */}
       </div>
 
       {/* <SearchBox /> */}

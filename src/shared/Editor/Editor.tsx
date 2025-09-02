@@ -9,6 +9,7 @@ import React, {
   useState,
 } from 'react';
 import { DropdownMenu } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenuContent,
   DropdownMenuTrigger,
@@ -39,10 +40,6 @@ import Image from 'next/image';
 type TiptapProps = {
   value: string | null;
   onChange: (value: string) => void;
-  /**
-   * onSubmit will receive (editor, isEditing, messageId?)
-   * Parent can accept fewer args if it wants.
-   */
   onSubmit: (
     editor: any,
     isEditing?: boolean,
@@ -56,13 +53,33 @@ const Editor = forwardRef<any, TiptapProps>(
   ({ value, onChange, onSubmit, isEditing, messageId }, ref) => {
     const internalEditorRef = useRef<any>(null);
 
+    const SubmitOnEnter = Extension.create({
+      name: 'submitOnEnter',
+      addKeyboardShortcuts() {
+        return {
+          Enter: () => {
+            const text = this.editor.getText().trim();
+            if (!text) return false;
+
+            try {
+              const handler = submitHandlerRef.current;
+              handler(this.editor, isEditingRef.current);
+            } catch (e) {
+              console.error('submitOnEnter error', e);
+            }
+            return true; // prevent newline
+          },
+          'Shift-Enter': () => false,
+        };
+      },
+    });
+
     const [isEmojiOpen, setIsEmojiOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const emojiRef = useRef<HTMLDivElement | null>(null);
     const emojiBtnRef = useRef<HTMLDivElement | null>(null);
     const lastValueRef = useRef<string | null>(null);
 
-    // refs to hold up-to-date values for extension handlers
     const isEditingRef = useRef<boolean>(isEditing);
     const submitHandlerRef = useRef<
       (editor: any, editing?: boolean) => Promise<void> | void
@@ -72,13 +89,11 @@ const Editor = forwardRef<any, TiptapProps>(
       isEditingRef.current = isEditing;
     }, [isEditing]);
 
-    // Keep onSubmit wrapper (handleSubmit) in a ref so extension always calls latest
     useEffect(() => {
       submitHandlerRef.current = async (editor: any, editing = false) => {
-        // delegate to handleSubmit (defined later)
         await handleSubmit(editor, editing);
       };
-    }, []); // we will overwrite below after handleSubmit is defined via another effect
+    }, []);
 
     // click outside for emoji dropdown
     useEffect(() => {
@@ -100,37 +115,10 @@ const Editor = forwardRef<any, TiptapProps>(
         document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // The extension that will handle Enter / Shift+Enter
-    const SubmitOnEnter = Extension.create({
-      name: 'submitOnEnter',
-      addKeyboardShortcuts() {
-        return {
-          Enter: () => {
-            const text = this.editor.getText().trim();
-            if (!text) return false; // allow newline if empty
-
-            try {
-              // call the latest submit handler with current editing flag
-              const handler = submitHandlerRef.current;
-              handler(this.editor, isEditingRef.current);
-            } catch (e) {
-              // swallow errors so keyboard handling isn't broken
-
-              console.error('submitOnEnter error', e);
-            }
-
-            return true; // prevent default newline because we submitted
-          },
-          'Shift-Enter': () => false,
-        };
-      },
-    });
-
     // handleUpdate for onChange
     const handleUpdate = useCallback(
       ({ editor }: any) => {
-        if (isSubmitting) return; // don't emit updates while submitting
-
+        if (isSubmitting) return;
         const html = editor.getHTML();
         if (html !== lastValueRef.current) {
           lastValueRef.current = html;
@@ -140,7 +128,6 @@ const Editor = forwardRef<any, TiptapProps>(
       [onChange, isSubmitting],
     );
 
-    // handleSubmit defined with stable identity for use in refs
     const handleSubmit = useCallback(
       async (editor: any, editing = false) => {
         if (isSubmitting) return;
@@ -148,21 +135,18 @@ const Editor = forwardRef<any, TiptapProps>(
         try {
           await onSubmit(editor, editing, messageId);
 
-          // Only clear editor for NEW messages (not when editing an existing message)
           if (!editing) {
-            // clear content and notify parent
             editor.commands.clearContent();
             lastValueRef.current = '<p></p>';
-            onChange('<p></p>');
+            // ✅ removed onChange('<p></p>') to prevent fake typing animation
           }
         } finally {
           setIsSubmitting(false);
         }
       },
-      [onSubmit, isSubmitting, messageId, onChange],
+      [onSubmit, isSubmitting, messageId],
     );
 
-    // keep the submitHandlerRef pointing to latest handleSubmit
     useEffect(() => {
       submitHandlerRef.current = handleSubmit;
     }, [handleSubmit]);
@@ -195,7 +179,7 @@ const Editor = forwardRef<any, TiptapProps>(
       onUpdate: handleUpdate,
     });
 
-    // Sync incoming value -> editor (but avoid clobbering when focused or submitting)
+    // Sync external value -> editor
     useEffect(() => {
       if (
         editor &&
@@ -209,7 +193,6 @@ const Editor = forwardRef<any, TiptapProps>(
       }
     }, [value, editor, isSubmitting]);
 
-    // Imperative handle for parent (forwarded ref)
     useImperativeHandle(ref, () => ({
       focus: () => {
         internalEditorRef.current?.commands.focus();
@@ -252,6 +235,7 @@ const Editor = forwardRef<any, TiptapProps>(
         />
 
         <div className="flex justify-between">
+          {/* Formatting Buttons */}
           <div className="flex gap-[6px]">
             <button
               className="rounded-md p-1 transition-all hover:scale-105 active:scale-90"
@@ -339,6 +323,7 @@ const Editor = forwardRef<any, TiptapProps>(
             </button>
           </div>
 
+          {/* Emoji + Send */}
           <div className="flex items-center gap-3">
             <DropdownMenu>
               <DropdownMenuTrigger>

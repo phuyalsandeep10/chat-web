@@ -79,6 +79,9 @@ const Inbox = () => {
       conversation_id: Number(chatId),
     });
   };
+  const handleCustomerDisConnected = (data: any) => {
+    console.log('Customer Disconnect Data ', { data });
+  };
 
   useEffect(() => {
     if (!chatId || !socket || !userId) return;
@@ -157,20 +160,17 @@ const Inbox = () => {
 
   const handleReply = (replyToMessage: any) => {
     if (!replyToMessage || !replyToMessage.id || !replyToMessage.content) {
-      console.warn('Invalid replyToMessage:', replyToMessage);
       return;
     }
-    console.log('Setting replyingTo:', replyToMessage);
     setReplyingTo({ ...replyToMessage });
     setEditedMessage(null);
   };
 
   const handleEditMessage = (messageToEdit: any) => {
     if (!messageToEdit || !messageToEdit.id || !messageToEdit.content) {
-      console.warn('Invalid messageToEdit:', messageToEdit);
       return;
     }
-    console.log('Setting editedMessage:', messageToEdit);
+
     setEditedMessage(messageToEdit);
     setMessage(messageToEdit.content);
     setReplyingTo(null);

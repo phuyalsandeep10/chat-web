@@ -5,7 +5,7 @@ import { formatTime } from '@/lib/timeFormatUtils';
 import { cn } from '@/lib/utils';
 import { CustomerConversationService } from '@/services/inbox/customerConversation.service';
 import { RiMessage2Line } from '@remixicon/react';
-import { X } from 'lucide-react';
+import { Smile, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
@@ -20,6 +20,12 @@ import {
   SendIcon,
 } from './ChatBoxIcons';
 import EmailInput from './EmailInput';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import EmojiPicker from 'emoji-picker-react';
 
 interface Message {
   content: string;
@@ -126,7 +132,7 @@ export default function ChatBox() {
       newSocket.on('receive_message', handleMessage);
       newSocket.on('message_seen', (data) => console.log('message_seen', data));
       newSocket.on(CHAT_EVENTS.edit_message, (data) => {
-        console.log('Edited event Data', data);
+        // console.log('Edited event Data', data);
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === data.id
@@ -341,6 +347,49 @@ export default function ChatBox() {
     });
   }, [groupedMessages]);
 
+  // emojis
+  const [isEmojiOpen, setIsEmojiOpen] = useState(false);
+  const emojiRef = useRef<HTMLDivElement>(null);
+  const emojiBtnRef = useRef<HTMLDivElement>(null);
+
+  const handleEmojiBtn = () => {
+    setIsEmojiOpen((prev) => !prev);
+  };
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      setTimeout(() => {
+        if (
+          emojiRef.current &&
+          !emojiRef.current.contains(event.target as Node) &&
+          emojiBtnRef.current &&
+          !emojiBtnRef.current.contains(event.target as Node)
+        ) {
+          setIsEmojiOpen(false);
+        }
+      }, 0);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        emojiRef.current &&
+        !emojiRef.current.contains(event.target as Node) &&
+        emojiBtnRef.current &&
+        !emojiBtnRef.current.contains(event.target as Node)
+      ) {
+        setIsEmojiOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // if (!visitor?.customer?.email) {
   //   return (
   //     <div className="mx-auto flex h-screen max-w-2xl flex-col items-center justify-center p-4">
@@ -374,14 +423,14 @@ export default function ChatBox() {
               expand && 'w-[1024px] transition-all',
             )}
           >
-            <div className="flex items-center justify-between bg-gradient-to-b from-[#6D28D9] to-[#A77EE8] px-6 py-2">
-              <div className="left flex items-center gap-4">
-                <div className="flex min-h-[42px] min-w-[42px] items-center justify-center rounded-full bg-[#5A189A]">
+            <div className="flex items-center justify-between bg-gradient-to-b from-[#6D28D9] to-[#A77EE8] px-2 py-2">
+              <div className="left flex items-center">
+                <div className="flex items-center justify-center rounded-full">
                   <Image
-                    src="/widget-logo.svg"
-                    height={24}
+                    src="/widget-logo-bottom.svg"
+                    height={20}
                     width={20}
-                    className="h-6 w-6"
+                    className="h-full w-full"
                     alt=""
                   />
                 </div>
@@ -419,6 +468,9 @@ export default function ChatBox() {
               )}
             >
               {/* Date  */}
+              {/* email input here */}
+
+              <EmailInput />
 
               {!isConnected && (
                 <div className="mt-8 text-center text-gray-500">
@@ -451,8 +503,6 @@ export default function ChatBox() {
                 </div>
               ))}
 
-              {/* email input here */}
-              {/* <EmailInput /> */}
               {otherTyping && (
                 <div className="mt-4 flex items-center space-x-1">
                   <div className="flex space-x-1">
@@ -513,16 +563,27 @@ export default function ChatBox() {
                   }}
                 />
                 <div className="flex items-center gap-[14px]">
-                  <button>
+                  {/* <button>
                     <AttachmentIcon />
                   </button>
                   <button>
                     <MicIcon />
-                  </button>
+                  </button> */}
 
-                  <button>
-                    <EmojiIcon />
-                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div ref={emojiBtnRef}>
+                        <Smile />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="mr-5 p-0" side="top">
+                      <EmojiPicker
+                        onEmojiClick={(emojiData) => {
+                          setMessage((prev) => prev + emojiData.emoji);
+                        }}
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
                   <button
                     disabled={!message.trim() || !isConnected}
@@ -591,17 +652,17 @@ const MessageItem = ({ socket, message }: any) => {
           {/* Agent/Bot Message  */}
           <div className="mt-4 flex gap-4">
             <div className="flex items-end">
-              <div className="flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full bg-[#5A189A]">
+              <div className="flex items-center justify-center rounded-full">
                 <Image
-                  src="/widget-logo.svg"
-                  height={12}
-                  width={12}
-                  className="h-4 w-4"
-                  alt=""
+                  src="/widget-logo-bottom.svg"
+                  height={10}
+                  width={10}
+                  className="-ml-5 h-16 w-16"
+                  alt="bot icon"
                 />
               </div>
             </div>
-            <div className="font-inter space-y-2 rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
+            <div className="font-inter -ml-6 space-y-2 rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
               {/* input email field */}
 
               <div

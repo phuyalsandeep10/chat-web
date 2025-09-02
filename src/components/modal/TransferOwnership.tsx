@@ -22,15 +22,11 @@ import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganizati
 interface TransferOwnershipModalProps {
   open: boolean;
   onClose: () => void;
-  currentOwnerId?: string | null;
-  setCurrentOwnerId?: any;
 }
 
 const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
   open,
   onClose,
-  currentOwnerId,
-  setCurrentOwnerId,
 }) => {
   const { authData } = useAuthStore();
   const orgId = authData?.data.user.attributes.organization_id;
@@ -53,7 +49,6 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
         },
       },
     );
-    setCurrentOwnerId(userId);
   };
 
   return (

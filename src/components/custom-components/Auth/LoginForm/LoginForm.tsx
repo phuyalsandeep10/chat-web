@@ -178,6 +178,7 @@ const LoginForm = () => {
             type="submit"
             size="lg"
             className="mt-4 w-full"
+            disabled={isPending}
           >
             {isPending ? 'Logging in...' : 'Login to Dashboard'}
           </Button>

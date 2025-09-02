@@ -26,7 +26,7 @@ const SidebarHeader: React.FC = () => {
           )}
         >
           <h1 className="from-theme-text-dark via-brand-text to-brand-primary font-outfit bg-gradient-to-r bg-clip-text text-lg leading-[29px] font-medium text-transparent">
-            Brahamabyte Lab
+            Brahmabyte Lab
           </h1>
           <p className="text-theme-text-primary font-outfit text-xs leading-[17px] font-normal">
             brahmabytelab.com

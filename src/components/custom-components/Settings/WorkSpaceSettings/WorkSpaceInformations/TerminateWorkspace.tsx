@@ -16,7 +16,7 @@ type FormData = {
   workspaceId: string;
 };
 
-const TerminateWorkspace = ({ currentOwnerId }: any) => {
+const TerminateWorkspace = () => {
   const dialogRef = useRef<AlertDialogDemoRef>(null);
 
   const { control, handleSubmit, getValues, watch } = useForm<FormData>({
@@ -26,7 +26,7 @@ const TerminateWorkspace = ({ currentOwnerId }: any) => {
   });
   const workspaceId = watch('workspaceId');
 
-  const { mutate: deleteOrganization } = useDeleteOrganization();
+  const { mutate: deleteOrganization, isPending } = useDeleteOrganization();
 
   const { authData } = useAuthStore();
   const orgId = authData?.data.user.attributes.organization_id;
@@ -100,7 +100,7 @@ const TerminateWorkspace = ({ currentOwnerId }: any) => {
                   className={cn(
                     'font-outfit mb-5 cursor-pointer text-xs leading-[16px] font-semibold',
                   )}
-                  disabled={!workspaceId?.trim()}
+                  disabled={!workspaceId?.trim() || isPending}
                 >
                   Delete workspace
                 </Button>

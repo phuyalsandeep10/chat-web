@@ -13,7 +13,6 @@ import { useEffect, useState } from 'react';
 import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWorkspaceInformation';
 
 export default function WorkspaceInformation() {
-  const [currentOwnerId, setCurrentOwnerId] = useState('');
   const { workspace } = useWorkspaceInformationStore();
   const { authData } = useAuthStore();
   const orgId = authData?.data.user.attributes.organization_id;
@@ -39,8 +38,6 @@ export default function WorkspaceInformation() {
         {/* Workspace Information */}
         <div className={cn('mt-10 mb-9')}>
           <Information
-            currentOwnerId={currentOwnerId}
-            setCurrentOwnerId={setCurrentOwnerId}
             workspace_owner={organization?.owner_name}
             creation_date={organization?.created_at}
           />
@@ -56,7 +53,7 @@ export default function WorkspaceInformation() {
           telegramUsername={organization?.telegram_username}
         />
         {/* Terminate Workspace */}
-        <TerminateWorkspace currentOwnerId={currentOwnerId} />
+        <TerminateWorkspace />
       </div>
     </>
   );
