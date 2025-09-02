@@ -45,7 +45,9 @@ const TicketDetails = () => {
         const ticketResponse = await getTicketDetails(ticketId);
         setTicket(ticketResponse.data);
 
-        const receiverEmail = ticketResponse.data.customer_email || '';
+        const receiverEmail =
+          ticketResponse.data?.customer?.email ||
+          ticketResponse.data?.customer_email;
         setReceiver(receiverEmail);
 
         const conversationResponse = await getConversation(ticketId, 10);
@@ -200,7 +202,7 @@ const TicketDetails = () => {
           ticket={ticket}
           onUpdateTicket={handleUpdateTicket}
         />
-        <LanguageSelector />
+        {/* <LanguageSelector /> */}
         <Conversation
           conversationData={conversationData}
           onLoadMore={loadMoreMessages}
@@ -241,7 +243,7 @@ const TicketDetails = () => {
             <Button
               type="button"
               onClick={handleSendMessage}
-              disabled={!message.trim()}
+              // disabled={!message.trim()}
             >
               {editingId ? 'Update' : 'Send'}
             </Button>
