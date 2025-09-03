@@ -17,7 +17,7 @@ export class OrganizationsService {
   // Update Organization
   static async updateOrganization(payload: Partial<WorkspaceData>) {
     try {
-      const res = await axiosInstance.post(
+      const res = await axiosInstance.patch(
         `${baseURL}/organizations/update-workspace`,
         payload,
       );

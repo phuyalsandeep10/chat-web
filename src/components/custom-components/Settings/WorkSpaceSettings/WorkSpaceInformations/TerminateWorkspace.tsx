@@ -9,6 +9,8 @@ import React, { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { InputField } from '@/components/common/hook-form/InputField';
 import useDeleteOrganization from '@/hooks/organizations/useDeleteOrganization';
+import { useAuthStore } from '@/store/AuthStore/useAuthStore';
+import { useGetMembers } from '@/hooks/organizations/useGetMembers';
 
 type FormData = {
   workspaceId: string;
@@ -24,7 +26,9 @@ const TerminateWorkspace = () => {
   });
   const workspaceId = watch('workspaceId');
 
-  const { mutate: deleteOrganization } = useDeleteOrganization();
+  const { mutate: deleteOrganization, isPending } = useDeleteOrganization();
+
+  const { data: organizationMembers } = useGetMembers();
 
   const handleDeleteClick = () => {
     dialogRef.current?.open();
@@ -33,6 +37,7 @@ const TerminateWorkspace = () => {
   // This function runs when user clicks "Yes, Delete" in modal
   const handleConfirmDelete = handleSubmit(async (data) => {
     console.log('Typed confirmation:', data.workspaceId);
+
     deleteOrganization(data.workspaceId);
 
     dialogRef.current?.close();
@@ -91,7 +96,7 @@ const TerminateWorkspace = () => {
                   className={cn(
                     'font-outfit mb-5 cursor-pointer text-xs leading-[16px] font-semibold',
                   )}
-                  disabled={!workspaceId?.trim()}
+                  disabled={!workspaceId?.trim() || isPending}
                 >
                   Delete workspace
                 </Button>

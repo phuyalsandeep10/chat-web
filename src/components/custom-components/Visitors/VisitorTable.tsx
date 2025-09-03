@@ -6,7 +6,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import { Icons } from '@/components/ui/Icons';
 import VisitorDetailModal from '@/components/custom-components/Visitors/VisitorDetailModal';
-import profile from '@/assets/images/profile.jpg';
+import profile from '@/assets/images/MenProfile.svg';
 import FilterComponent from './FilterComponent';
 import DeleteModal from '@/components/modal/DeleteModal';
 import {

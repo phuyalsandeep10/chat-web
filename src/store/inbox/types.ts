@@ -141,4 +141,6 @@ export interface ConversationState {
   resetMessageNotificationCount: () => void;
   setCustomerIsOnlineOffline: (data: any) => void;
   setConversationUnresolved: (data: any) => void;
+  updateConversationLastMessage: (data: any) => void;
+  insertConversation: (data: any) => void;
 }

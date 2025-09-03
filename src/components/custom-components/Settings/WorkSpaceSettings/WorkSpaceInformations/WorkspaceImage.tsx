@@ -33,7 +33,7 @@ const WorkspaceImage = ({ organization }: any) => {
   const [showChangePhotoModal, setShowChangePhotoModal] = useState(false);
 
   const { setData } = useWorkspaceStore();
-  console.log(organization);
+  console.log('From workspace image: ', organization);
 
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
     x: number;
@@ -91,8 +91,8 @@ const WorkspaceImage = ({ organization }: any) => {
 
   const logoSrc =
     imageUrl ||
-    (organization?.owner_image?.startsWith('https')
-      ? organization.owner_image
+    (organization?.owner.image?.startsWith('https')
+      ? organization.owner.image
       : '/profile-placeholder.jpeg');
 
   return (

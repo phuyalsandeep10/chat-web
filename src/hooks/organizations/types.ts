@@ -1,24 +1,24 @@
 export type Organization = {
   id: number;
   name: string;
-  domain?: string;
-  description?: string;
-  logo?: string;
-  purpose?: string;
+  domain?: string | null;
+  description?: string | null;
+  logo?: string | null;
+  purpose?: string | null;
   active?: boolean;
   contact_email?: string | null;
-  contact_phone?: string | '';
+  contact_phone?: string | null;
   twitter_username?: string | null;
   facebook_username?: string | null;
   whatsapp_number?: string | null;
   telegram_username?: string | null;
-  owner_id?: number;
-  identifier?: string;
+  owner_id?: number | null;
+  identifier?: string | null;
   created_at?: string;
-  contact_dial_code?: string;
-  owner_image?: string;
-  owner_name?: string;
-  timezone_id?: number;
+  contact_dial_code?: string | null;
+  owner_image?: string | null;
+  owner_name?: string | null;
+  timezone_id?: number | null;
 };
 
 export type Owner = {
@@ -53,8 +53,10 @@ export type OrganizationListResponse = {
 
 export interface OrganizationMember {
   id: number;
-  name: string;
+  user_name: string;
   image: string;
+  email: string;
+  user_id: number;
 }
 
 export interface OrganizationMemberResponse {

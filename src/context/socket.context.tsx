@@ -57,12 +57,15 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   // Use the new useAudio hook
   const { playSound } = useMessageAudio();
   const {
-    fetchAllConversations,
+    // fetchAllConversations,
     setCustomerIsOnlineOffline,
     setConversationUnresolved,
+    updateConversationLastMessage,
+    insertConversation,
   } = useAgentConversationStore();
   const handleCustomerJoinConversation = (data: any) => {
     console.log('Customer join conversation', data);
+    insertConversation(data?.conversation);
   };
   const connectSocket = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -115,9 +118,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       );
 
       newSocket.on(CHAT_EVENTS.message_notification, (data: Message) => {
-        // console.log('Message notification:', data);
+        console.log('Message notification:', data);
         playSound();
-        fetchAllConversations();
+        updateConversationLastMessage(data);
       });
       newSocket.on(CHAT_EVENTS.customer_disconnected, (data) => {
         // console.log('customer disconnected', data);
