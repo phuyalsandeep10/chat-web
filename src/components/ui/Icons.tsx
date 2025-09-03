@@ -38,6 +38,7 @@ import {
   Reply,
   ArrowUpCircle,
   Eye,
+  FolderPlus,
 } from 'lucide-react';
 import {
   RiCheckboxCircleFill,
@@ -232,4 +233,5 @@ export const Icons = {
   ri_pie_chart_2_fill: RiPieChart2Fill,
   drag_move_fill: RiDragMoveFill,
   vector: RiFileListLine,
+  folderPlus: FolderPlus,
 };

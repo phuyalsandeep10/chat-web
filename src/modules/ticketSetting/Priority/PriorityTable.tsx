@@ -53,6 +53,7 @@ export default function TicketPriorityPage() {
   const {
     control: formControl,
     handleSubmit: formHandleSubmit,
+    reset,
     formState: { errors },
   } = useForm<PriorityFormData>({
     resolver: zodResolver(prioritySchema),
@@ -73,6 +74,11 @@ export default function TicketPriorityPage() {
     }
     setDeleteModalOpen(false);
     setSelectedPriorityId(null);
+  };
+
+  const handleAddPriority = (data: PriorityFormData) => {
+    onAddPriority(data);
+    reset();
   };
 
   if (isLoading) {
@@ -159,7 +165,7 @@ export default function TicketPriorityPage() {
           {/*  Add New Priority with Validation */}
           <div className="border-t pt-6">
             <form
-              onSubmit={formHandleSubmit(onAddPriority)}
+              onSubmit={formHandleSubmit(handleAddPriority)}
               className="flex items-start gap-4"
             >
               <div className="flex-1">
@@ -220,6 +226,7 @@ export default function TicketPriorityPage() {
         description={`Deleting this ticket is a permanent action and cannot be undone. This may result in the loss of important information and context related to the issue.`}
         descriptionColor="text-alert-prominent font-outfit text-xs font-normal"
         onConfirm={handleConfirmDelete}
+        confirmText="Delete"
         icon={''}
       />
     </>

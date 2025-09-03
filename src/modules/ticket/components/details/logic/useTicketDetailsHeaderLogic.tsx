@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { getTicketDetails } from '@/services/ticket/services';
 import { usePriorities } from '@/modules/ticket/hooks/usePriorities';
 import { useTicketStatuses } from '@/modules/ticket/hooks/useTicketStatus';
 import axiosInstance from '@/apiConfigs/axiosInstance';
 import { showToast } from '@/shared/toast';
+import { TicketService } from '@/services/ticket/ticketServices';
 
 export interface Note {
   id: string;
@@ -61,7 +61,7 @@ export const useTicketHeaderLogic = (
   const fetchTicket = async () => {
     if (!ticketId) return;
     try {
-      const response = await getTicketDetails(ticketId);
+      const response = await TicketService.getTicketDetails(ticketId);
       const data = response.data;
 
       setTicket(data);
@@ -85,7 +85,7 @@ export const useTicketHeaderLogic = (
     if (!ticketId) return;
     try {
       await updateTicketPriorityApi(ticketId, newPriorityId);
-      const updated = await getTicketDetails(ticketId);
+      const updated = await TicketService.getTicketDetails(ticketId);
       setTicket(updated.data);
       setPriorityId(updated.data.priority?.id?.toString() || '');
       onUpdateTicket?.(updated.data);
@@ -107,7 +107,7 @@ export const useTicketHeaderLogic = (
     if (!ticketId) return;
     try {
       await updateTicketStatusApi(ticketId, newStatusId);
-      const updated = await getTicketDetails(ticketId);
+      const updated = await TicketService.getTicketDetails(ticketId);
       setTicket(updated.data);
       setStatusId(updated.data.status?.id?.toString() || '');
       onUpdateTicket?.(updated.data);

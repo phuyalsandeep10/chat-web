@@ -240,6 +240,7 @@ export default function CardView() {
         description={`Deleting this ticket is a permanent action and cannot be undone. This may result in the loss of important information and context related to the issue.`}
         descriptionColor="text-alert-prominent font-outfit text-xs font-normal"
         onConfirm={handleConfirmDelete}
+        confirmText="Delete"
         onCancel={closeDeleteModal}
         icon={''}
       />

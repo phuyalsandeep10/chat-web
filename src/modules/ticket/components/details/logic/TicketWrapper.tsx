@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getTicketDetails } from '@/services/ticket/services';
+
+import { TicketService } from '@/services/ticket/ticketServices';
 import TicketDetailsHeader from '../TicketDetailsHeader';
 import TicketRightSidebar from '../TicketDetailsSidebar';
 import { TicketDetailsSla } from '../TicketDetailsSla';
@@ -17,7 +18,7 @@ export default function TicketWrapper({ ticketId }: TicketWrapperProps) {
   // Fetch ticket details
   const fetchTicket = async () => {
     try {
-      const response = await getTicketDetails(ticketId);
+      const response = await TicketService.getTicketDetails(ticketId);
       setTicket(response.data);
     } catch (err) {
       console.error('Failed to fetch ticket details', err);
