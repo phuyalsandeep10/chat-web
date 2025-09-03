@@ -137,14 +137,14 @@ const MessageItem = ({
               </div>
             </div>
 
-            <div className="">
+            <div>
               {isUserId && (
                 <Avatar className="min-h-12 min-w-12 overflow-hidden">
                   {message?.user && message?.user?.image ? (
                     <AvatarImage
                       src={message?.user?.image}
                       alt="user image"
-                      className="ml-2 flex h-full w-full rounded-full object-center"
+                      className="flex h-full w-full shrink-0 rounded-full object-center"
                     />
                   ) : (
                     <AvatarFallback className="text-theme-text-dark h-full w-full text-xs font-medium">

@@ -9,7 +9,6 @@ import React, {
   useState,
 } from 'react';
 import { DropdownMenu } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
 import {
   DropdownMenuContent,
   DropdownMenuTrigger,
@@ -59,6 +58,8 @@ const Editor = forwardRef<any, TiptapProps>(
 
     const [isEmojiOpen, setIsEmojiOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    //for active status of button
+    const [selectedButton, setSelectedButton] = useState<number[]>([]);
     const emojiRef = useRef<HTMLDivElement | null>(null);
     const emojiBtnRef = useRef<HTMLDivElement | null>(null);
     const lastValueRef = useRef<string | null>(null);
@@ -245,6 +246,19 @@ const Editor = forwardRef<any, TiptapProps>(
 
     if (!editor) return <div>Loading editor...</div>;
 
+    // handle button selections
+    const handleButtonSelection = (id: number) => {
+      setSelectedButton((prev) => {
+        if (prev.includes(id)) {
+          return prev.filter((btnId) => btnId !== id);
+        } else {
+          return [...prev, id];
+        }
+      });
+
+      console.log(selectedButton);
+    };
+
     return (
       <div className="relative -mt-15 space-y-4 bg-white pt-2">
         <EditorContent
@@ -255,24 +269,33 @@ const Editor = forwardRef<any, TiptapProps>(
         <div className="flex justify-between">
           <div className="flex gap-[6px]">
             <button
-              className="rounded-md p-1 transition-all hover:scale-105 active:scale-90"
-              onClick={() => editor.chain().focus().toggleBold().run()}
+              className={`${selectedButton.includes(1) ? 'bg-brand-primary text-white' : ''} rounded-md p-1 transition-all hover:scale-105 active:scale-90`}
+              onClick={() => {
+                handleButtonSelection(1);
+                editor.chain().focus().toggleBold().run();
+              }}
               disabled={isSubmitting}
             >
-              <Bold />
+              <Bold className={``} />
             </button>
 
             <button
-              className="rounded-md p-1 transition-all hover:scale-105 active:scale-90"
-              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={`${selectedButton.includes(2) ? 'bg-brand-primary text-white' : ''} rounded-md p-1 transition-all hover:scale-105 active:scale-90`}
+              onClick={() => {
+                handleButtonSelection(2);
+                editor.chain().focus().toggleItalic().run();
+              }}
               disabled={isSubmitting}
             >
               <Italic />
             </button>
 
             <button
-              className="rounded-md p-1 transition-all hover:scale-105 active:scale-90"
-              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              className={`${selectedButton.includes(3) ? 'bg-brand-primary text-white' : ''} rounded-md p-1 transition-all hover:scale-105 active:scale-90`}
+              onClick={() => {
+                handleButtonSelection(3);
+                editor.chain().focus().toggleUnderline().run();
+              }}
               disabled={isSubmitting}
             >
               <UnderlineIcon />
@@ -289,7 +312,9 @@ const Editor = forwardRef<any, TiptapProps>(
                 }
               }}
               className={`rounded-md p-1 transition-all hover:scale-105 active:scale-90 ${
-                editor.isActive('bulletList') ? 'is-active' : ''
+                editor.isActive('bulletList')
+                  ? 'is-active bg-brand-primary text-white'
+                  : ''
               }`}
               disabled={isSubmitting}
             >
@@ -307,7 +332,9 @@ const Editor = forwardRef<any, TiptapProps>(
                 }
               }}
               className={`rounded-md p-1 transition-all hover:scale-105 active:scale-90 ${
-                editor.isActive('orderedList') ? 'bg-blue-200 text-white' : ''
+                editor.isActive('orderedList')
+                  ? 'bg-brand-primary text-white'
+                  : ''
               }`}
               disabled={isSubmitting}
             >
@@ -315,7 +342,7 @@ const Editor = forwardRef<any, TiptapProps>(
             </button>
 
             <button
-              className="rounded-md p-1 transition-all hover:scale-105 active:scale-90"
+              className={`active:bg-brand-primary rounded-md p-1 transition-all hover:scale-105 active:scale-90 active:text-white`}
               onClick={() => {
                 const { state, view } = editor;
                 const { from, to } = state.selection;

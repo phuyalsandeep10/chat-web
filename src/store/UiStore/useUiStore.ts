@@ -9,7 +9,7 @@ interface UiState {
 }
 
 export const useUiStore = create<UiState>((set) => ({
-  showChatInfo: false,
+  showChatInfo: true,
   openChatInfo: () => set({ showChatInfo: true }),
   closeChatInfo: () => set({ showChatInfo: false }),
   activeTab: 'Unresolved',
