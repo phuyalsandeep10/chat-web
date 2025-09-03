@@ -37,6 +37,7 @@ const ChannelSection: React.FC<ChannelProps> = ({
             description={channel.description}
             websiteUrl={channel.websiteUrl}
             isConnected={connectionStatus[channel.name]}
+            route={channel.route}
             onConnectionChange={(isConnected) =>
               onConnectionChange(channel.name, isConnected)
             }

@@ -56,11 +56,19 @@ const Header: FC<HeaderProps> = ({
       </div>
 
       <div className="mt-7.5 flex justify-center gap-6">
-        <Button size="sm" className="px-3 py-4" onClick={onInstallClick}>
+        <Button
+          size="sm"
+          className="h-[45px] w-[150px] px-3 py-4"
+          onClick={onInstallClick}
+        >
           {installButton}
         </Button>
 
-        <Button variant="outline" size="sm" className="px-3 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-[45px] w-[170px] px-3 py-4"
+        >
           {videoButton}
         </Button>
       </div>
