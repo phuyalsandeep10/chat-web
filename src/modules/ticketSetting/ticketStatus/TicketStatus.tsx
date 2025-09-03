@@ -127,13 +127,15 @@ export default function TicketStatus() {
                 placeholder="New Status Name"
               />
             </div>
-            <div className="font-outfit text-disabled-foreground w-48 flex-1 text-sm font-medium">
+            <div className="font-outfit text-disabled-foreground min-w-[12rem] flex-1 text-sm font-medium">
               <SelectField
                 control={logic.control}
                 name="newCategoryName"
                 options={logic.categoryOptions}
+                className="break-words whitespace-normal"
               />
             </div>
+
             <div className="flex">
               <div className="border px-1 py-1">
                 <AdvancedColorPicker
@@ -168,6 +170,7 @@ export default function TicketStatus() {
         description={`Deleting this ticket is a permanent action and cannot be undone. This may result in the loss of important information and context related to the issue.`}
         descriptionColor="text-alert-prominent font-outfit text-xs font-normal"
         onConfirm={logic.handleConfirmDelete}
+        confirmText="Delete"
         icon={''}
       />
     </TooltipProvider>
