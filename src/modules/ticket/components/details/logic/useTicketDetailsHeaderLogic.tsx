@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { getTicketDetails } from '@/services/ticket/services';
 import { usePriorities } from '@/modules/ticket/hooks/usePriorities';
 import {
   useTicketStatuses,
@@ -9,6 +8,7 @@ import {
 } from '@/modules/ticket/hooks/useTicketStatus';
 import axiosInstance from '@/apiConfigs/axiosInstance';
 import { showToast } from '@/shared/toast';
+import { TicketService } from '@/services/ticket/ticketServices';
 
 // ---- DEBOUNCE HOOK ----
 function useDebounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
@@ -55,7 +55,7 @@ export const useTicketHeaderLogic = (ticketId: number) => {
 
     const fetchTicket = async () => {
       try {
-        const response = await getTicketDetails(ticketId);
+        const response = await TicketService.getTicketDetails(ticketId);
         const data = response.data;
 
         setTicket(data);

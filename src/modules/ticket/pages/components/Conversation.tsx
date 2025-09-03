@@ -2,16 +2,7 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { parseISO, isToday, isYesterday } from 'date-fns';
 import Dropdown from './Dropdown';
-
-export interface Ticket {
-  id?: number;
-  sender: string;
-  receiver?: string;
-  content: string;
-  direction: 'incoming' | 'outgoing';
-  created_at: string;
-  isEdited?: boolean;
-}
+import { Ticket } from '@/services/ticket/ticketTypes';
 
 interface ConversationProps {
   conversationData: Ticket[];
@@ -117,7 +108,7 @@ const Conversation: React.FC<ConversationProps> = ({
   return (
     <div
       ref={containerRef}
-      className="h-[60vh] space-y-3 overflow-y-auto scroll-smooth pb-5"
+      className="h-[65vh] space-y-3 overflow-y-auto scroll-smooth pb-5"
     >
       {isLoading && (
         <div className="flex justify-center py-4">
@@ -155,6 +146,13 @@ const Conversation: React.FC<ConversationProps> = ({
                 {msg.direction === 'outgoing' ? (
                   <>
                     <div className="group relative max-w-[60%]">
+                      {msg.isEdited && (
+                        <div className="flex justify-end">
+                          <span className="text-info text-xs font-medium">
+                            Edited
+                          </span>
+                        </div>
+                      )}
                       <div className="bg-brand-primary relative rounded-xl px-7 py-2.5 break-words text-white">
                         <p className="text-lg">{msg.content}</p>
                         {/* <p className="text-lg">{msg.id}</p> */}

@@ -2,7 +2,7 @@
 import GeneralInfo from '@/components/custom-components/Inbox/InboxChatInfo/Informations/GeneralInfo';
 import { TicketProvider } from '@/context/ticket.context';
 import TicketDetails from '@/modules/ticket/pages/TicketDetails';
-import { getTicketDetails } from '@/services/ticket/services';
+import { getTicketDetails } from '@/services/ticket/ticketServices';
 import React from 'react';
 import { useParams } from 'next/navigation';
 

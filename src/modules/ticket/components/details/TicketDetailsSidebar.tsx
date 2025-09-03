@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getTicketDetails } from '@/services/ticket/services';
 import { Icons } from '@/components/ui/Icons';
 import { parseISO, addMinutes, format, formatDistanceToNow } from 'date-fns';
 
 import { TicketGeneralInfo } from './TicketGeneralInformation';
 import TicketDetailsSla from './TicketDetailsSla';
+import { TicketService } from '@/services/ticket/ticketServices';
 
 interface TicketRightSidebarProps {
   isOpen: boolean;
@@ -26,7 +26,7 @@ export default function TicketRightSidebar({
 
     const fetchTicket = async () => {
       try {
-        const response = await getTicketDetails(ticketId);
+        const response = await TicketService.getTicketDetails(ticketId);
         setTicket(response.data);
       } catch (error) {
         console.error('Failed to fetch ticket details', error);
