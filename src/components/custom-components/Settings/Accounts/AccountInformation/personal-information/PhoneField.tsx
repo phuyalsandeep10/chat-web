@@ -57,35 +57,38 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
     fetchPhoneCode();
   }, []);
 
-  console.log(data);
-  console.log(storeDialCode);
+  // console.log(data);
+  // console.log(storeDialCode);
   // Set selectedCountry and dialCode from storeDialCode (backend ID)
   useEffect(() => {
-    if (data.length === 0 || !storeDialCode) return;
+    if (data?.length === 0 || !storeDialCode) return;
 
-    const matchedPhoneCode = data.find(
+    const matchedPhoneCode = data?.find(
       (item) => item.dial_code === storeDialCode,
     );
 
     if (matchedPhoneCode) {
-      const country = countries.find(
-        (c) => c.code === matchedPhoneCode.code.toUpperCase(),
+      const country = countries?.find(
+        (c) => c?.code === matchedPhoneCode?.code?.toUpperCase(),
       );
       if (country) {
         setSelectedCountry(country); // for flag/+code display
-        setDialCode(matchedPhoneCode.id); // backend ID to store/submit
+        setDialCode(matchedPhoneCode?.id); // backend ID to store/submit
       }
     } else {
       // Fallback: US
-      const fallbackCountry = countries.find((c) => c.code === 'US');
-      const fallbackPhoneCode = data.find((d) => d.code.toUpperCase() === 'US');
+      const fallbackCountry = countries.find((c) => c?.code === 'US');
+      const fallbackPhoneCode = data.find(
+        (d) => d?.code?.toUpperCase() === 'US',
+      );
+
       if (fallbackCountry && fallbackPhoneCode) {
         setSelectedCountry(fallbackCountry);
         setDialCode(fallbackPhoneCode.id);
       }
     }
   }, [data, storeDialCode]);
-
+  console.log(countries);
   // Submit backend ID if it changes
   const handleDialCode = useCallback(async () => {
     if (!dialCode || !authData?.data?.user) return;
