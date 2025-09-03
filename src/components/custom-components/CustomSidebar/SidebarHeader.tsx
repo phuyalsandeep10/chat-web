@@ -36,10 +36,10 @@ const SidebarHeader: React.FC = () => {
             'overflow-hidden transition-all duration-300 ease-in-out',
           )}
         >
-          <h1 className="from-theme-text-dark via-brand-text to-brand-primary font-outfit bg-gradient-to-r bg-clip-text text-lg leading-[29px] font-medium text-transparent">
+          <h1 className="from-theme-text-dark via-brand-text to-brand-primary font-outfit w-40 truncate bg-gradient-to-r bg-clip-text text-lg leading-[29px] font-medium text-transparent">
             {workspace?.owner_name || 'Org Name'}
           </h1>
-          <p className="text-theme-text-primary font-outfit text-xs leading-[17px] font-normal">
+          <p className="text-theme-text-primary font-outfit w-40 truncate text-xs leading-[17px] font-normal">
             {workspace?.domain || 'example.com'}
           </p>
         </div>
