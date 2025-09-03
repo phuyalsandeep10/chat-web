@@ -18,6 +18,7 @@ import { useGetMembers } from '@/hooks/organizations/useGetMembers';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useSendOwnershipInvitation } from '@/hooks/organizations/useSendOwnershipInvitation';
 import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganization';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TransferOwnershipModalProps {
   open: boolean;
@@ -28,23 +29,20 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
   open,
   onClose,
 }) => {
-  const { authData } = useAuthStore();
-  const orgId = authData?.data.user.attributes.organization_id;
-  const { data: organizationMembers } = useGetMembers(orgId ?? 0, {
-    enabled: !!orgId,
-  });
+  const { data: organizationMembers } = useGetMembers();
+  console.log('From transfer model', organizationMembers);
+
+  const queryClient = useQueryClient();
 
   const sendOwnershipInvitation = useUpdateOrganization();
 
   const handleInvite = (userId: number) => {
-    console.log(userId);
-
     sendOwnershipInvitation.mutate(
+      { owner_id: userId },
       {
-        owner_id: userId,
-      },
-      {
-        onSuccess: (data) => {
+        onSuccess: () => {
+          // 🔑 Force refetch members or organization data
+          queryClient.invalidateQueries({ queryKey: ['getOrganizationById'] });
           onClose();
         },
       },
@@ -78,14 +76,14 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
           <div className="space-y-4 pt-4 pr-4">
             {organizationMembers?.map((user) => (
               <div
-                key={user.id}
+                key={user?.id}
                 className="hover:bg-light-blue font-outfit text-gray-primary flex cursor-pointer items-center justify-between p-2 text-xs leading-[16px] font-semibold"
-                onClick={() => handleInvite(user.id)}
+                onClick={() => handleInvite(user?.user_id)}
               >
                 <div className="flex items-center gap-1">
                   <div>
                     <Image
-                      src={user.image}
+                      src={user?.image}
                       alt="user"
                       width={24}
                       height={24}
@@ -93,7 +91,7 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
                     />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">{user.name}</p>
+                    <p className="text-sm font-medium">{user?.user_name}</p>
                     {/* <p className="text-muted-foreground text-xs">
                       {user.email}
                     </p> */}

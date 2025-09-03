@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { ROUTES } from '@/routes/routes';
 import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWorkspaceInformation';
 import Image from 'next/image';
+import { useGetOrganizationById } from '@/hooks/organizations/useGetorganizations';
 // import { useSidebar } from '@/components/ui/sidebar';
 const SidebarHeader: React.FC = () => {
   // const { toggleSidebar } = useSidebar();
-  const { workspace } = useWorkspaceInformationStore();
+  const { workspace }: any = useWorkspaceInformationStore();
+  useGetOrganizationById();
   console.log('From Sidebar: ', workspace);
-  const logoSrc = workspace?.owner_image?.startsWith('https')
-    ? workspace.owner_image
-    : '';
+  const logoSrc = workspace?.logo?.startsWith('https') ? workspace.logo : '';
   return (
     <div
       className={cn(
@@ -24,7 +24,13 @@ const SidebarHeader: React.FC = () => {
         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center">
           {/* <button onClick={toggleSidebar}>hello</button> */}
           {logoSrc ? (
-            <Image src={logoSrc} alt={workspace?.owner_name || 'logo'} />
+            <Image
+              width={32}
+              height={32}
+              src={logoSrc}
+              alt={workspace?.owner_name || 'logo'}
+              className={cn('h-10 w-10 rounded-full object-cover')}
+            />
           ) : (
             <Logo />
           )}
@@ -37,7 +43,7 @@ const SidebarHeader: React.FC = () => {
           )}
         >
           <h1 className="from-theme-text-dark via-brand-text to-brand-primary font-outfit w-40 truncate bg-gradient-to-r bg-clip-text text-lg leading-[29px] font-medium text-transparent">
-            {workspace?.owner_name || 'Org Name'}
+            {workspace?.name || 'Org Name'}
           </h1>
           <p className="text-theme-text-primary font-outfit w-40 truncate text-xs leading-[17px] font-normal">
             {workspace?.domain || 'example.com'}
