@@ -67,6 +67,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   const savedTime = useTimeStore((state) => state.savedTime);
   const { control, setValue, getValues, reset, watch } = form; // Get setValue from the main form instance
 
+  // reset from after submit
   useEffect(() => {
     if (defaultValues) reset(defaultValues);
   }, [defaultValues, form]);
