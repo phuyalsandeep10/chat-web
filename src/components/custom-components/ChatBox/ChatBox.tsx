@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import EmojiPicker from 'emoji-picker-react';
 import { useAudio } from '@/hooks/useAudio.hook';
+import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 
 interface Message {
   content: string;
@@ -67,6 +68,17 @@ export default function ChatBox() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // emojis
+  const [isEmojiOpen, setIsEmojiOpen] = useState(false);
+  const emojiRef = useRef<HTMLDivElement>(null);
+  const emojiBtnRef = useRef<HTMLDivElement>(null);
+
+  const {
+    messageNotificationCount,
+    resetMessageNotificationCount,
+    incrementMessageNotificationCount,
+  } = useAgentConversationStore();
 
   const { playSound } = useAudio({ src: '/message.mp3' });
 
@@ -120,6 +132,10 @@ export default function ChatBox() {
         console.log('Received message:', data);
         setMessages((prev) => [...prev, data]);
         playSound();
+        if (!isOpen) {
+          console.log('hiii', isOpen);
+          incrementMessageNotificationCount();
+        }
       };
 
       // Set up event listeners
@@ -343,14 +359,6 @@ export default function ChatBox() {
     });
   }, [groupedMessages]);
 
-  // emojis
-  const [isEmojiOpen, setIsEmojiOpen] = useState(false);
-  const emojiRef = useRef<HTMLDivElement>(null);
-  const emojiBtnRef = useRef<HTMLDivElement>(null);
-
-  const handleEmojiBtn = () => {
-    setIsEmojiOpen((prev) => !prev);
-  };
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       setTimeout(() => {
@@ -396,12 +404,15 @@ export default function ChatBox() {
 
   return (
     <>
-      <div className="fixed right-4 bottom-4 z-50 overflow-hidden rounded-xl">
+      <div className="fixed right-4 bottom-4 z-50">
         {/* Floating button */}
         {!isOpen && (
           <button
-            onClick={() => setIsOpen(true)}
-            className="flex min-h-[42px] min-w-[42px] cursor-pointer items-center justify-center rounded-full bg-[#5A189A] shadow-lg transition hover:bg-[#5A189A]"
+            onClick={() => {
+              setIsOpen(true);
+              resetMessageNotificationCount();
+            }}
+            className="relative flex min-h-[42px] min-w-[42px] cursor-pointer items-center justify-center rounded-full bg-[#5A189A] shadow-lg transition hover:bg-[#5A189A]"
           >
             <Image
               src="/widget-logo.svg"
@@ -410,12 +421,17 @@ export default function ChatBox() {
               className="h-6 w-6"
               alt="chatboq bot logo"
             />
+            {messageNotificationCount > 0 && (
+              <span className="bg-error absolute top-[-5px] right-[0px] flex h-4 w-4 animate-bounce items-center justify-center rounded-full text-[10px] text-white">
+                {messageNotificationCount}
+              </span>
+            )}
           </button>
         )}
         {isOpen && (
           <div
             className={cn(
-              `w-[360px] rounded-xl bg-[#FAFAFA]`,
+              `w-[360px] overflow-hidden rounded-xl bg-[#FAFAFA]`,
               expand &&
                 'h-[calc(100vh-20px)] w-[calc(100vw-100px)] transition-all',
             )}
@@ -450,7 +466,10 @@ export default function ChatBox() {
                   <MaximizeIcon />
                 </button>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    resetMessageNotificationCount();
+                  }}
                   className="cursor-pointer"
                 >
                   <X size={18} />

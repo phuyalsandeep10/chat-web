@@ -47,7 +47,7 @@ const EmailInput = () => {
   };
 
   const { errors } = formState;
-  // console.log(errors);
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}

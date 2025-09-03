@@ -114,6 +114,11 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
   insertConversation: (conversationData) =>
     set((state) => {
       console.log('conversationData', conversationData);
+      const record = state.all_conversations.find(
+        (el) => el?.id == conversationData?.id,
+      );
+      if (record) return state;
+
       return {
         all_conversations: [conversationData, ...state.all_conversations],
       };
