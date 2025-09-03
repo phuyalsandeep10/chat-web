@@ -39,17 +39,17 @@ jobs:
           source: "chatboqApp.tar"
           target: "/var/www/chatboq_portal/chatboq-web"
 
-#   deploy:
-#     needs: build-and-test
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Deploy on server
-#         uses: appleboy/ssh-action@master
-#         with:
-#           host: ${{ secrets.SSH_HOST }}
-#           username: ${{ secrets.SSH_USER }}
-#           key: ${{ secrets.SSH_PRIVATE_KEY }}
-#           script: |
-#             cd /var/www/chatboq_portal/chatboq-web
-#             docker load -i chatboqApp.tar
-#             docker compose up -d --force-recreate
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/chatboq_portal/chatboq-web
+            docker load -i chatboqApp.tar
+            docker compose up -d --force-recreate
