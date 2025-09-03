@@ -65,7 +65,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   } = useAgentConversationStore();
   const handleCustomerJoinConversation = (data: any) => {
     console.log('Customer join conversation', data);
-    // insertConversation(data?.conversation)
+    insertConversation(data?.conversation);
   };
   const connectSocket = useCallback(() => {
     if (typeof window === 'undefined') return;
