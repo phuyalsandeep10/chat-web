@@ -28,7 +28,7 @@ jobs:
       - name: Save image to tarball
         run: |
           docker save chatboq-web:latest -o chatboqApp.tar
-          chmod 664 chatboq-back.tar
+          chmod 664 chatboqApp.tar
 
       - name: Upload tarball and .env to server
         uses: appleboy/scp-action@master
