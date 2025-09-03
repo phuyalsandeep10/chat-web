@@ -93,6 +93,7 @@ export default function SlaTable({ slaList }: SlaTableProps) {
         descriptionColor="text-alert-prominent font-outfit text-xs font-normal"
         onConfirm={handleConfirmDelete}
         onCancel={() => setIsDeleteOpen(false)}
+        confirmText="Delete"
         icon={''}
       />
 
@@ -214,7 +215,7 @@ export default function SlaTable({ slaList }: SlaTableProps) {
                     control={newSlaControl}
                     name="new_sla_priority"
                     options={priorityOptions}
-                    className="h-9 w-28 text-sm"
+                    className="min-w-28 text-sm break-words whitespace-normal"
                   />
                 </TableCell>
 

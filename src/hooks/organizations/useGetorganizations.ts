@@ -22,19 +22,16 @@ export const useGetorganizationDetails = () => {
   });
 };
 
-export const useGetOrganizationById = (orgId: number, options?: any) => {
+export const useGetOrganizationById = (options?: any) => {
   const { workspace, setWorkspace } = useWorkspaceInformationStore();
   return useQuery<OrganizationAPIResponse>({
-    queryKey: ['getOrganizationById', orgId],
+    queryKey: ['getOrganizationById'],
     queryFn: async () => {
       const res = await axiosInstance.get(`/organizations/current`);
-      console.log('Api Response: ', res.data.data.organization);
-      setWorkspace(res.data.data.organization);
-      console.log(res.data.data);
+      console.log('Api Response: ', res.data.data);
+      setWorkspace(res.data.data);
       return res.data.data;
     },
-
-    enabled: !!orgId,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     ...options,

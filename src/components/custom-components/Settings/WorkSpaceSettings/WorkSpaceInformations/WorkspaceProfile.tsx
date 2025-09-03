@@ -79,7 +79,7 @@ const WorkspaceProfile = ({ organization }: any) => {
   );
 
   useEffect(() => {
-    if (organization && timezones.length > 0) {
+    if (organization && timezones.length > 0 && !selectedTimeZone) {
       const ownerCountry =
         timezones.find((c) => c.id === organization?.timezone_id) || null;
       setSelectedTimeZone(ownerCountry);
