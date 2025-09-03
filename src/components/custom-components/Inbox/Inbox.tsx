@@ -47,6 +47,7 @@ const Inbox = () => {
 
   const handleReceiveMessage = (data: any) => {
     const isSenderMessage = data?.user_id === userId;
+    if (data?.conversation_id !== Number(chatId)) return;
     setTypingMessage('');
     setShowTyping(false);
     if (!isSenderMessage) {
@@ -56,11 +57,14 @@ const Inbox = () => {
   };
 
   const handleTyping = (data: any) => {
+    if (data?.conversation_id !== Number(chatId)) return;
     setShowTyping(true);
+
     setTypingMessage(data?.message || '');
   };
 
-  const handleStopTyping = () => {
+  const handleStopTyping = (data: any) => {
+    if (data?.conversation_id !== Number(chatId)) return;
     setShowTyping(false);
     setTypingMessage('');
   };
@@ -78,9 +82,6 @@ const Inbox = () => {
     socket.emit(CHAT_EVENTS.leave_conversation, {
       conversation_id: Number(chatId),
     });
-  };
-  const handleCustomerDisConnected = (data: any) => {
-    console.log('Customer Disconnect Data ', { data });
   };
 
   useEffect(() => {
@@ -127,6 +128,7 @@ const Inbox = () => {
   const onSend = async (editorInstance?: any) => {
     const latestMessage = editorInstance?.getHTML?.();
     console.log({ editedMessage, replyingTo });
+
     if (!latestMessage || latestMessage === '<p></p>') {
       console.warn('Empty message, not sending');
       return;

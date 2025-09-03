@@ -111,6 +111,46 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
         all_conversations: updatedConversations,
       };
     }),
+  insertConversation: (conversationData) =>
+    set((state) => {
+      console.log('conversationData', conversationData);
+      return {
+        all_conversations: [conversationData, ...state.all_conversations],
+      };
+    }),
+  updateConversationLastMessage: (message) =>
+    set((state) => {
+      const updatedConversations = state.all_conversations.map((conv) =>
+        conv.id === message.conversation_id
+          ? {
+              ...conv,
+              attributes: {
+                ...conv.attributes,
+                last_message: {
+                  id: message.id,
+                  content: message.content,
+                  created_at: message.created_at,
+                  updated_at: message.updated_at,
+                  conversation_id: message.conversation_id,
+                  seen: message.seen,
+                  user_id: message.user_id,
+                  customer_id: message.customer_id,
+                  reply_to_id: message.reply_to_id,
+                  active: message.active,
+                  created_by_id: message.created_by_id,
+                  updated_by_id: message.updated_by_id,
+                  feedback: message.feedback,
+                  deleted_at: message.deleted_at,
+                },
+              },
+            }
+          : conv,
+      );
+      // console.log(updatedConversations);
+      return {
+        all_conversations: updatedConversations,
+      };
+    }),
   updateMessageSeen: (messageId) =>
     set((state) => ({
       messages: state.messages.map((m: Message) =>
