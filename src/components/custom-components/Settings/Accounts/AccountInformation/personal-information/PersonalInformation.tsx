@@ -6,7 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import { InputField } from '@/components/common/hook-form/InputField';
 import { ContactNumberSection } from './ContactNumberSection';
 
-import { UpdateProfileFormValues } from '../types';
+import { FetchProfileFormValues, UpdateProfileFormValues } from '../types';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { AuthService } from '@/services/auth/auth';
 import { toast } from 'sonner';
@@ -16,7 +16,7 @@ import { LanguageSection } from './LanguageSection';
 export default function PersonalInformation() {
   const authData = useAuthStore((state) => state.authData);
 
-  const { control, handleSubmit, watch } = useForm<UpdateProfileFormValues>({
+  const { control, handleSubmit, watch } = useForm<FetchProfileFormValues>({
     defaultValues: {
       name: authData?.data?.user?.name,
       mobile: authData?.data?.user?.mobile,
@@ -52,9 +52,10 @@ export default function PersonalInformation() {
       country: data.country,
       image: data.image,
       language: data.language,
-      phone_code: data.phone_code,
+      phone_code_id: data.phone_code_id,
     };
     mutation.mutate(updateProfileData);
+    console.log('personal information', updateProfileData.phone_code_id);
   };
 
   const debouncedSubmit = useCallback(
