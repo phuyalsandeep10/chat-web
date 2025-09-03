@@ -77,7 +77,7 @@ const SidebarFooterMenu = () => {
       <DropdownMenuContent side="top" className={cn('w-full')}>
         <DropdownMenuItem
           onSelect={(e) => {
-            e.preventDefault();
+            // e.preventDefault();
             router.push(ROUTES.SETTINGS.ACCOUNT_INFORMATION);
           }}
           className={cn('hover:bg-muted w-full cursor-pointer text-sm')}
