@@ -28,11 +28,7 @@ const TerminateWorkspace = () => {
 
   const { mutate: deleteOrganization, isPending } = useDeleteOrganization();
 
-  const { authData } = useAuthStore();
-  const orgId = authData?.data.user.attributes.organization_id;
-  const { data: organizationMembers } = useGetMembers(orgId ?? 0, {
-    enabled: !!orgId,
-  });
+  const { data: organizationMembers } = useGetMembers();
 
   const handleDeleteClick = () => {
     dialogRef.current?.open();

@@ -13,14 +13,8 @@ import { useEffect, useState } from 'react';
 import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWorkspaceInformation';
 
 export default function WorkspaceInformation() {
-  const { workspace } = useWorkspaceInformationStore();
-  const { authData } = useAuthStore();
-  const orgId = authData?.data.user.attributes.organization_id;
-  const { data: organizationDetails } = useGetOrganizationById(orgId ?? 0, {
-    enabled: !!orgId,
-  });
-
-  const organization = workspace;
+  const organization = useWorkspaceInformationStore((state) => state.workspace);
+  console.log('From workspace information', organization);
 
   return (
     <>
@@ -38,7 +32,7 @@ export default function WorkspaceInformation() {
         {/* Workspace Information */}
         <div className={cn('mt-10 mb-9')}>
           <Information
-            workspace_owner={organization?.owner_name}
+            workspace_owner={organization?.owner?.name}
             creation_date={organization?.created_at}
           />
         </div>

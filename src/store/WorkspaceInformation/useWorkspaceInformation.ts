@@ -1,5 +1,24 @@
 import { create } from 'zustand';
 
+export type Owner = {
+  id: number;
+  name: string;
+  email: string;
+  country: string;
+  is_superuser: boolean;
+  is_staff: boolean;
+  is_active: boolean;
+  mobile?: string;
+  address?: string;
+  image?: string;
+  language?: string;
+  two_fa_enabled?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  email_verified_at?: string;
+  [key: string]: any;
+};
+
 export type WorkspaceInformationData = {
   id: number;
   name: string;
@@ -21,6 +40,7 @@ export type WorkspaceInformationData = {
   owner_image?: string;
   owner_name?: string;
   timezone_id?: number;
+  owner?: Owner;
 };
 
 type WorkspaceInformationStore = {
