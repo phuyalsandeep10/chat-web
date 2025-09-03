@@ -12,6 +12,7 @@ import {
   VerifyEmailpayload,
 } from './types';
 import { UpdateProfileFormValues } from '@/components/custom-components/Settings/Accounts/AccountInformation/types';
+import { count } from 'console';
 
 export class AuthService {
   // Login User
@@ -243,6 +244,16 @@ export class AuthService {
     } catch (error) {
       console.error('Error uploading Personal Profile', error);
       throw error;
+    }
+  }
+
+  static async fetchPhoneCodes() {
+    try {
+      const countryData = await axiosInstance.get('/organizations/phone-codes');
+      console.log(countryData.data.data);
+      return countryData.data.data;
+    } catch (error) {
+      console.error('Error fetching Country Phone details: ', error);
     }
   }
 }

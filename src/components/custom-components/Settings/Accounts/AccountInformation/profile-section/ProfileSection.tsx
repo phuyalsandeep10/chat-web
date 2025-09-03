@@ -135,6 +135,8 @@ export default function ProfileSection({
     handleRemoveProfilePicture();
   };
 
+  console.log(imageUrl);
+
   return (
     <>
       <div className="text-brand-dark flex items-center">
