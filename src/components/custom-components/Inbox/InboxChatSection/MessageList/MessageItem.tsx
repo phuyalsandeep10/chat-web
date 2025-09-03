@@ -81,7 +81,7 @@ const MessageItem = ({
           {message?.edited_content && (
             <div className="group relative mr-16 flex justify-end">
               <span className="text-info text-xs font-medium">Edited</span>
-              <div className="text-info bg-info-light absolute top-[-30px] hidden rounded-lg px-3 py-1.5 text-xs group-hover:block">
+              <div className="text-info bg-info-light absolute top-[-30px] hidden rounded-lg px-3 py-1.5 text-xs break-all group-hover:block">
                 <div
                   dangerouslySetInnerHTML={{ __html: message?.edited_content }}
                 />
@@ -141,7 +141,7 @@ const MessageItem = ({
                 } ${message?.reply_to && message?.reply_to_id && 'mt-1'}`}
               >
                 <div
-                  className="message__content prose prose-sm max-w-none [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
+                  className="message__content prose prose-sm max-w-none break-all [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
                   dangerouslySetInnerHTML={{ __html: message?.content }}
                 />
               </div>
