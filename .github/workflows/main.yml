@@ -1,0 +1,58 @@
+name: Deploying chatboq-web on VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create .env file from secret
+        run: |
+          echo "${{ secrets.DOT_ENV }}" > .env
+        shell: bash
+
+      - name: Build Docker image
+        run: |
+          docker build -t chatboq-web:latest .
+
+      - name: Save image to tarball
+        run: |
+          docker save chatboq-web:latest -o chatboqApp.tar
+
+      - name: Upload tarball and .env to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: |
+            chatboqApp.tar
+            .env
+          target: "/var/www/chatboq_portal/chatboq-web"
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/chatboq_portal/chatboq-web
+            docker load -i chatboqApp.tar
+            rm -f chatboqApp.tar   # cleanup tarball
+            docker compose down
+            docker compose up -d --force-recreate
