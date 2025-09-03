@@ -7,7 +7,7 @@ import VisualOverview from '../SharedComponent/VisualOverview';
 import { Icons } from '@/components/ui/Icons';
 import Image from 'next/image';
 import messenger from '@/assets/images/integration/messenger.svg';
-import { getFacebookIntegrationUrl } from '@/services/integration/getIntegrationUrl';
+import { IntegrationService } from '@/services/integration/IntegrationService';
 
 const MessengerSection = () => {
   const capabilities = [
@@ -75,7 +75,7 @@ const MessengerSection = () => {
 
   const handleInstallClick = async () => {
     try {
-      const data = await getFacebookIntegrationUrl();
+      const data = await IntegrationService.getFacebookIntegrationUrl();
       if (data?.redirect_url) {
         window.location.href = data.redirect_url;
       } else {

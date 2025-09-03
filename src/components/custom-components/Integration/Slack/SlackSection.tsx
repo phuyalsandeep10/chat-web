@@ -7,7 +7,7 @@ import VisualOverview from '../SharedComponent/VisualOverview';
 import { Icons } from '@/components/ui/Icons';
 import Image from 'next/image';
 import zapier from '@/assets/images/integration/zapier.svg';
-import { getSlackIntegrationUrl } from '@/services/integration/getIntegrationUrl';
+import { IntegrationService } from '@/services/integration/IntegrationService';
 
 const SlackSection = () => {
   const capabilities = [
@@ -75,7 +75,7 @@ const SlackSection = () => {
 
   const handleInstallClick = async () => {
     try {
-      const data = await getSlackIntegrationUrl();
+      const data = await IntegrationService.getSlackIntegrationUrl();
       if (data?.redirect_url) {
         window.location.href = data.redirect_url;
       } else {
