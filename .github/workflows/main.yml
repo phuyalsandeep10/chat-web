@@ -52,6 +52,5 @@ jobs:
           script: |
             cd /var/www/chatboq_portal/chatboq-web
             docker load -i chatboqApp.tar
-            rm -f chatboqApp.tar
-            docker compose down
+            docker compose down 
             docker compose up -d --force-recreate
