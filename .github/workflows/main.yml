@@ -36,8 +36,9 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: |
-            chatboqApp.tar
-            .env
+            ${{ github.workspace }}/chatboqApp.tar
+            ${{ github.workspace }}/.env
+
           target: "/var/www/chatboq_portal/chatboq-web"
 
   deploy:
