@@ -35,7 +35,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "chatboqApp.tar,.env"
+          source: "chatboqApp.tar"
           target: "/var/www/chatboq_portal/chatboq-web"
 
   deploy:
