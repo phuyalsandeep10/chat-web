@@ -1,3 +1,4 @@
+'use client';
 import React, { FC } from 'react';
 import { Icons } from '@/components/ui/Icons';
 import { Button } from '@/components/ui/button';
