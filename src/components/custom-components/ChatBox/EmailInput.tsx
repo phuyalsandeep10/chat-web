@@ -1,12 +1,14 @@
 'use client';
-import axiosInstance from '@/apiConfigs/axiosInstance';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { email, z } from 'zod';
+import { z } from 'zod';
 import { useChatBox } from './chatbox.provider';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import chatBoxAxiosInstance from '@/apiConfigs/chatBoxAxiosInstance';
+
 const EmailInputSchema = z.object({
   email: z.email('Invalid email'),
 });
@@ -28,7 +30,7 @@ const EmailInput = () => {
     setLoading(true);
     console.log(data);
     // return
-    const response = await axiosInstance.put(
+    const response = await chatBoxAxiosInstance.put(
       `/customers/${visitor.customer.id}/customer-email`,
       data,
     );
@@ -45,7 +47,7 @@ const EmailInput = () => {
   };
 
   const { errors } = formState;
-  console.log(errors);
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -57,14 +59,14 @@ const EmailInput = () => {
             src="/widget-logo-bottom.svg"
             height={12}
             width={12}
-            className="-ml-5 h-18 w-18"
+            className="-ml-5 h-16 w-16 shrink-0"
             alt="bot icon"
           />
         </div>
       </div>
       <div className="font-inter -ml-6 w-full rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
         {visitor?.customer?.email || success ? (
-          <p className="text-sm">
+          <p className="text-[11px] leading-[18px] font-normal text-black">
             Your email has been submitted we will contact{' '}
             <span className="text-brand-primary">
               {visitor?.customer?.email}
@@ -82,7 +84,7 @@ const EmailInput = () => {
               <input
                 type="email"
                 placeholder="Enter your Email"
-                className="w-full rounded-md border p-2 text-xs outline-none placeholder:text-xs"
+                className="w-full rounded-md border border-[#E2D4F7] bg-white p-2 text-xs shadow-sm outline-none placeholder:text-xs"
                 {...register('email')}
               />
               {errors?.email && (

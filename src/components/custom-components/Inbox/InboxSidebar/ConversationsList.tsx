@@ -151,7 +151,7 @@ const ConversationsList = () => {
                       <h3 className="text-theme-text-dark truncate text-base font-semibold">
                         {conversation?.customer?.name || 'Unknown'}
                       </h3>
-                      <span className="text-gra-liborder-b-gray-light ml-1 text-xs">
+                      <span className="text-gra-liborder-b-gray-light ml-1 truncate text-xs">
                         {formatTime(lastMessage?.updated_at, undefined, false)}
                       </span>
                     </div>
