@@ -1,10 +1,11 @@
 import axiosInstance from '@/apiConfigs/axiosInstance';
+import chatBoxAxiosInstance from '@/apiConfigs/chatBoxAxiosInstance';
 
 export class CustomerConversationService {
   static async getCustomerAllChatConversationMessages(conversationId: number) {
     // identifier
     try {
-      const res = await axiosInstance.get(
+      const res = await chatBoxAxiosInstance.get(
         `/customers/${conversationId}/messages`,
       );
       return res.data;
@@ -15,7 +16,7 @@ export class CustomerConversationService {
 
   static async initializeConversation(customerId: number, data: any) {
     try {
-      const res = await axiosInstance.post(
+      const res = await chatBoxAxiosInstance.post(
         `/customers/${customerId}/initialize-conversation`,
         data,
       );
@@ -29,7 +30,7 @@ export class CustomerConversationService {
     data: any,
   ) {
     try {
-      const res = await axiosInstance.post(
+      const res = await chatBoxAxiosInstance.post(
         `/customers/conversations/${conversationId}/messages`,
         data,
       );
@@ -40,7 +41,7 @@ export class CustomerConversationService {
   }
   static async createCustomer() {
     try {
-      const res = await axiosInstance.post(`/customers/create`);
+      const res = await chatBoxAxiosInstance.post(`/customers/create`);
       return res.data;
     } catch (error) {
       throw error;
@@ -48,7 +49,9 @@ export class CustomerConversationService {
   }
   static async customerVisit(customerId: any) {
     try {
-      const res = await axiosInstance.post(`/customers/${customerId}/visit`);
+      const res = await chatBoxAxiosInstance.post(
+        `/customers/${customerId}/visit`,
+      );
       return res.data;
     } catch (error) {
       throw error;

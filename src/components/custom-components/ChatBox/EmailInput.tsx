@@ -1,12 +1,14 @@
 'use client';
-import axiosInstance from '@/apiConfigs/axiosInstance';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { email, z } from 'zod';
+import { z } from 'zod';
 import { useChatBox } from './chatbox.provider';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import chatBoxAxiosInstance from '@/apiConfigs/chatBoxAxiosInstance';
+
 const EmailInputSchema = z.object({
   email: z.email('Invalid email'),
 });
@@ -28,7 +30,7 @@ const EmailInput = () => {
     setLoading(true);
     console.log(data);
     // return
-    const response = await axiosInstance.put(
+    const response = await chatBoxAxiosInstance.put(
       `/customers/${visitor.customer.id}/customer-email`,
       data,
     );
@@ -45,7 +47,7 @@ const EmailInput = () => {
   };
 
   const { errors } = formState;
-  console.log(errors);
+  // console.log(errors);
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
