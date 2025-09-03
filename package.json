@@ -60,6 +60,7 @@
     "country-telephone-data": "^0.6.3",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
+    "dompurify": "^3.2.6",
     "emoji-picker-react": "^4.13.2",
     "geometric": "^2.5.5",
     "immer": "^10.1.1",

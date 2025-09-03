@@ -74,7 +74,7 @@ export const TicketDetailsSla: React.FC<TicketDetailsSlaProps> = ({
   if (!ticket) return <p className="p-4">Loading SLA details...</p>;
 
   return (
-    <div className="border-0.5 border-gray-primary border">
+    <div className="border-0.5 border-gray-primary rounded-md border">
       <h1 className="font-outfit text-brand-dark my-4 ml-4 flex items-center gap-2 text-xl font-semibold">
         <span>
           <Icons.vector />
