@@ -75,7 +75,7 @@ const RegisterForm = () => {
         refreshToken,
       };
       AuthService.setAuthTokens(authTokens);
-      router.replace(ROUTES.DASHBOARD);
+      router.replace(ROUTES.YOUR_INBOXES.MAIN_INBOX);
     }
   }, [accessToken, refreshToken, router]);
   return (
