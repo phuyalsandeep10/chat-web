@@ -144,13 +144,22 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
           inputMode="numeric"
           placeholder="Enter phone number"
           value={phoneNumber}
-          onChange={handlePhoneChange}
+          onChange={(e) => {
+            const value = e.target.value.replace(/\D/g, ''); // keep only digits
+            if (value.length <= 16) {
+              handlePhoneChange(e);
+            }
+          }}
+          maxLength={16} // acts as an extra safeguard
           className="ml-3 flex-1 rounded-md border-none focus:ring-0 focus:outline-none"
           onKeyDown={(e) => {
             if (
               !/[0-9]/.test(e.key) &&
               e.key !== 'Backspace' &&
-              e.key !== 'Delete'
+              e.key !== 'Delete' &&
+              e.key !== 'ArrowLeft' &&
+              e.key !== 'ArrowRight' &&
+              e.key !== 'Tab'
             ) {
               e.preventDefault();
             }

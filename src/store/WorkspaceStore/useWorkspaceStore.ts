@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export default interface WorkspaceData {
-  owner_image: string | null;
+  logo: string | null;
   workspace_owner: string;
   name: string;
   domain: string;
@@ -17,7 +17,7 @@ export default interface WorkspaceData {
   owner_id?: number;
 }
 const defaultValues: Partial<WorkspaceData> = {
-  owner_image: '',
+  logo: '',
   workspace_owner: '',
   name: '',
   domain: '',

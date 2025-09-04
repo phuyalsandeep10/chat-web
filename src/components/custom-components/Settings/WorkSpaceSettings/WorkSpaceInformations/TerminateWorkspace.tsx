@@ -19,7 +19,7 @@ type FormData = {
 const TerminateWorkspace = () => {
   const dialogRef = useRef<AlertDialogDemoRef>(null);
 
-  const { control, handleSubmit, getValues, watch } = useForm<FormData>({
+  const { control, handleSubmit, watch } = useForm<FormData>({
     defaultValues: {
       workspaceId: '',
     },
@@ -36,8 +36,6 @@ const TerminateWorkspace = () => {
 
   // This function runs when user clicks "Yes, Delete" in modal
   const handleConfirmDelete = handleSubmit(async (data) => {
-    console.log('Typed confirmation:', data.workspaceId);
-
     deleteOrganization(data.workspaceId);
 
     dialogRef.current?.close();

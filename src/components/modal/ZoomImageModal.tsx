@@ -15,6 +15,7 @@ import {
   DialogFooter,
   DialogTrigger,
 } from '../ui/dialog';
+import { Loader2 } from 'lucide-react'; // Spinner icon
 
 interface ZoomImageModalProps {
   heading: ReactNode;
@@ -27,7 +28,7 @@ interface ZoomImageModalProps {
     croppedArea: any,
     croppedAreaPixels: { x: number; y: number; width: number; height: number },
   ) => void;
-  onSave: (imageSrc: string) => void;
+  onSave: (imageSrc: string) => Promise<void> | void; // allow async save
   triggerButton?: ReactNode;
   labelClickText?: string;
   labelRestText?: string;
@@ -54,6 +55,7 @@ const ZoomImageModal = ({
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // helper function: convert File to base64 data URL
   const fileToDataUrl = (file: File): Promise<string> => {
@@ -90,13 +92,17 @@ const ZoomImageModal = ({
     onClose();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (uploadedImage) {
-      onSave(uploadedImage);
-      onClose();
-      setUploadedImage(null);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
+      try {
+        setLoading(true);
+        await onSave(uploadedImage); // support async save
+        setUploadedImage(null);
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -181,15 +187,23 @@ const ZoomImageModal = ({
         )}
 
         <DialogFooter className="mt-4">
-          <Button {...cancelButtonProps} onClick={handleCancel}>
+          <Button
+            {...cancelButtonProps}
+            onClick={handleCancel}
+            disabled={loading}
+          >
             {cancelText}
           </Button>
           <Button
             {...actionButtonProps}
             onClick={handleSave}
-            disabled={!uploadedImage}
+            disabled={!uploadedImage || loading}
           >
-            {actionText}
+            {loading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              actionText
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
