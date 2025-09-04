@@ -6,7 +6,6 @@ import { useMessageAudio } from '@/hooks/useMessageAudio.hook';
 import { AuthService } from '@/services/auth/auth';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
-import { useUiStore } from '@/store/UiStore/useUiStore';
 import {
   createContext,
   useCallback,
