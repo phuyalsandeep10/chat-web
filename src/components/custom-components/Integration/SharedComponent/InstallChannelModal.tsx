@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { InputField } from '@/components/common/hook-form/InputField';
+import { postTelegramDetails } from '@/services/integration/postTelegramDetails';
 
 const installTelegramSchema = z.object({
   displayName: z.string().min(1, 'Display name is required'),
@@ -34,10 +35,33 @@ const InstallChannelModal: React.FC<InstallChannelModalProps> = ({
     resolver: zodResolver(installTelegramSchema),
   });
 
-  const onSubmit = (data: FormData) => {
-    console.log('Telegram Bot Data:', data);
-    reset();
-    setOpen(false);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      setLoading(true);
+      setError(null); // Clear previous errors
+
+      const response = await postTelegramDetails({
+        display_name: data.displayName,
+        token: data.token,
+      });
+
+      console.log('Telegram Installed:', response);
+
+      reset();
+      setOpen(false);
+    } catch (err: any) {
+      const apiError =
+        err?.response?.data?.data ||
+        err?.response?.data?.message ||
+        err?.message ||
+        'Something went wrong';
+      setError(apiError);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -64,8 +88,10 @@ const InstallChannelModal: React.FC<InstallChannelModalProps> = ({
             labelClassName="font-medium text-base"
           />
 
-          <Button type="submit" className="w-full">
-            Install Telegram
+          {error && <p className="text-sm text-red-500">{error}</p>}
+
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Installing...' : 'Install Telegram'}
           </Button>
         </form>
 

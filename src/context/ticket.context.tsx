@@ -67,13 +67,12 @@ export const TicketProvider: FC<TicketSocketProps> = ({
         ticket_id: ticketId,
       };
     }
-    console.log('The is', socketOptions.auth);
+    // console.log('The is', socketOptions.auth);
     try {
       const newSocket = io(socketUrl, socketOptions);
       newSocket.on('connect', () => {
         setSocketId(newSocket.id);
         setIsConnected(true);
-        console.log('Connected to:', socketUrl);
       });
       newSocket.on('disconnect', () => {
         setIsConnected(false);

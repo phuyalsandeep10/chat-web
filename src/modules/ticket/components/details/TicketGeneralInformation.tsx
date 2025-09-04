@@ -220,7 +220,7 @@ export const TicketGeneralInfo = ({
   const assignees = data.assignees || [];
 
   return (
-    <div className="border-0.5 border-gray-primary flex flex-col gap-2 border p-2">
+    <div className="border-0.5 border-gray-primary flex flex-col gap-2 rounded-md border p-2">
       <h4 className="font-outfit text-brand-dark flex items-center gap-2 text-xl font-semibold">
         <Icons.client className="h-5 w-5" />
         General Information

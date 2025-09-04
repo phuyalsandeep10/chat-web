@@ -54,11 +54,26 @@ const MessageItem = ({
       key={message?.id}
     >
       {!isUserId && (
-        <div className="bg-gray-light mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
-          <span className="text-theme-text-dark text-xs font-medium">
-            {customer?.name?.substring(0, 2)?.toLocaleUpperCase()}
-          </span>
-        </div>
+        <>
+          <Avatar className="bg-gray-light mr-2 flex h-[50px] w-[50px] flex-shrink-0 items-center justify-center rounded-full">
+            {message?.user && message?.user?.image ? (
+              <AvatarImage
+                src={message?.user?.image}
+                alt="user image"
+                className="ml-2 flex h-full w-full rounded-full object-center"
+              />
+            ) : (
+              <AvatarFallback className="text-theme-text-dark h-full w-full text-xs font-medium">
+                {customer?.name?.substring(0, 2)?.toLocaleUpperCase()}
+              </AvatarFallback>
+            )}
+          </Avatar>
+          {/* <div className="bg-gray-light mr-2 flex h-[50px] w-[50px] flex-shrink-0 items-center justify-center rounded-full">
+            <span className="text-theme-text-dark text-xs font-medium">
+              {customer?.name?.substring(0, 2)?.toLocaleUpperCase()}
+            </span>
+          </div> */}
+        </>
       )}
 
       <div className={`flex`}>
@@ -66,7 +81,7 @@ const MessageItem = ({
           {message?.edited_content && (
             <div className="group relative mr-16 flex justify-end">
               <span className="text-info text-xs font-medium">Edited</span>
-              <div className="text-info bg-info-light absolute top-[-30px] hidden rounded-lg px-3 py-1.5 text-xs group-hover:block">
+              <div className="text-info bg-info-light absolute top-[-30px] hidden rounded-lg px-3 py-1.5 text-xs break-all group-hover:block">
                 <div
                   dangerouslySetInnerHTML={{ __html: message?.edited_content }}
                 />
@@ -109,7 +124,7 @@ const MessageItem = ({
                       <Icons.reply className="h-5 w-5" />
                       <span className="text-sm">Replied</span>
                     </div>
-                    <div className="mt-1 text-sm font-normal text-white">
+                    <div className="mt-1 text-lg font-normal text-white">
                       <div
                         dangerouslySetInnerHTML={{
                           __html: message?.reply_to?.content,
@@ -122,11 +137,11 @@ const MessageItem = ({
 
               <div
                 className={`text-lg leading-[29px] font-normal ${
-                  isUserId ? 'text-sm font-normal break-all' : ''
+                  isUserId ? 'font-normal break-all' : ''
                 } ${message?.reply_to && message?.reply_to_id && 'mt-1'}`}
               >
                 <div
-                  className="message__content prose prose-sm max-w-none [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
+                  className="message__content prose prose-sm max-w-none break-all [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
                   dangerouslySetInnerHTML={{ __html: message?.content }}
                 />
               </div>

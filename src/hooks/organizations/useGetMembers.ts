@@ -2,16 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/apiConfigs/axiosInstance';
 import { OrganizationMember } from './types';
 
-export const useGetMembers = (orgId: number, options?: any) => {
+export const useGetMembers = (options?: any) => {
   return useQuery<OrganizationMember[]>({
-    queryKey: ['getMembers', orgId],
+    queryKey: ['getMembers'],
     queryFn: async () => {
-      const res = await axiosInstance.get(`/organizations/${orgId}/members`);
-      return res.data.data.map(
-        (member: any) => member.user as OrganizationMember,
-      );
+      const res = await axiosInstance.get(`/organizations/members`);
+      return res.data.data;
     },
-    enabled: !!orgId,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     ...options,

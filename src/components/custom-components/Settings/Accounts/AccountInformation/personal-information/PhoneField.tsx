@@ -57,35 +57,6 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
     fetchPhoneCode();
   }, []);
 
-  console.log(data);
-  console.log(storeDialCode);
-  // Set selectedCountry and dialCode from storeDialCode (backend ID)
-  // useEffect(() => {
-  //   if (data.length === 0 || !storeDialCode) return;
-
-  //   const matchedPhoneCode = data.find(
-  //     (item) => item.dial_code === storeDialCode,
-  //   );
-
-  //   if (matchedPhoneCode) {
-  //     const country = countries.find(
-  //       (c) => c.code === matchedPhoneCode.code.toUpperCase(),
-  //     );
-  //     if (country) {
-  //       setSelectedCountry(country); // for flag/+code display
-  //       setDialCode(matchedPhoneCode.id); // backend ID to store/submit
-  //     }
-  //   } else {
-  //     // Fallback: US
-  //     const fallbackCountry = countries.find((c) => c.code === 'US');
-  //     const fallbackPhoneCode = data.find((d) => d.code.toUpperCase() === 'US');
-  //     if (fallbackCountry && fallbackPhoneCode) {
-  //       setSelectedCountry(fallbackCountry);
-  //       setDialCode(fallbackPhoneCode.id);
-  //     }
-  //   }
-  // }, [data, storeDialCode]);
-
   useEffect(() => {
     if (data.length === 0) return;
 
@@ -101,19 +72,17 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
       );
       if (country) {
         setSelectedCountry(country);
-        setDialCode(matchedPhoneCode.id);
+        setDialCode(Number(matchedPhoneCode.dial_code));
       }
     } else {
-      // Fallback: US
-      const fallbackCountry = countries.find((c) => c.code === 'US');
-      console.log(fallbackCountry);
-      console.log('us fallback');
-      const fallbackPhoneCode = data.find((d) => d.code.toUpperCase() === 'US');
+      // Fallback: NEPAL
+      const fallbackCountry = countries.find((c) => c.dialCode === '+977');
+      const fallbackPhoneCode = data.find(
+        (d) => d.dial_code.toUpperCase() === '+977',
+      );
       if (fallbackCountry && fallbackPhoneCode) {
         setSelectedCountry(fallbackCountry);
         setDialCode(fallbackPhoneCode.id);
-        console.log(fallbackCountry);
-        console.log(fallbackPhoneCode.id);
       }
     }
   }, [data, storeDialCode]);
