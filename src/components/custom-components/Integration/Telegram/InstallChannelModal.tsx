@@ -13,7 +13,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { InputField } from '@/components/common/hook-form/InputField';
-import { postTelegramDetails } from '@/services/integration/postTelegramDetails';
+import { IntegrationService } from '@/services/integration/IntegrationService';
 
 const installTelegramSchema = z.object({
   displayName: z.string().min(1, 'Display name is required'),
@@ -41,9 +41,9 @@ const InstallChannelModal: React.FC<InstallChannelModalProps> = ({
   const onSubmit = async (data: FormData) => {
     try {
       setLoading(true);
-      setError(null); // Clear previous errors
+      setError(null);
 
-      const response = await postTelegramDetails({
+      const response = await IntegrationService.postTelegramDetails({
         display_name: data.displayName,
         token: data.token,
       });
@@ -88,7 +88,7 @@ const InstallChannelModal: React.FC<InstallChannelModalProps> = ({
             labelClassName="font-medium text-base"
           />
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-alert-prominent text-sm">{error}</p>}
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Installing...' : 'Install Telegram'}

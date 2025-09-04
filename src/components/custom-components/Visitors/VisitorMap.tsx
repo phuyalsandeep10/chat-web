@@ -26,6 +26,7 @@ const VisitorMap: React.FC<VisitorMapProps> = ({ visitors }) => {
         zoomControl={false}
         keyboard={false}
         center={[20, 0]}
+        attributionControl={false}
         zoom={2}
         style={{ height: '100%', width: '100%', backgroundColor: '#B8D1FF' }}
       >

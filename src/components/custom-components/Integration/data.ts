@@ -33,6 +33,7 @@ export const activeChannels: Channel[] = [
     description:
       "Streamline tasks by linking tools using Zapier's powerful automation.",
     websiteUrl: 'Zapier.com',
+    route: '/integration/crm/zapier',
   },
   {
     image: prestashop,
@@ -118,6 +119,7 @@ export const messagingChannels: Channel[] = [
     description:
       'Chat with your customers instantly through Facebook Messenger.',
     websiteUrl: 'Messenger.com',
+    route: '/integration/messaging/messenger',
   },
   {
     image: instagram,
@@ -126,6 +128,7 @@ export const messagingChannels: Channel[] = [
     description:
       'Engage with followers and manage DMs via Instagram integration.',
     websiteUrl: 'Instagram.com',
+    route: '/integration/messaging/instagram',
   },
   {
     image: viber,
@@ -133,6 +136,22 @@ export const messagingChannels: Channel[] = [
     description:
       'Connect with your users and send real-time updates through Viber.',
     websiteUrl: 'Viber.com',
+  },
+  {
+    image: messenger,
+    name: 'Slack',
+    description:
+      'Connect with your users and send real-time updates through Viber.',
+    websiteUrl: 'Slack.com',
+    route: '/integration/messaging/slack',
+  },
+  {
+    image: instagram,
+    name: 'Telegram',
+    description:
+      'Connect with your users and send real-time updates through Viber.',
+    websiteUrl: 'Telegram.com',
+    route: '/integration/messaging/telegram',
   },
 ];
 
