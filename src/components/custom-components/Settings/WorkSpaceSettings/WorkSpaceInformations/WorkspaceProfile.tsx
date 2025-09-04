@@ -11,6 +11,10 @@ import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganizati
 import useDebouncedEffect from '@/hooks/useDebounceEffect';
 import { useGetTimeZones } from '@/hooks/organizations/useGetTimeZones';
 import WorkspaceCountrySelect from './WorkspaceCountrySelect';
+import {
+  useWorkspaceInformationStore,
+  WorkspaceInformationData,
+} from '@/store/WorkspaceInformation/useWorkspaceInformation';
 
 const WorkspaceProfile = ({ organization }: any) => {
   const { updatedData, setData } = useWorkspaceStore();
@@ -20,6 +24,7 @@ const WorkspaceProfile = ({ organization }: any) => {
     null,
   );
   const prevUpdatedData = useRef<Partial<WorkspaceData>>(updatedData);
+  const { updateWorkspace } = useWorkspaceInformationStore();
 
   const { data: TimeZones, isLoading, isError } = useGetTimeZones();
   const { mutate: updateOrganization } = useUpdateOrganization();
@@ -48,6 +53,16 @@ const WorkspaceProfile = ({ organization }: any) => {
         JSON.stringify(updatedData) !== JSON.stringify(prevUpdatedData.current)
       ) {
         updateOrganization(updatedData);
+        if (updatedData.name) {
+          updateWorkspace({ name: updatedData.name });
+        }
+        if (updatedData.domain) {
+          updateWorkspace({ domain: updatedData.domain });
+        }
+        if (updatedData.logo) {
+          updateWorkspace({ logo: updatedData.logo });
+        }
+
         prevUpdatedData.current = updatedData;
       }
     },
@@ -62,7 +77,7 @@ const WorkspaceProfile = ({ organization }: any) => {
 
       let normalized = rawValue.trim();
 
-      // ❌ reject http://
+      // reject http://
       if (/^http:\/\//i.test(normalized)) {
         setError('Only https:// is supported, http:// is not allowed.');
         return;
@@ -73,7 +88,7 @@ const WorkspaceProfile = ({ organization }: any) => {
         .replace(/^https?:\/\//i, '')
         .replace(/^www\./i, '');
 
-      // ❌ reject spaces
+      // reject spaces
       if (/\s/.test(normalized)) {
         setError('Domain cannot contain spaces.');
         return;

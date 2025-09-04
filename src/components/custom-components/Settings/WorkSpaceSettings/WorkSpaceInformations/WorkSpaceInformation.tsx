@@ -5,16 +5,12 @@ import TerminateWorkspace from './TerminateWorkspace';
 import Information from './Information';
 import WorkSpaceDetails from './WorkSpaceDetails';
 import WorkSpaceHeader from './WorkSpaceHeader';
-import { useAuthStore } from '@/store/AuthStore/useAuthStore';
-import { useGetOrganizationById } from '@/hooks/organizations/useGetorganizations';
 import WorkspaceImage from './WorkspaceImage';
 import WorkspaceProfile from './WorkspaceProfile';
-import { useEffect, useState } from 'react';
 import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWorkspaceInformation';
 
 export default function WorkspaceInformation() {
   const organization = useWorkspaceInformationStore((state) => state.workspace);
-  console.log('From workspace information', organization);
 
   return (
     <>
@@ -32,7 +28,7 @@ export default function WorkspaceInformation() {
         {/* Workspace Information */}
         <div className={cn('mt-10 mb-9')}>
           <Information
-            workspace_owner={organization?.owner?.name}
+            workspace_owner={organization?.owner_name}
             creation_date={organization?.created_at}
           />
         </div>

@@ -10,9 +10,7 @@ import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { v4 } from 'uuid';
 import { AuthService } from '@/services/auth/auth';
-import WorkspaceData, {
-  useWorkspaceStore,
-} from '@/store/WorkspaceStore/useWorkspaceStore';
+import { useWorkspaceStore } from '@/store/WorkspaceStore/useWorkspaceStore';
 import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWorkspaceInformation';
 
 function dataURLtoFile(dataurl: string, filename: string): File {
@@ -31,9 +29,9 @@ const WorkspaceImage = ({ organization }: any) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChangePhotoModal, setShowChangePhotoModal] = useState(false);
+  const { updateWorkspace } = useWorkspaceInformationStore();
 
   const { setData } = useWorkspaceStore();
-  console.log('From workspace image: ', organization);
 
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
     x: number;
@@ -71,7 +69,7 @@ const WorkspaceImage = ({ organization }: any) => {
 
         if (uploadedUrl) {
           setImageUrl(uploadedUrl);
-          setData({ owner_image: uploadedUrl });
+          setData({ logo: uploadedUrl });
         }
         setShowChangePhotoModal(false);
       } catch (error) {
@@ -86,13 +84,14 @@ const WorkspaceImage = ({ organization }: any) => {
   const handleRemovePhoto = () => {
     setImageUrl(null);
     setShowProfileModal(false);
-    setData({ owner_image: null });
+    setData({ logo: null });
+    updateWorkspace({ logo: '' });
   };
 
   const logoSrc =
     imageUrl ||
-    (organization?.owner.image?.startsWith('https')
-      ? organization.owner.image
+    (organization?.logo?.startsWith('https')
+      ? organization.logo
       : '/profile-placeholder.jpeg');
 
   return (
@@ -109,6 +108,7 @@ const WorkspaceImage = ({ organization }: any) => {
             width={250}
             height={250}
             className="h-full w-full object-cover"
+            priority
           />
           <div
             className={cn(

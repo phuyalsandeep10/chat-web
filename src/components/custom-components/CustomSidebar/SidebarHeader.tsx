@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Logo from '@/assets/svg/Logo';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -9,10 +9,13 @@ import { useGetOrganizationById } from '@/hooks/organizations/useGetorganization
 // import { useSidebar } from '@/components/ui/sidebar';
 const SidebarHeader: React.FC = () => {
   // const { toggleSidebar } = useSidebar();
-  const { workspace }: any = useWorkspaceInformationStore();
+
   useGetOrganizationById();
 
+  const workspace = useWorkspaceInformationStore((state) => state.workspace);
+
   const logoSrc = workspace?.logo?.startsWith('https') ? workspace.logo : '';
+  console.log(logoSrc);
 
   return (
     <div
@@ -31,6 +34,7 @@ const SidebarHeader: React.FC = () => {
               src={logoSrc}
               alt={workspace?.owner_name || 'logo'}
               className={cn('h-10 w-10 rounded-full object-cover')}
+              priority
             />
           ) : (
             <Logo />
