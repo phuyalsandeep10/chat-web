@@ -82,7 +82,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
       );
       if (fallbackCountry && fallbackPhoneCode) {
         setSelectedCountry(fallbackCountry);
-        setDialCode(fallbackPhoneCode.id);
+        setDialCode(Number(fallbackPhoneCode.dial_code));
       }
     }
   }, [data, storeDialCode]);

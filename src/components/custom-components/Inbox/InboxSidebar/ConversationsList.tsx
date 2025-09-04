@@ -166,6 +166,7 @@ const ConversationsList = () => {
                       )}
                     >
                       <div
+                        className="line-clamp-1"
                         dangerouslySetInnerHTML={{
                           __html: lastMessage?.content || 'No message',
                         }}
