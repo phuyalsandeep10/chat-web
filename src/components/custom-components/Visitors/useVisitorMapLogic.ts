@@ -92,7 +92,7 @@ export function useVisitorMapLogic(visitors: Visitor[]) {
         ${
           flagUrl
             ? `<div class="border border-grey-light p-0.5 rounded-[6px] flex items-center justify-center w-10 h-10 shrink-0">
-                <img src="${flagUrl}" alt="${countryName} flag" class="w-5 h-[22px] block" />
+                <Image src="${flagUrl}" alt="${countryName} flag" class="w-5 h-[22px] block" />
               </div>`
             : ''
         }

@@ -2,9 +2,10 @@ import { AuthService } from '@/services/auth/auth';
 import axios from 'axios';
 
 // export const baseURL = 'http://localhost:8000';
-export const baseURL = 'https://api.chatboq.com';
-// export const baseURL = 'http://192.168.1.78:8000';
-// export const baseURL = 'https://rv7r2p5f-8000.inc1.devtunnels.ms';
+// export const baseURL = 'https://api.chatboq.com';
+// export const baseURL =
+//   'https://employee-lonely-iceland-sides.trycloudflare.com';
+export const baseURL = 'https://q7wm2jtk-8000.inc1.devtunnels.ms';
 
 type FailedRequest = {
   resolve: (token: string) => void;

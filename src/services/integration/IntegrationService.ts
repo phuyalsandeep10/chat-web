@@ -46,4 +46,36 @@ export class IntegrationService {
       );
     }
   }
+
+  static async getInstagramIntegration() {
+    try {
+      const response = await axiosInstance.get(`/facebook-pages`);
+      if (!response?.data) {
+        throw new Error(`Failed to fetch slack login url`);
+      }
+      const data = response.data;
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async postInstagramDetails(params: { facebookPageId: string }) {
+    try {
+      const response = await axiosInstance.post(
+        `/instagram/auth/add-account/${params.facebookPageId}`,
+        params,
+      );
+
+      if (!response?.data) {
+        throw new Error('Failed to post instagram details.');
+      }
+
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Error posting instagram details.',
+      );
+    }
+  }
 }

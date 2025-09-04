@@ -1,15 +1,17 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../SharedComponent/Header';
 import CoreCapabilities from '../SharedComponent/CoreCapabilities';
 import RequiredPermissions from '../SharedComponent/RequiredPremissions';
 import VisualOverview from '../SharedComponent/VisualOverview';
 import { Icons } from '@/components/ui/Icons';
 import Image from 'next/image';
-import messenger from '@/assets/images/integration/messenger.svg';
-import { IntegrationService } from '@/services/integration/IntegrationService';
+import instagram from '@/assets/images/integration/instagram.svg';
+import InstallInstagramModal from './InstallInstagramModal';
 
 const InstagramSection = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const capabilities = [
     {
       icon: Icons.ri_magic_line,
@@ -73,19 +75,6 @@ const InstagramSection = () => {
     },
   ];
 
-  const handleInstallClick = async () => {
-    try {
-      const data = await IntegrationService.getFacebookIntegrationUrl();
-      if (data?.redirect_url) {
-        window.location.href = data.redirect_url;
-      } else {
-        console.error('No redirect URL returned from server');
-      }
-    } catch (error) {
-      console.error('Failed to fetch integration URL:', error);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <Header
@@ -94,9 +83,9 @@ const InstagramSection = () => {
         name="Instagram"
         desc="Automate customer interactions, streamline workflows, and enhance support efficiency."
         installButton=" Install Instagram"
-        onInstallClick={handleInstallClick}
+        onInstallClick={() => setIsModalOpen(true)}
         videoButton="Watch Demo Video"
-        image={<Image src={messenger} alt="Instagram" className="h-12 w-12" />}
+        image={<Image src={instagram} alt="Instagram" className="h-12 w-12" />}
       />
 
       <div className="mb-10 flex gap-5">
@@ -118,6 +107,8 @@ const InstagramSection = () => {
         steps={visualSteps}
         headingIcon={Icons.ri_pie_chart_2_fill}
       />
+
+      <InstallInstagramModal open={isModalOpen} setOpen={setIsModalOpen} />
     </div>
   );
 };

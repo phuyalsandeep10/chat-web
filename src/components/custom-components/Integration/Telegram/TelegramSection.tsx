@@ -8,7 +8,7 @@ import VisualOverview from '../SharedComponent/VisualOverview';
 import { Icons } from '@/components/ui/Icons';
 import Image from 'next/image';
 import telegram from '@/assets/images/integration/telegram.svg';
-import InstallChannelModal from '../SharedComponent/InstallChannelModal';
+import InstallChannelModal from './InstallChannelModal';
 
 const TelegramSection = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
