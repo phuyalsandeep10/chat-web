@@ -11,8 +11,9 @@ const SidebarHeader: React.FC = () => {
   // const { toggleSidebar } = useSidebar();
   const { workspace }: any = useWorkspaceInformationStore();
   useGetOrganizationById();
-  console.log('From Sidebar: ', workspace);
+
   const logoSrc = workspace?.logo?.startsWith('https') ? workspace.logo : '';
+
   return (
     <div
       className={cn(

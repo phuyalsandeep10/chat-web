@@ -2,17 +2,8 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { parseISO, isToday, isYesterday } from 'date-fns';
 import Dropdown from './Dropdown';
-
-export interface Ticket {
-  id?: number;
-  sender: string;
-  receiver?: string;
-  content: string;
-  direction: 'incoming' | 'outgoing';
-  created_at: string;
-  isEdited?: boolean;
-}
-
+import { Ticket } from '@/services/ticket/ticketTypes';
+import { renderHtml } from '@/modules/utils/textUtils';
 interface ConversationProps {
   conversationData: Ticket[];
   onLoadMore: () => Promise<void>;
@@ -117,13 +108,11 @@ const Conversation: React.FC<ConversationProps> = ({
   return (
     <div
       ref={containerRef}
-      className="h-[60vh] space-y-3 overflow-y-auto scroll-smooth pb-5"
+      className="h-[65vh] space-y-3 overflow-y-auto scroll-smooth px-10 pb-5"
     >
       {isLoading && (
-        <div className="flex justify-center py-4">
-          <div className="text-theme-text-primary text-sm">
-            Loading older messages...
-          </div>
+        <div className="text-theme-text-primary flex justify-center py-4 text-sm">
+          Loading older messages...
         </div>
       )}
 
@@ -133,8 +122,6 @@ const Conversation: React.FC<ConversationProps> = ({
           const showHeader = dateHeader !== lastDateHeader;
           if (showHeader) lastDateHeader = dateHeader;
           const uniqueKey = `${index}-${msg.id || 'no-id'}-${msg.created_at}-${msg.sender.replace(/[^a-zA-Z0-9]/g, '')}`;
-
-          console.log('Message object:', msg);
 
           return (
             <React.Fragment key={uniqueKey}>
@@ -147,48 +134,37 @@ const Conversation: React.FC<ConversationProps> = ({
                   <div className="flex-grow border-t border-[#D4D4D4]"></div>
                 </div>
               )}
+
               <div
-                className={`flex w-full items-center gap-x-4 px-10 ${
+                className={`flex w-full items-center gap-x-4 ${
                   msg.direction === 'outgoing' ? 'justify-end' : 'justify-start'
                 }`}
               >
                 {msg.direction === 'outgoing' ? (
                   <>
                     <div className="group relative max-w-[60%]">
+                      {msg.isEdited && (
+                        <div className="flex justify-end">
+                          <span className="text-info text-xs font-medium">
+                            Edited
+                          </span>
+                        </div>
+                      )}
                       <div className="bg-brand-primary relative rounded-xl px-7 py-2.5 break-words text-white">
-                        <p className="text-lg">{msg.content}</p>
-                        {/* <p className="text-lg">{msg.id}</p> */}
+                        <div
+                          className="text-lg break-words"
+                          dangerouslySetInnerHTML={renderHtml(msg.content)}
+                        />
                         <p className="text-theme-text-light text-right text-base font-normal">
                           {formatTime(msg.created_at)}
                         </p>
                       </div>
-
-                      {/* 3-dot dropdown */}
-                      <div
-                        className={`absolute top-2 ${
-                          msg.direction === 'outgoing' ? '-left-8' : '-right-8'
-                        } opacity-0 transition-opacity group-hover:opacity-100`}
-                      >
+                      <div className="absolute top-2 -left-8 opacity-0 transition-opacity group-hover:opacity-100">
                         <Dropdown
                           items={[
                             {
                               label: 'Edit Message',
-                              onClick: () => {
-                                console.log(
-                                  'Edit clicked - Message ID:',
-                                  msg.id,
-                                  'Full message:',
-                                  msg,
-                                );
-                                if (msg.id) {
-                                  onEditMessage(msg);
-                                } else {
-                                  console.error(
-                                    'Cannot edit message without ID:',
-                                    msg,
-                                  );
-                                }
-                              },
+                              onClick: () => onEditMessage(msg),
                             },
                             {
                               label: 'Delete',
@@ -210,22 +186,13 @@ const Conversation: React.FC<ConversationProps> = ({
                     </div>
                     <div className="group relative max-w-[60%]">
                       <div className="bg-light-blue relative rounded-xl px-7 py-2.5 break-words text-black">
-                        <p className="text-lg">{msg.content}</p>
+                        <div
+                          className="text-lg break-words"
+                          dangerouslySetInnerHTML={renderHtml(msg.content)}
+                        />
                         <p className="text-theme-text-primary text-right text-base font-normal">
                           {formatTime(msg.created_at)}
                         </p>
-                      </div>
-                      {/* 3-dot dropdown */}
-                      <div className="absolute top-2 -right-8 opacity-0 transition-opacity group-hover:opacity-100">
-                        <Dropdown
-                          items={[
-                            {
-                              label: 'Delete',
-                              onClick: () => console.log('Delete', msg.id),
-                              className: 'text-error focus:text-error',
-                            },
-                          ]}
-                        />
                       </div>
                     </div>
                   </>

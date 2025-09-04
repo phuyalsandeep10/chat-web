@@ -135,6 +135,8 @@ export default function ProfileSection({
     handleRemoveProfilePicture();
   };
 
+  console.log(imageUrl);
+
   return (
     <>
       <div className="text-brand-dark flex items-center">
@@ -148,7 +150,7 @@ export default function ProfileSection({
         <div className="flex items-center gap-6">
           <div className="relative h-[167px] w-[167px] overflow-hidden rounded-[175px]">
             <Image
-              src={imageUrl ?? '/profile-placeholder.jpeg'}
+              src={imageUrl ? imageUrl : '/profile-placeholder.jpeg'}
               alt="Profile Image"
               fill
               className="object-cover"

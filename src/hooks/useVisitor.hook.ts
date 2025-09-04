@@ -1,6 +1,6 @@
 'use client';
 
-import axiosInstance from '@/apiConfigs/axiosInstance';
+import chatBoxAxiosInstance from '@/apiConfigs/chatBoxAxiosInstance';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 export const useVisitor = () => {
@@ -14,7 +14,7 @@ export const useVisitor = () => {
     console.log('create customer');
     setLoading(true);
     try {
-      const res = await axiosInstance.post(`/customers/create`);
+      const res = await chatBoxAxiosInstance.post(`/customers/create`);
 
       setVisitor(res.data?.data);
       localStorage.setItem('visitor', JSON.stringify(res.data?.data));
@@ -29,7 +29,7 @@ export const useVisitor = () => {
     if (!customerId) return;
     setLoading(true);
     try {
-      await axiosInstance.post(`/customers/${customerId}/visit`);
+      await chatBoxAxiosInstance.post(`/customers/${customerId}/visit`);
     } catch (error) {
       console.error('Failed to create visitor:', error);
     } finally {

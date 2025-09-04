@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import Header from '../SharedComponent/Header';
 import CoreCapabilities from '../SharedComponent/CoreCapabilities';
@@ -6,6 +7,7 @@ import VisualOverview from '../SharedComponent/VisualOverview';
 import { Icons } from '@/components/ui/Icons';
 import Image from 'next/image';
 import messenger from '@/assets/images/integration/messenger.svg';
+import { getFacebookIntegrationUrl } from '@/services/integration/getIntegrationUrl';
 
 const MessengerSection = () => {
   const capabilities = [
@@ -71,6 +73,19 @@ const MessengerSection = () => {
     },
   ];
 
+  const handleInstallClick = async () => {
+    try {
+      const data = await getFacebookIntegrationUrl();
+      if (data?.redirect_url) {
+        window.location.href = data.redirect_url;
+      } else {
+        console.error('No redirect URL returned from server');
+      }
+    } catch (error) {
+      console.error('Failed to fetch integration URL:', error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Header
@@ -78,7 +93,8 @@ const MessengerSection = () => {
         planType="Free"
         name="Messenger"
         desc="Automate customer interactions, streamline workflows, and enhance support efficiency."
-        installButton=" Install Zapier"
+        installButton=" Install Messenger"
+        onInstallClick={handleInstallClick}
         videoButton="Watch Demo Video"
         image={<Image src={messenger} alt="Zapier" className="h-12 w-12" />}
       />

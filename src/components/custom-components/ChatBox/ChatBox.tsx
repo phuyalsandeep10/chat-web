@@ -10,15 +10,7 @@ import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useChatBox } from './chatbox.provider';
-import {
-  AttachmentIcon,
-  EmojiIcon,
-  HomeIcon,
-  InfoIcon,
-  MaximizeIcon,
-  MicIcon,
-  SendIcon,
-} from './ChatBoxIcons';
+import { HomeIcon, InfoIcon, MaximizeIcon, SendIcon } from './ChatBoxIcons';
 import EmailInput from './EmailInput';
 import {
   DropdownMenu,
@@ -26,6 +18,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import EmojiPicker from 'emoji-picker-react';
+import { useAudio } from '@/hooks/useAudio.hook';
+import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 
 interface Message {
   content: string;
@@ -74,6 +68,19 @@ export default function ChatBox() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // emojis
+  const [isEmojiOpen, setIsEmojiOpen] = useState(false);
+  const emojiRef = useRef<HTMLDivElement>(null);
+  const emojiBtnRef = useRef<HTMLDivElement>(null);
+
+  const {
+    messageNotificationCount,
+    resetMessageNotificationCount,
+    incrementMessageNotificationCount,
+  } = useAgentConversationStore();
+
+  const { playSound } = useAudio({ src: '/message.mp3' });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -124,6 +131,11 @@ export default function ChatBox() {
         setOtherTyping(false);
         console.log('Received message:', data);
         setMessages((prev) => [...prev, data]);
+        playSound();
+        if (!isOpen) {
+          console.log('hiii', isOpen);
+          incrementMessageNotificationCount();
+        }
       };
 
       // Set up event listeners
@@ -347,14 +359,6 @@ export default function ChatBox() {
     });
   }, [groupedMessages]);
 
-  // emojis
-  const [isEmojiOpen, setIsEmojiOpen] = useState(false);
-  const emojiRef = useRef<HTMLDivElement>(null);
-  const emojiBtnRef = useRef<HTMLDivElement>(null);
-
-  const handleEmojiBtn = () => {
-    setIsEmojiOpen((prev) => !prev);
-  };
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       setTimeout(() => {
@@ -400,12 +404,15 @@ export default function ChatBox() {
 
   return (
     <>
-      <div className="fixed right-4 bottom-4 z-50 overflow-hidden rounded-xl">
+      <div className="fixed right-4 bottom-4 z-50">
         {/* Floating button */}
         {!isOpen && (
           <button
-            onClick={() => setIsOpen(true)}
-            className="flex min-h-[42px] min-w-[42px] cursor-pointer items-center justify-center rounded-full bg-[#5A189A] shadow-lg transition hover:bg-[#5A189A]"
+            onClick={() => {
+              setIsOpen(true);
+              resetMessageNotificationCount();
+            }}
+            className="relative flex min-h-[42px] min-w-[42px] cursor-pointer items-center justify-center rounded-full bg-[#5A189A] shadow-lg transition hover:bg-[#5A189A]"
           >
             <Image
               src="/widget-logo.svg"
@@ -414,13 +421,19 @@ export default function ChatBox() {
               className="h-6 w-6"
               alt="chatboq bot logo"
             />
+            {messageNotificationCount > 0 && (
+              <span className="bg-error absolute top-[-5px] right-[0px] flex h-4 w-4 animate-bounce items-center justify-center rounded-full text-[10px] text-white">
+                {messageNotificationCount}
+              </span>
+            )}
           </button>
         )}
         {isOpen && (
           <div
             className={cn(
-              `w-[360px] rounded-xl bg-[#FAFAFA]`,
-              expand && 'w-[1024px] transition-all',
+              `w-[360px] overflow-hidden rounded-xl bg-[#FAFAFA]`,
+              expand &&
+                'h-[calc(100vh-20px)] w-[calc(100vw-100px)] transition-all',
             )}
           >
             <div className="flex items-center justify-between bg-gradient-to-b from-[#6D28D9] to-[#A77EE8] px-2 py-2">
@@ -453,7 +466,10 @@ export default function ChatBox() {
                   <MaximizeIcon />
                 </button>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    resetMessageNotificationCount();
+                  }}
                   className="cursor-pointer"
                 >
                   <X size={18} />
@@ -463,7 +479,7 @@ export default function ChatBox() {
 
             <div
               className={cn(
-                `max-h-[413px] min-h-[413px] overflow-auto px-6 py-4`,
+                `max-h-[50vh] min-h-[50vh] overflow-auto px-6 py-4`,
                 expand && 'h-[70vh] max-h-[70vh] overflow-auto',
               )}
             >
@@ -657,7 +673,7 @@ const MessageItem = ({ socket, message }: any) => {
                   src="/widget-logo-bottom.svg"
                   height={10}
                   width={10}
-                  className="-ml-5 h-16 w-16"
+                  className="-ml-5 h-16 w-16 shrink-0"
                   alt="bot icon"
                 />
               </div>
@@ -669,7 +685,7 @@ const MessageItem = ({ socket, message }: any) => {
                 dangerouslySetInnerHTML={{
                   __html: message?.content,
                 }}
-                className="text-xs leading-[18px] font-normal text-black"
+                className="text-xs leading-[18px] font-normal break-all text-black"
               />
 
               <p className="mt-[5px] text-xs font-normal text-[#6D6D6D]">
@@ -682,7 +698,7 @@ const MessageItem = ({ socket, message }: any) => {
         <>
           {/* Customer message  */}
           <div className="mt-4 ml-auto w-fit rounded-tl-[12px] rounded-tr-[12px] rounded-br-[2px] rounded-bl-[12px] border border-[rgba(170,170,170,0.10)] bg-gradient-to-b from-[#6D28D9] to-[#A77EE8] p-2 text-xs text-white">
-            <p> {message?.content}</p>
+            <p className="break-all"> {message?.content}</p>
             <p>{formatTime(message?.updated_at)}</p>
           </div>
         </>

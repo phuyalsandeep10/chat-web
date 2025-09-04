@@ -33,7 +33,7 @@ const addPriorityApi = async (priority: {
   bg_color: string;
   fg_color: string;
 }) => {
-  const response = await axiosInstance.post(`/tickets/priority`, [priority]);
+  const response = await axiosInstance.post(`/tickets/priority`, priority);
   return response.data;
 };
 

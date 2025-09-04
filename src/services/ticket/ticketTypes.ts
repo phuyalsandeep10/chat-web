@@ -8,8 +8,26 @@ export interface TicketType {
   created_at: string;
 }
 
+export interface Ticket {
+  id?: number;
+  sender: string;
+  receiver?: string;
+  content: string;
+  direction: 'incoming' | 'outgoing';
+  created_at: string;
+  isEdited?: boolean;
+}
 export interface TicketResponse {
   success: boolean;
   message: string;
   data: TicketType[];
+}
+export interface SendMessagePayload {
+  ticket_id: number | string;
+  receiver: string;
+  content: string;
+}
+export interface UpdateMessage {
+  content: string;
+  message_id: number;
 }
