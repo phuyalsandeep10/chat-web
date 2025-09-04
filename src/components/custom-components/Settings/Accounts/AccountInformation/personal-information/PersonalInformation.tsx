@@ -55,7 +55,6 @@ export default function PersonalInformation() {
       phone_code_id: data.phone_code_id,
     };
     mutation.mutate(updateProfileData);
-    console.log('personal information', updateProfileData.phone_code_id);
   };
 
   const debouncedSubmit = useCallback(
