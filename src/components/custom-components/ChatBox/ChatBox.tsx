@@ -1,10 +1,18 @@
 'use client';
 import { baseURL } from '@/apiConfigs/axiosInstance';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { CHAT_EVENTS } from '@/events/InboxEvents';
+import { useAudio } from '@/hooks/useAudio.hook';
 import { formatTime } from '@/lib/timeFormatUtils';
 import { cn } from '@/lib/utils';
 import { CustomerConversationService } from '@/services/inbox/customerConversation.service';
+import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import { RiMessage2Line } from '@remixicon/react';
+import EmojiPicker from 'emoji-picker-react';
 import { Smile, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -12,14 +20,6 @@ import { io, Socket } from 'socket.io-client';
 import { useChatBox } from './chatbox.provider';
 import { HomeIcon, InfoIcon, MaximizeIcon, SendIcon } from './ChatBoxIcons';
 import EmailInput from './EmailInput';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import EmojiPicker from 'emoji-picker-react';
-import { useAudio } from '@/hooks/useAudio.hook';
-import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 
 interface Message {
   content: string;
@@ -58,6 +58,7 @@ export default function ChatBox() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [expand, setExpand] = useState(false);
+  const messageBoxOpenRef = useRef<any>(null);
 
   const [isOnline, setIsOnline] = useState(false);
 
@@ -132,7 +133,7 @@ export default function ChatBox() {
         console.log('Received message:', data);
         setMessages((prev) => [...prev, data]);
         playSound();
-        if (!isOpen) {
+        if (!messageBoxOpenRef.current) {
           console.log('hiii', isOpen);
           incrementMessageNotificationCount();
         }
@@ -305,6 +306,7 @@ export default function ChatBox() {
     console.log('stop typing....');
     await socket.emit('stop_typing', {
       conversation_id: visitor.conversation.id,
+      organization_id: visitor.conversation.organization_id,
     });
   };
 
@@ -410,6 +412,7 @@ export default function ChatBox() {
           <button
             onClick={() => {
               setIsOpen(true);
+              messageBoxOpenRef.current = true;
               resetMessageNotificationCount();
             }}
             className="relative flex min-h-[42px] min-w-[42px] cursor-pointer items-center justify-center rounded-full bg-[#5A189A] shadow-lg transition hover:bg-[#5A189A]"
@@ -468,6 +471,7 @@ export default function ChatBox() {
                 <button
                   onClick={() => {
                     setIsOpen(false);
+                    messageBoxOpenRef.current = false;
                     resetMessageNotificationCount();
                   }}
                   className="cursor-pointer"
@@ -514,7 +518,12 @@ export default function ChatBox() {
 
                   {/* Messages for this date */}
                   {msgs.map((msg) => (
-                    <MessageItem message={msg} key={msg?.id} socket={socket} />
+                    <MessageItem
+                      message={msg}
+                      key={msg?.id}
+                      socket={socket}
+                      organization_id={visitor?.conversation?.organization_id}
+                    />
                   ))}
                 </div>
               ))}
@@ -650,16 +659,17 @@ export default function ChatBox() {
   );
 }
 
-const MessageItem = ({ socket, message }: any) => {
+const MessageItem = ({ socket, message, organization_id }: any) => {
   useEffect(() => {
     if (!socket) return;
     if (!!message?.user_id && !message?.seen) {
       console.log('message seen', message);
       socket.emit('message_seen', {
         message_id: message?.id,
+        organization_id: organization_id,
       });
     }
-  }, [message, socket]);
+  }, [message, socket, organization_id]);
 
   return (
     <div>

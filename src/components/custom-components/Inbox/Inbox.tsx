@@ -1,6 +1,11 @@
 'use client';
 import { useSocket } from '@/context/socket.context';
+import { CHAT_EVENTS } from '@/events/InboxEvents';
 import { useMessageAudio } from '@/hooks/useMessageAudio.hook';
+import { ConversationService } from '@/services/inbox/agentCoversation.service';
+import Editor from '@/shared/Editor/Editor';
+import { useAuthStore } from '@/store/AuthStore/useAuthStore';
+import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import { useUiStore } from '@/store/UiStore/useUiStore';
 import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -9,11 +14,6 @@ import ChatEmptyScreen from './ChatEmptyScreen/ChatEmptyScreen';
 import InboxChatInfo from './InboxChatInfo/InboxChatInfo';
 import InboxChatSection from './InboxChatSection/InboxChatSection';
 import InboxSubSidebar from './InboxSidebar/InboxSubSidebar';
-import { CHAT_EVENTS } from '@/events/InboxEvents';
-import { ConversationService } from '@/services/inbox/agentCoversation.service';
-import Editor from '@/shared/Editor/Editor';
-import { useAuthStore } from '@/store/AuthStore/useAuthStore';
-import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 
 const Inbox = () => {
   const editorRef = useRef<any>(null);
@@ -40,6 +40,7 @@ const Inbox = () => {
     fetchMessages,
     editMessage,
     joinConversation,
+    updateConversationLastMessage,
   } = useAgentConversationStore();
   const params: any = useParams();
   const chatId = params?.userId;
@@ -47,7 +48,11 @@ const Inbox = () => {
 
   const handleReceiveMessage = (data: any) => {
     const isSenderMessage = data?.user_id === userId;
-    if (data?.conversation_id !== Number(chatId)) return;
+
+    if (data?.conversation_id !== Number(chatId)) {
+      updateConversationLastMessage(data);
+      return;
+    }
     setTypingMessage('');
     setShowTyping(false);
     if (!isSenderMessage) {
@@ -70,6 +75,8 @@ const Inbox = () => {
   };
 
   const handleMessageSeen = (data: any) => {
+    console.log('seen message', 'message seen');
+
     updateMessageSeen(data?.message_id);
   };
 
@@ -79,13 +86,13 @@ const Inbox = () => {
     socket.off(CHAT_EVENTS.receive_typing, handleTyping);
     socket.off(CHAT_EVENTS.message_seen, handleMessageSeen);
     socket.off(CHAT_EVENTS.stop_typing, handleStopTyping);
-    socket.emit(CHAT_EVENTS.leave_conversation, {
-      conversation_id: Number(chatId),
-    });
+    // socket.emit(CHAT_EVENTS.leave_conversation, {
+    //   conversation_id: Number(chatId),
+    // });
   };
 
   useEffect(() => {
-    if (!chatId || !socket || !userId) return;
+    if (!socket || !userId) return;
 
     // Fetch data
     fetchMessages(Number(chatId));
@@ -106,7 +113,7 @@ const Inbox = () => {
     socket.on(CHAT_EVENTS.stop_typing, handleStopTyping);
 
     return () => cleanupSocketListeners();
-  }, [chatId, socket, userId]);
+  }, [socket, userId]);
 
   const emitTyping = (msg: string) => {
     if (!socket || isSending || !chatId) return;
