@@ -41,6 +41,7 @@ const Inbox = () => {
     editMessage,
     joinConversation,
     updateConversationLastMessage,
+    updateCustomerConversationDetails,
   } = useAgentConversationStore();
   const params: any = useParams();
   const chatId = params?.userId;
@@ -76,9 +77,11 @@ const Inbox = () => {
   };
 
   const handleMessageSeen = (data: any) => {
-    console.log('seen message', 'message seen');
-
     updateMessageSeen(data?.message_id);
+  };
+
+  const updatEmail = (data: any) => {
+    updateCustomerConversationDetails(data?.customer);
   };
 
   const cleanupSocketListeners = () => {
@@ -112,6 +115,7 @@ const Inbox = () => {
     socket.on(CHAT_EVENTS.receive_typing, handleTyping);
     socket.on(CHAT_EVENTS.message_seen, handleMessageSeen);
     socket.on(CHAT_EVENTS.stop_typing, handleStopTyping);
+    socket.on(CHAT_EVENTS.customer_email_update, updatEmail);
 
     return () => cleanupSocketListeners();
   }, [socket, userId]);
@@ -230,7 +234,7 @@ const Inbox = () => {
               typingmessage={typingMessage}
             />
             {replyingTo && (
-              <div className="bg bg-brand-disable relative -top-12 left-4 z-30 flex w-fit items-center justify-between rounded-md border px-4 py-2 text-black">
+              <div className="bg bg-brand-disable relative ml-4 flex w-fit items-center justify-between rounded-md border px-4 py-2 text-black">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-black">Replying to:</span>
                   <span className="text-theme-text-primary max-w-[200px] truncate text-xs font-medium">
@@ -245,7 +249,7 @@ const Inbox = () => {
                 </button>
               </div>
             )}
-            <div className="relative m-4">
+            <div className="relative m-4 mt-2">
               <Editor
                 value={message}
                 ref={editorRef}

@@ -69,8 +69,6 @@ const ConversationsList = () => {
     return lastMessage && !lastMessage?.seen && lastMessage?.user_id === null;
   };
 
-  // console.log(all_conversations)
-
   return (
     <>
       <div className="mt-[26px]">
@@ -174,7 +172,7 @@ const ConversationsList = () => {
                     </div>
                   </div>
                   {conversation?.customer?.is_online && (
-                    <div className="bg-brand-primary absolute top-[10px] left-[10px] min-h-2.5 min-w-2.5 rounded-full"></div>
+                    <div className="bg-success absolute top-[10px] left-[10px] min-h-2.5 min-w-2.5 rounded-full"></div>
                   )}
                 </div>
               </Link>
