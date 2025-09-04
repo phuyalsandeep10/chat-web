@@ -12,34 +12,9 @@ import useDebouncedEffect from '@/hooks/useDebounceEffect';
 import { useGetTimeZones } from '@/hooks/organizations/useGetTimeZones';
 import WorkspaceCountrySelect from './WorkspaceCountrySelect';
 
-const validTLDs = [
-  'com',
-  'org',
-  'net',
-  'io',
-  'edu',
-  'gov',
-  'co',
-  'uk',
-  'np',
-  'in',
-  'info',
-  'xyz',
-  'dev',
-  'app',
-  'me',
-  'biz',
-  'online',
-  'shop',
-  'us',
-  'ca',
-  'de',
-  'jp',
-];
-
 const WorkspaceProfile = ({ organization }: any) => {
   const { updatedData, setData } = useWorkspaceStore();
-  const [value, setValue] = useState('');
+  const [rawValue, setRawValue] = useState(''); // user input
   const [error, setError] = useState('');
   const [selectedTimeZone, setSelectedTimeZone] = useState<TimeZone | null>(
     null,
@@ -47,7 +22,6 @@ const WorkspaceProfile = ({ organization }: any) => {
   const prevUpdatedData = useRef<Partial<WorkspaceData>>(updatedData);
 
   const { data: TimeZones, isLoading, isError } = useGetTimeZones();
-
   const { mutate: updateOrganization } = useUpdateOrganization();
 
   const timezones = useMemo(
@@ -55,14 +29,17 @@ const WorkspaceProfile = ({ organization }: any) => {
     [TimeZones?.data?.timezones],
   );
 
+  // Initialize from org domain
   useEffect(() => {
     if (organization?.domain) {
-      setValue(
-        organization.domain.replace(/^https?:\/\//, '').replace(/^www\./, ''),
-      );
+      const normalized = organization.domain
+        .replace(/^https?:\/\//, '')
+        .replace(/^www\./, '');
+      setRawValue(normalized);
     }
   }, [organization?.domain]);
 
+  // Debounced update to API
   useDebouncedEffect(
     () => {
       if (
@@ -78,6 +55,46 @@ const WorkspaceProfile = ({ organization }: any) => {
     2000,
   );
 
+  // Debounced domain cleanup + validation
+  useDebouncedEffect(
+    () => {
+      if (!rawValue) return;
+
+      let normalized = rawValue.trim();
+
+      // ❌ reject http://
+      if (/^http:\/\//i.test(normalized)) {
+        setError('Only https:// is supported, http:// is not allowed.');
+        return;
+      }
+
+      // remove https:// and www.
+      normalized = normalized
+        .replace(/^https?:\/\//i, '')
+        .replace(/^www\./i, '');
+
+      // ❌ reject spaces
+      if (/\s/.test(normalized)) {
+        setError('Domain cannot contain spaces.');
+        return;
+      }
+
+      // Regex for domain: labels + dot + TLD (>=2 chars)
+      const domainRegex = /^(?!-)([a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,}$/;
+
+      if (domainRegex.test(normalized)) {
+        setData({ domain: `https://${normalized}` });
+        setError('');
+        setRawValue(normalized); // update input after cleanup
+      } else {
+        setError('Enter a valid domain.');
+      }
+    },
+    [rawValue],
+    1500, // delay cleanup
+  );
+
+  // Set timezone if org has one
   useEffect(() => {
     if (organization && timezones.length > 0 && !selectedTimeZone) {
       const ownerCountry =
@@ -120,45 +137,12 @@ const WorkspaceProfile = ({ organization }: any) => {
           <Input
             id="domain"
             placeholder="Enter your URL"
-            value={value}
+            value={rawValue}
             className="h-9 rounded-l-none border-l-0"
-            onChange={(e) => {
-              let value = e.target.value.trim();
-              setValue(value);
-              // http error
-              if (/^http:\/\//i.test(value)) {
-                setError('Only https:// is supported, http:// is not allowed.');
-                return;
-              }
-
-              // Normalize value (remove https:// and www.)
-              value = value.replace(/^https?:\/\//i, '').replace(/^www\./i, '');
-
-              // Regex for domain + subdomains
-              const domainRegex =
-                /^(?!-)([a-zA-Z0-9-]{1,63}(?<!-)\.)+([a-zA-Z]{2,63})$/;
-
-              if (domainRegex.test(value)) {
-                const tld = value.split('.').pop()?.toLowerCase();
-
-                if (tld && validTLDs.includes(tld)) {
-                  setData({ domain: `https://${value}` });
-                  setError('');
-                  setValue(value);
-                } else {
-                  setError('Invalid or unsupported TLD.');
-                }
-              } else {
-                setError('Enter a valid domain with a proper TLD.');
-              }
-            }}
+            onChange={(e) => setRawValue(e.target.value)}
           />
         </div>
-        {error && (
-          <p className="text-alert-prominent text-xs">
-            {typeof error === 'string' ? error : 'Enter a valid domain!'}
-          </p>
-        )}
+        {error && <p className="text-alert-prominent text-xs">{error}</p>}
         <p className="font-outfit text-gray-primary text-xs font-normal">
           This will be your workspace’s public URL.
         </p>
