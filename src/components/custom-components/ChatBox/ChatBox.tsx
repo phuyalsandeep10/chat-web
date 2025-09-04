@@ -306,6 +306,7 @@ export default function ChatBox() {
     console.log('stop typing....');
     await socket.emit('stop_typing', {
       conversation_id: visitor.conversation.id,
+      organization_id: visitor.conversation.organization_id,
     });
   };
 
@@ -517,7 +518,12 @@ export default function ChatBox() {
 
                   {/* Messages for this date */}
                   {msgs.map((msg) => (
-                    <MessageItem message={msg} key={msg?.id} socket={socket} />
+                    <MessageItem
+                      message={msg}
+                      key={msg?.id}
+                      socket={socket}
+                      organization_id={visitor?.conversation?.organization_id}
+                    />
                   ))}
                 </div>
               ))}
@@ -653,16 +659,17 @@ export default function ChatBox() {
   );
 }
 
-const MessageItem = ({ socket, message }: any) => {
+const MessageItem = ({ socket, message, organization_id }: any) => {
   useEffect(() => {
     if (!socket) return;
     if (!!message?.user_id && !message?.seen) {
       console.log('message seen', message);
       socket.emit('message_seen', {
         message_id: message?.id,
+        organization_id: organization_id,
       });
     }
-  }, [message, socket]);
+  }, [message, socket, organization_id]);
 
   return (
     <div>

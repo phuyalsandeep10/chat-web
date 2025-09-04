@@ -75,6 +75,8 @@ const Inbox = () => {
   };
 
   const handleMessageSeen = (data: any) => {
+    console.log('seen message', 'message seen');
+
     updateMessageSeen(data?.message_id);
   };
 
@@ -90,7 +92,7 @@ const Inbox = () => {
   };
 
   useEffect(() => {
-    if (!chatId || !socket || !userId) return;
+    if (!socket || !userId) return;
 
     // Fetch data
     fetchMessages(Number(chatId));
@@ -111,7 +113,7 @@ const Inbox = () => {
     socket.on(CHAT_EVENTS.stop_typing, handleStopTyping);
 
     return () => cleanupSocketListeners();
-  }, [chatId, socket, userId]);
+  }, [socket, userId]);
 
   const emitTyping = (msg: string) => {
     if (!socket || isSending || !chatId) return;
