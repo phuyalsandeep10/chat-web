@@ -18,7 +18,7 @@ const AccountInformation = () => {
         country={authData?.data?.user.country ?? ''}
         mobile={authData?.data?.user?.mobile ?? ''}
         image={authData?.data?.user?.image ?? ''}
-        language={''}
+        language={authData?.data?.user?.language ?? ''}
       />
 
       {/* <PublicProfile /> */}
