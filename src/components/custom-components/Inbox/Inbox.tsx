@@ -63,6 +63,7 @@ const Inbox = () => {
 
   const handleTyping = (data: any) => {
     if (data?.conversation_id !== Number(chatId)) return;
+    if (!data?.is_customer) return;
     setShowTyping(true);
 
     setTypingMessage(data?.message || '');
