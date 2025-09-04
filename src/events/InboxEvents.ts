@@ -18,4 +18,5 @@ export const CHAT_EVENTS = {
   resolved_conversation: 'resolved_conversation',
   unresolve_conversation: 'unresolve_conversation',
   leave_conversation: 'leave_conversation',
+  customer_email_update: 'customer_email_update',
 };

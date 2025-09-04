@@ -1,7 +1,5 @@
 import axios from 'axios';
-
-export const baseURL = 'https://api.chatboq.com';
-// export const baseURL = 'http://localhost:8000';
+import { baseURL } from './axiosInstance';
 
 const chatBoxAxiosInstance = axios.create({ baseURL });
 

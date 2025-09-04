@@ -242,7 +242,7 @@ const Editor = forwardRef<any, TiptapProps>(
     };
 
     return (
-      <div className="relative -mt-10 space-y-4 bg-white pt-4">
+      <div className="relative space-y-4 bg-white">
         <EditorContent
           className="overflow-y-auto rounded-2xl border-2 p-4 text-wrap [&_.ProseMirror]:h-[70px] [&_.ProseMirror]:break-all [&_.ProseMirror]:whitespace-pre-wrap [&_.ProseMirror]:caret-black [&_.ProseMirror]:outline-none [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror:focus]:outline-none [&_.ProseMirror>.placeholder]:text-gray-400"
           editor={editor}
