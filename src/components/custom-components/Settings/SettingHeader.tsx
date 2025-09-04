@@ -18,7 +18,7 @@ const SettingsHeader = () => {
   return (
     <div
       className={cn(
-        'border-b-gray-light flex h-auto w-full items-center justify-between border-b px-24 xl:h-10',
+        'border-b-gray-light flex h-auto w-full items-center justify-between border-b px-24 py-2 xl:h-10',
       )}
     >
       <div
@@ -50,12 +50,12 @@ const SettingsHeader = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-5">
+      {/* <div className="flex items-center gap-5">
         <div className="flex h-8 w-24 items-center gap-2">
           <Icons.search className="text-gray-primary h-4 w-4" />
           <span className="text-gray-primary text-sm">Search</span>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

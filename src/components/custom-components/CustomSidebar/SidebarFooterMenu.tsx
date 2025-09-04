@@ -19,7 +19,6 @@ const SidebarFooterMenu = () => {
   const router = useRouter();
   const { mutate: logout, isPending } = useLogout();
   const { authData, clearAuthData } = useAuthStore((state) => state);
-  console.log(authData?.data.user.image);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="w-full">
