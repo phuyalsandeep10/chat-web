@@ -28,7 +28,7 @@ export default function WorkspaceInformation() {
         {/* Workspace Information */}
         <div className={cn('mt-10 mb-9')}>
           <Information
-            workspace_owner={organization?.owner_name}
+            workspace_owner={organization?.owner?.name}
             creation_date={organization?.created_at}
           />
         </div>

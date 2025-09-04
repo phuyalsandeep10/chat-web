@@ -30,7 +30,6 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
   onClose,
 }) => {
   const { data: organizationMembers } = useGetMembers();
-  console.log('From transfer model', organizationMembers);
 
   const queryClient = useQueryClient();
 
@@ -41,7 +40,7 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
       { owner_id: userId },
       {
         onSuccess: () => {
-          // 🔑 Force refetch members or organization data
+          // Force refetch organization data
           queryClient.invalidateQueries({ queryKey: ['getOrganizationById'] });
           onClose();
         },
