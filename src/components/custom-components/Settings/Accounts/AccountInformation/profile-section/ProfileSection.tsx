@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import type { UpdateProfileFormValues } from '../types';
 import { toast } from 'sonner';
 import { v4 } from 'uuid';
+import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 
 // Convert base64 to File object
 function dataURLtoFile(dataurl: string, filename: string): File {
@@ -67,6 +68,7 @@ export default function ProfileSection({
     [],
   );
 
+  const { authData, setAuthData } = useAuthStore();
   const handleCroppedSave = useCallback(
     async (imageSrc: string) => {
       if (!croppedAreaPixels) return;
@@ -102,8 +104,46 @@ export default function ProfileSection({
           await AuthService.updatePersonalInformation(photoUpdate);
 
         // toast here
-        if (backendRes) toast.success('Photo uploaded successfully!');
-        else toast.error('Profile Not Updated!');
+        if (backendRes) {
+          // for updating the store after updating the image... we've to update the entire store with previous value, but only the image is changes with the updated cloudinary(or s3bucket) link
+          const updatedDataForStore: any = {
+            ...authData,
+            data: {
+              ...authData?.data,
+              is_2fa_verified: authData?.data.is_2fa_verified,
+              user: {
+                ...authData?.data.user,
+                name: name ?? authData?.data.user.name,
+                country: country ?? authData?.data.user.country,
+                language: language ?? authData?.data.user.language,
+                mobile: mobile ?? authData?.data.user.mobile,
+                email: email ?? authData?.data.user.email,
+                address: address ?? authData?.data.user.address,
+                image: uploadedUrl ?? authData?.data.user.image,
+                id: authData?.data.user.id,
+                email_verified_at: authData?.data.user.email_verified_at,
+                is_staff: authData?.data.user.is_staff,
+                is_superuser: authData?.data.user.is_superuser,
+                is_active: authData?.data.user.is_active,
+                attributes: authData?.data.user.attributes,
+                two_fa_secret: authData?.data.user.two_fa_secret,
+                two_fa_auth_url: authData?.data.user.two_fa_auth_url,
+                two_fa_enabled: authData?.data.user.two_fa_enabled,
+                is_2fa_verified: authData?.data.user.is_2fa_verified,
+                created_at: authData?.data.user.created_at,
+                updated_at: new Date().toISOString(),
+                phone_code: authData?.data.user.phone_code,
+              },
+            },
+            success: authData?.success,
+            message: authData?.message,
+          };
+
+          console.log(updatedDataForStore);
+
+          setAuthData(updatedDataForStore);
+          toast.success('Photo uploaded successfully!');
+        } else toast.error('Profile Not Updated!');
 
         setShowChangePhotoModal(false);
       } catch (error) {
@@ -134,8 +174,6 @@ export default function ProfileSection({
 
     handleRemoveProfilePicture();
   };
-
-  console.log(imageUrl);
 
   return (
     <>

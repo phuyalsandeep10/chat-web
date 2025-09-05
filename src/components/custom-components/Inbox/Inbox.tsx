@@ -1,6 +1,11 @@
 'use client';
 import { useSocket } from '@/context/socket.context';
+import { CHAT_EVENTS } from '@/events/InboxEvents';
 import { useMessageAudio } from '@/hooks/useMessageAudio.hook';
+import { ConversationService } from '@/services/inbox/agentCoversation.service';
+import Editor from '@/shared/Editor/Editor';
+import { useAuthStore } from '@/store/AuthStore/useAuthStore';
+import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import { useUiStore } from '@/store/UiStore/useUiStore';
 import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -9,11 +14,7 @@ import ChatEmptyScreen from './ChatEmptyScreen/ChatEmptyScreen';
 import InboxChatInfo from './InboxChatInfo/InboxChatInfo';
 import InboxChatSection from './InboxChatSection/InboxChatSection';
 import InboxSubSidebar from './InboxSidebar/InboxSubSidebar';
-import { CHAT_EVENTS } from '@/events/InboxEvents';
-import { ConversationService } from '@/services/inbox/agentCoversation.service';
-import Editor from '@/shared/Editor/Editor';
-import { useAuthStore } from '@/store/AuthStore/useAuthStore';
-import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
+import InboxChatInfoDetails from './InboxChatInfo/InboxChatInfoDetails';
 
 const Inbox = () => {
   const editorRef = useRef<any>(null);
@@ -40,6 +41,8 @@ const Inbox = () => {
     fetchMessages,
     editMessage,
     joinConversation,
+    updateConversationLastMessage,
+    updateCustomerDetails,
   } = useAgentConversationStore();
   const params: any = useParams();
   const chatId = params?.userId;
@@ -47,7 +50,11 @@ const Inbox = () => {
 
   const handleReceiveMessage = (data: any) => {
     const isSenderMessage = data?.user_id === userId;
-    if (data?.conversation_id !== Number(chatId)) return;
+
+    if (data?.conversation_id !== Number(chatId)) {
+      updateConversationLastMessage(data);
+      return;
+    }
     setTypingMessage('');
     setShowTyping(false);
     if (!isSenderMessage) {
@@ -58,6 +65,7 @@ const Inbox = () => {
 
   const handleTyping = (data: any) => {
     if (data?.conversation_id !== Number(chatId)) return;
+    if (!data?.is_customer) return;
     setShowTyping(true);
 
     setTypingMessage(data?.message || '');
@@ -73,19 +81,23 @@ const Inbox = () => {
     updateMessageSeen(data?.message_id);
   };
 
+  const updatEmail = (data: any) => {
+    updateCustomerDetails(data?.customer);
+  };
+
   const cleanupSocketListeners = () => {
     if (!socket) return;
     socket.off(CHAT_EVENTS.receive_message, handleReceiveMessage);
     socket.off(CHAT_EVENTS.receive_typing, handleTyping);
     socket.off(CHAT_EVENTS.message_seen, handleMessageSeen);
     socket.off(CHAT_EVENTS.stop_typing, handleStopTyping);
-    socket.emit(CHAT_EVENTS.leave_conversation, {
-      conversation_id: Number(chatId),
-    });
+    // socket.emit(CHAT_EVENTS.leave_conversation, {
+    //   conversation_id: Number(chatId),
+    // });
   };
 
   useEffect(() => {
-    if (!chatId || !socket || !userId) return;
+    if (!socket || !userId) return;
 
     // Fetch data
     fetchMessages(Number(chatId));
@@ -104,9 +116,47 @@ const Inbox = () => {
     socket.on(CHAT_EVENTS.receive_typing, handleTyping);
     socket.on(CHAT_EVENTS.message_seen, handleMessageSeen);
     socket.on(CHAT_EVENTS.stop_typing, handleStopTyping);
+    socket.on(CHAT_EVENTS.customer_email_update, updatEmail);
 
     return () => cleanupSocketListeners();
-  }, [chatId, socket, userId]);
+  }, [socket, userId]);
+
+  useEffect(() => {
+    if (!chatId) return;
+
+    const savedDraft = localStorage.getItem(`draft-${chatId}`);
+    if (savedDraft) {
+      try {
+        const parsedDraft = JSON.parse(savedDraft);
+
+        if (parsedDraft.message) {
+          setMessage(parsedDraft.message);
+          editorRef.current?.commands?.setContent(parsedDraft.message);
+        }
+
+        if (parsedDraft.replyingTo) {
+          setReplyingTo(parsedDraft.replyingTo);
+        }
+      } catch (err) {
+        console.error('Failed to parse draft:', err);
+      }
+    }
+  }, [chatId]);
+
+  // Save draft when message changes
+  useEffect(() => {
+    if (!chatId) return;
+
+    if (message || replyingTo) {
+      const draft = {
+        message,
+        replyingTo,
+      };
+      localStorage.setItem(`draft-${chatId}`, JSON.stringify(draft));
+    } else {
+      localStorage.removeItem(`draft-${chatId}`);
+    }
+  }, [message, replyingTo, chatId]);
 
   const emitTyping = (msg: string) => {
     if (!socket || isSending || !chatId) return;
@@ -153,10 +203,18 @@ const Inbox = () => {
         setReplyingTo(null);
       }
       setMessage(null);
+      localStorage.removeItem(`draft-${chatId}`);
       editorRef.current?.onClear();
     } catch (error) {
     } finally {
       setIsSending(false);
+    }
+  };
+  const debounceFocus = () => {
+    if (editorRef.current) {
+      setTimeout(() => {
+        editorRef.current.focus();
+      }, 500);
     }
   };
 
@@ -166,6 +224,7 @@ const Inbox = () => {
     }
     setReplyingTo({ ...replyToMessage });
     setEditedMessage(null);
+    debounceFocus();
   };
 
   const handleEditMessage = (messageToEdit: any) => {
@@ -179,6 +238,7 @@ const Inbox = () => {
 
     if (editorRef.current) {
       editorRef?.current?.commands?.setContent(messageToEdit.content);
+      debounceFocus();
     }
   };
 
@@ -213,16 +273,17 @@ const Inbox = () => {
 
       {chatId ? (
         <>
-          <div className="flex-1">
+          <div className="border-gray-light flex-1 border-r">
             <InboxChatSection
               messages={messages}
               onReply={handleReply}
               handleEditMessage={handleEditMessage}
               showTyping={showTyping}
               typingmessage={typingMessage}
+              replyingTo={replyingTo}
             />
             {replyingTo && (
-              <div className="bg bg-brand-disable relative -top-12 left-4 z-30 flex w-fit items-center justify-between rounded-md border px-4 py-2 text-black">
+              <div className="bg bg-brand-disable relative ml-4 flex w-fit items-center justify-between rounded-md border px-4 py-2 text-black">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-black">Replying to:</span>
                   <span className="text-theme-text-primary max-w-[200px] truncate text-xs font-medium">
@@ -237,7 +298,7 @@ const Inbox = () => {
                 </button>
               </div>
             )}
-            <div className="relative m-4">
+            <div className="relative m-4 mt-2">
               <Editor
                 value={message}
                 ref={editorRef}
@@ -248,9 +309,12 @@ const Inbox = () => {
           </div>
 
           {showChatInfo && (
-            <div className="w-[400px]">
-              <InboxChatInfo />
-            </div>
+            // <div className="w-[400px]">
+            //   <InboxChatInfo />
+            // </div>
+            <>
+              <InboxChatInfoDetails />
+            </>
           )}
         </>
       ) : (

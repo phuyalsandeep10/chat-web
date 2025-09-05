@@ -73,7 +73,6 @@ export const TicketProvider: FC<TicketSocketProps> = ({
       newSocket.on('connect', () => {
         setSocketId(newSocket.id);
         setIsConnected(true);
-        console.log('Connected to:', socketUrl);
       });
       newSocket.on('disconnect', () => {
         setIsConnected(false);

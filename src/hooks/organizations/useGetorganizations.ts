@@ -28,7 +28,6 @@ export const useGetOrganizationById = (options?: any) => {
     queryKey: ['getOrganizationById'],
     queryFn: async () => {
       const res = await axiosInstance.get(`/organizations/current`);
-      console.log('Api Response: ', res.data.data);
       setWorkspace(res.data.data);
       return res.data.data;
     },

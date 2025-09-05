@@ -11,7 +11,7 @@ export const useRedirectIfAuthenticated = () => {
   useEffect(() => {
     const tokens = AuthService.getAuthTokens();
     if (tokens) {
-      router.replace(ROUTES.DASHBOARD);
+      router.replace(ROUTES.YOUR_INBOXES.MAIN_INBOX);
     }
   }, [router]);
 };

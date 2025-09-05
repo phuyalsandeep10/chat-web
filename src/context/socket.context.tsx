@@ -6,7 +6,6 @@ import { useMessageAudio } from '@/hooks/useMessageAudio.hook';
 import { AuthService } from '@/services/auth/auth';
 import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
-import { useUiStore } from '@/store/UiStore/useUiStore';
 import {
   createContext,
   useCallback,
@@ -137,7 +136,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
       newSocket.on('disconnect', () => {
         setIsConnected(false);
-        // console.log('Disconnected from:', socketUrl);
+        console.log('Disconnected from:', socketUrl);
       });
 
       // typing: listen
