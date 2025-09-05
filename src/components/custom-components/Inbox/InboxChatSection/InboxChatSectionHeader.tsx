@@ -30,7 +30,7 @@ const InboxChatSectionHeader = () => {
           </span>
         </div>
         <div>
-          <h2 className="text-theme-text-dark text-base font-semibold">
+          <h2 className="text-brand-dark text-base font-semibold">
             {customer?.name}
           </h2>
           <p className="text-gray-primary text-xs font-normal">
@@ -80,14 +80,14 @@ const InboxChatSectionHeader = () => {
                       resolveConversation(Number(conversation?.id));
                       // router.push('/inbox');
                     }}
-                    className="text-brand-dark hover:bg-gray-50"
+                    className="text-brand-dark text-xs hover:bg-gray-50"
                   >
                     Resolve
                   </DropdownMenuItem>
                 </>
               )}
 
-              <DropdownMenuItem className="text-red-600 hover:bg-red-50">
+              <DropdownMenuItem className="text-error text-xs hover:bg-red-50">
                 Block
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -192,7 +192,7 @@ const MessageItem = ({
                   Create a ticket
                 </DropdownMenuItem> */}
                 <DropdownMenuItem
-                  className="flex cursor-pointer items-center gap-2"
+                  className="text-brand-dark flex cursor-pointer items-center gap-2 text-xs"
                   onClick={handleReplyClick}
                 >
                   Reply
