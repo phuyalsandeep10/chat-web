@@ -150,7 +150,11 @@ const Sidebar = () => {
   const isActive = pathname === ROUTES.SETTINGS.Ticket_Setting;
 
   return (
-    <div className={cn('text-brand-dark w-full pt-2 pr-4 pl-4 text-sm')}>
+    <div
+      className={cn(
+        'text-brand-dark fixed mt-10 w-full pt-2 pr-4 pl-4 text-sm',
+      )}
+    >
       {sidebarSectionsData.map((section) => (
         <SidebarSection
           key={section.title}

@@ -73,7 +73,7 @@ const ConversationsList = () => {
 
   return (
     <>
-      <div className="mt-[26px]">
+      <div className="mt-1">
         <div className="relative">
           <Icons.search className="text-gray-primary absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
           <Input
