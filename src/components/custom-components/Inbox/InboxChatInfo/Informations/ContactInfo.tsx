@@ -14,16 +14,18 @@ const ContactInfo = () => {
     <InformationsWrapper>
       <div>
         <h5 className="text-theme-text-dark flex items-center gap-2 font-medium">
-          <Icons.contact_line className="h-4 w-4" />
+          <Icons.contact_line className="h-6 w-6" />
           Contact Information
         </h5>
 
         <div className="space-y-2">
           {/* Email Section */}
           <div className="mt-3 flex items-center justify-between">
-            <div className="flex gap-1">
+            <div className="flex items-center gap-1">
               <Icons.mail className="h-4 w-4" />
-              <span className="text-sm text-gray-600">{customer?.email}</span>
+              <span className="text-sm text-gray-600 underline">
+                {customer?.email}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -42,9 +44,11 @@ const ContactInfo = () => {
 
           {/* Phone Section */}
           <div className="flex items-center justify-between">
-            <div className="flex gap-1">
+            <div className="flex items-center gap-1">
               <Icons.phone className="h-4 w-4" />
-              <span className="text-sm text-gray-600">{customer?.phone}</span>
+              <span className="text-sm text-gray-600 underline">
+                {customer?.phone}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <button

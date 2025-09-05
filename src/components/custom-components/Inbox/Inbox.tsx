@@ -234,7 +234,7 @@ const Inbox = () => {
 
       {chatId ? (
         <>
-          <div className="flex-1">
+          <div className="border-gray-light flex-1 border-r">
             <InboxChatSection
               messages={messages}
               onReply={handleReply}

@@ -11,7 +11,7 @@ const SubSidebarContentWrapper = ({
   return (
     <div
       className={cn(
-        'border-l-gray-light border-r-gray-light box-border h-screen w-[234px] border-r-1 border-l-1 px-2.5 py-[30px]',
+        'border-r-gray-light box-border h-screen w-[234px] border-r-1 px-2.5 py-[30px]',
         className,
       )}
     >
