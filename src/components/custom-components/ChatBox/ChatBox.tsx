@@ -695,7 +695,7 @@ const MessageItem = ({ socket, message, organization_id }: any) => {
                 dangerouslySetInnerHTML={{
                   __html: message?.content,
                 }}
-                className="text-xs leading-[18px] font-normal break-all text-black"
+                className="text-xs leading-[18px] font-normal break-all text-black [&_ol]:list-decimal [&_ol]:pl-2 [&_ul]:list-disc [&_ul]:pl-2"
               />
 
               <p className="mt-[5px] text-xs font-normal text-[#6D6D6D]">

@@ -171,6 +171,13 @@ const Inbox = () => {
       setIsSending(false);
     }
   };
+  const debounceFocus = () => {
+    if (editorRef.current) {
+      setTimeout(() => {
+        editorRef.current.focus();
+      }, 500);
+    }
+  };
 
   const handleReply = (replyToMessage: any) => {
     if (!replyToMessage || !replyToMessage.id || !replyToMessage.content) {
@@ -178,6 +185,7 @@ const Inbox = () => {
     }
     setReplyingTo({ ...replyToMessage });
     setEditedMessage(null);
+    debounceFocus();
   };
 
   const handleEditMessage = (messageToEdit: any) => {
@@ -191,6 +199,7 @@ const Inbox = () => {
 
     if (editorRef.current) {
       editorRef?.current?.commands?.setContent(messageToEdit.content);
+      debounceFocus();
     }
   };
 
@@ -232,6 +241,7 @@ const Inbox = () => {
               handleEditMessage={handleEditMessage}
               showTyping={showTyping}
               typingmessage={typingMessage}
+              replyingTo={replyingTo}
             />
             {replyingTo && (
               <div className="bg bg-brand-disable relative ml-4 flex w-fit items-center justify-between rounded-md border px-4 py-2 text-black">
