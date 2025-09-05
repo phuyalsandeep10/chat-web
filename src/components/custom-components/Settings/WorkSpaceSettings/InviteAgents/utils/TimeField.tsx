@@ -67,11 +67,11 @@ const TimeField: React.FC<TimeFieldProps> = ({
         <InputField
           name={name}
           control={control}
-          placeholder={inputValue}
+          // placeholder={inputValue}
           inputClassName="!text-xs leading-[21px] font-normal"
           labelClassName="text-base leading-[26px] font-medium"
           label={label}
-          value={inputValue}
+          // value={inputValue}
           onChange={handleInputChange}
           required
           readOnly

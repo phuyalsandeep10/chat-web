@@ -1,4 +1,5 @@
 import { parse, format } from 'date-fns';
+import { toast } from 'sonner';
 
 // capitalize first letter of days
 export const capitalize = (s: string | string[]) => {
@@ -14,15 +15,27 @@ export const capitalize = (s: string | string[]) => {
 // conver etime format into 24 hour
 export const to24Hour = (time12h: string) => {
   if (!time12h) return '';
-  const parsed = parse(time12h, 'hh:mm a', new Date());
-  return format(parsed, 'HH:mm');
+  try {
+    const parsed = parse(time12h, 'hh:mm a', new Date());
+    return format(parsed, 'HH:mm');
+  } catch (error) {
+    // toast('Invalid time value');
+    return ''; // fallback so it doesn’t break submission
+  }
 };
 
 // helper (handles overnight shifts too)
-export const diffInMinutes = (start12: string, end12: string) => {
-  if (!start12 || !end12) return 0;
-  const start = parse(start12, 'hh:mm a', new Date());
-  const end = parse(end12, 'hh:mm a', new Date());
-  if (end < start) end.setDate(end.getDate() + 1); // cross-midnight
-  return Math.round((end.getTime() - start.getTime()) / (1000 * 60));
-}; //place in another function
+export const diffInMinutes = (start: string, end: string): number => {
+  try {
+    // Parse both times using 12-hour format
+    const startDate = parse(start, 'hh:mm a', new Date());
+    const endDate = parse(end, 'hh:mm a', new Date());
+
+    const diff = (endDate.getTime() - startDate.getTime()) / (1000 * 60);
+
+    // Handle overnight shifts (e.g., 10:00 PM → 06:00 AM)
+    return diff >= 0 ? diff : diff + 24 * 60;
+  } catch {
+    return 0;
+  }
+};

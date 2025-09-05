@@ -34,6 +34,8 @@ export default function OperatorsTable({
     null,
   );
 
+  console.log('selectedOperator', selectedOperator);
+
   // table columbe header field and row data
   const columns: OperatorColumn<OperatorsOrderRow>[] = [
     { key: 'FullName', label: 'Full Name' },
@@ -192,10 +194,8 @@ export default function OperatorsTable({
             endTime: selectedOperator?.end_time || '',
             clientHandled: selectedOperator?.client_handled || '',
             totalHours: selectedOperator?.total_hours || '',
-            team: selectedOperator?.team?.name || '',
-            // day: selectedOperator?.day
-            //   ? [selectedOperator.day.toLowerCase()]
-            //   : '',
+            team: selectedOperator?.team_name || '',
+            days: selectedOperator?.days || [],
           }}
           onClose={() => setOpenEdit(false)}
         />

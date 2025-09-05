@@ -44,7 +44,8 @@ export const useEditOperator = () => {
       queryClient.invalidateQueries({ queryKey: ['operators'] });
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to update role');
+      console.log('error', error);
+      toast.error(error?.response?.data?.message);
     },
   });
 };

@@ -11,7 +11,11 @@ import { Icons } from '@/components/ui/Icons';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { FieldProps } from '../types';
 
-const DayField: React.FC<FieldProps> = ({ control }) => {
+interface DayFieldProps extends FieldProps {
+  errorMessage?: string;
+}
+
+const DayField: React.FC<FieldProps> = ({ control, errorMessage }) => {
   const [open, setOpen] = useState(false);
 
   const weekDays = [
@@ -34,10 +38,10 @@ const DayField: React.FC<FieldProps> = ({ control }) => {
       </Label>
       <Controller
         control={control}
-        name="day"
+        name="days"
         render={({ field }) => {
           const selectedDays: string[] = Array.isArray(field.value)
-            ? field.value
+            ? field.value.map((daysItems) => daysItems.toLowerCase())
             : [];
 
           const removeDay = (dayToRemove: string) => {
@@ -85,6 +89,10 @@ const DayField: React.FC<FieldProps> = ({ control }) => {
                   <Icons.ri_calendar_line />
                 </Button>
               </PopoverTrigger>
+
+              {errorMessage && (
+                <p className="mt-1 text-xs text-red-500">{errorMessage}</p>
+              )}
               <PopoverContent
                 className="w-auto overflow-hidden p-0"
                 align="start"
@@ -101,7 +109,7 @@ const DayField: React.FC<FieldProps> = ({ control }) => {
                     <ToggleGroupItem
                       key={day}
                       className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
-                      value={day.toLowerCase()}
+                      value={day}
                     >
                       {day.substring(0, 3)}
                     </ToggleGroupItem>

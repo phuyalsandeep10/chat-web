@@ -143,18 +143,11 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
       (memberItems) => memberItems.access_level.toLowerCase() === 'lead',
     ).length;
 
-    if (leadCount > 1) {
-      toast.error('Only one group lead allowed');
-      return; // stop the form submission
-    }
-
     updateTeamMemberById(
       { teamId, members: membersPayload },
       {
         onError: (error: any) => {
-          toast.error(
-            error?.response?.data?.data || 'Only one group lead allowed',
-          );
+          toast.error(error?.response?.data?.data);
         },
       },
     );

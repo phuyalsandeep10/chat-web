@@ -10,6 +10,7 @@ export type TeamFieldProps = {
   control: Control<AddorEditFormValues>;
   teamsData: { data: Team[] } | undefined;
   setOpenInviteMember: React.Dispatch<React.SetStateAction<boolean>>;
+  errorMessage?: string;
 };
 
 // TIME FIELD PROPS
@@ -29,4 +30,5 @@ export type TimeFieldProps = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   defaultValue?: string;
+  errorMessage?: string;
 };

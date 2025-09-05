@@ -26,7 +26,7 @@ export default function TimePicker({
   time: parentTime,
 }: TimePickerProps) {
   const parseTime = (val?: string | Date | TimeType): TimeType => {
-    if (!val) return { hours: 7, minutes: 0, period: 'AM' }; // default
+    if (!val) return { hours: 12, minutes: 0, period: 'AM' }; // default
 
     // Check if val is TimeType
     if (
@@ -53,9 +53,11 @@ export default function TimePicker({
     return { hours, minutes, period: periodStr as 'AM' | 'PM' };
   };
 
-  const [localTime, setLocalTime] = useState<TimeType>(() =>
-    parseTime(parentTime),
-  );
+  const [localTime, setLocalTime] = useState<TimeType>({
+    hours: 12,
+    minutes: 0,
+    period: 'AM',
+  });
 
   // Sync with parent
   useEffect(() => {

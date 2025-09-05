@@ -3,6 +3,10 @@ import { Controller } from 'react-hook-form';
 import { SelectField } from '@/components/common/hook-form/SelectField';
 import { FieldProps } from '../types';
 
+interface RoleFieldProps extends FieldProps {
+  errorMessage?: string;
+}
+
 const RoleField: React.FC<FieldProps> = ({ control, roleTableData }) => {
   return (
     <div>

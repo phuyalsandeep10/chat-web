@@ -3,6 +3,10 @@ import { Controller } from 'react-hook-form';
 import { SelectField } from '@/components/common/hook-form/SelectField';
 import { FieldProps } from '../types';
 
+interface ClientFieldProps extends FieldProps {
+  errorMessage?: string;
+}
+
 const ClientField: React.FC<FieldProps> = ({ control }) => {
   return (
     <div>

@@ -20,11 +20,13 @@ export const useUpdateTeamMembersById = () => {
       TeamsService.updateTeamMembersById(teamId, members),
     onSuccess: (_, variables) => {
       toast.success('Team members updated successfully');
-      {
-        queryClient.invalidateQueries({
-          queryKey: ['teamMembersById', variables.teamId],
-        });
-      }
+      // Refresh the list of all teams
+      queryClient.invalidateQueries({ queryKey: ['getAllTeams'] });
+
+      // Refresh the specific team's members if you have a detail view
+      queryClient.invalidateQueries({
+        queryKey: ['teamMembersById', variables.teamId],
+      });
     },
     onError: (error: any) => {
       toast.error(

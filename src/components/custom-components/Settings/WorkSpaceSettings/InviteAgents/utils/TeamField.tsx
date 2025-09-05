@@ -16,6 +16,7 @@ const TeamField: React.FC<TeamFieldProps> = ({
   control,
   teamsData,
   setOpenInviteMember,
+  errorMessage,
 }) => {
   const teamsArray = teamsData?.data || [];
 
@@ -31,40 +32,49 @@ const TeamField: React.FC<TeamFieldProps> = ({
       <Controller
         name="team"
         control={control}
-        render={({ field }) => (
-          <Select
-            value={field.value}
-            onValueChange={(value) => {
-              if (value === 'add_team') {
-                setOpenInviteMember(true);
-                field.onChange('');
-              } else {
-                field.onChange(value);
-              }
-            }}
-          >
-            <SelectTrigger className="border-gray-light font-outfit w-full rounded-md border text-xs leading-[21px] font-normal !text-black">
-              <SelectValue className="" placeholder="Select Team" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {/* teamsData?.data?.map((teamsDataItems: any) => ({ */}
-                {teamsArray.map((team: Team) => (
-                  <SelectItem key={team.id} value={team.name}>
-                    <span className="font-outfit rounded-md px-3 py-1 text-sm leading-[16px] font-medium">
-                      {team.name}
-                    </span>
-                  </SelectItem>
-                ))}
-                <SelectItem value="add_team" className="bg-brand-primary">
-                  <span className="font-outfit rounded-md px-3 py-1 text-sm leading-[16px] font-medium">
-                    Add Team
-                  </span>
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        )}
+        render={({ field, fieldState }) => {
+          return (
+            <>
+              <Select
+                value={field.value}
+                onValueChange={(value) => {
+                  if (value === 'add_team') {
+                    setOpenInviteMember(true);
+                    field.onChange('');
+                  } else {
+                    field.onChange(value);
+                  }
+                }}
+              >
+                <SelectTrigger className="border-gray-light font-outfit w-full rounded-md border text-xs leading-[21px] font-normal !text-black">
+                  <SelectValue className="" placeholder="Select Team" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {/* teamsData?.data?.map((teamsDataItems: any) => ({ */}
+                    {teamsArray.map((team: Team) => (
+                      <SelectItem key={team.id} value={team.name}>
+                        <span className="font-outfit rounded-md px-3 py-1 text-sm leading-[16px] font-medium">
+                          {team.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="add_team" className="bg-brand-primary">
+                      <span className="font-outfit rounded-md px-3 py-1 text-sm leading-[16px] font-medium">
+                        Add Team
+                      </span>
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              {fieldState.error && (
+                <p className="mt-1 text-xs text-red-500">
+                  {fieldState.error.message}
+                </p>
+              )}
+            </>
+          );
+        }}
       />
     </div>
   );

@@ -28,7 +28,7 @@ const AgentInviteModal: React.FC<AgentInviteModalProps> = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange} modal>
       <DialogContent
-        className={`!w-full !max-w-[1240px] gap-8 ${dialogClass}`}
+        className={`!w-full max-w-[1240px] gap-8 ${dialogClass}`}
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader className="gap-0">

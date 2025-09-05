@@ -41,6 +41,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
     resolver: zodResolver(RoleSchema),
     defaultValues: defaultValues || { name: '' },
   });
+  console.log('defaultValues', defaultValues);
 
   useEffect(() => {
     if (defaultValues) {
@@ -52,10 +53,14 @@ const RoleForm: React.FC<RoleFormProps> = ({
 
   const { data } = useGetAllPermissionGroup();
 
+  useEffect(() => {
+    if (data) console.log('laknefakenf', data);
+  }, [data]);
+
   const [changeableIds, setChangeableIds] = React.useState<Set<number>>(
     new Set(),
   );
-  const [selectedTab, setSelectedTab] = useState('setting');
+  const [selectedTab, setSelectedTab] = useState('Setting');
 
   const orders: RoleOrderRow[] = React.useMemo(() => {
     const tabData =
@@ -108,27 +113,28 @@ const RoleForm: React.FC<RoleFormProps> = ({
 
     const permissions = permissionsState;
 
-    if (!isEdit && permissions.length === 0) {
-      toast.error('Please select at least one permission.');
-      return;
-    }
-
     const isAllPermissionsValid = permissionsState.some(
       ({ is_changeable, is_viewable, is_deletable }) =>
         is_changeable || is_viewable || is_deletable,
     );
 
-    // check if used or not
-    if (!isAllPermissionsValid) {
-      toast.error('Please select at least one permission from each table');
-      return;
-    }
+    // Get the active tab name with first letter capitalized
+    const activeTabName =
+      selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1);
+
+    // Get the permissions of that tab
+    const tabPermissions = (data as any)?.[activeTabName] || [];
+
+    // Get the group_id of the first permission in this tab (all permissions in the same tab share the same group_id)
+    const groupId = tabPermissions[0]?.group_id || null;
+
+    console.log('groupId', groupId);
 
     const payload = {
       id: defaultValues?.id,
       name: formData.name,
       description: '',
-      permission_group: 1,
+      permission_group: groupId,
       permissions: permissions,
     };
 

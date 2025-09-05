@@ -9,8 +9,5 @@ export const useGetTeams = () => {
   return useQuery({
     queryKey: ['getAllTeams'],
     queryFn: TeamsService.GetTeams,
-    // onSuccess: () => {
-    //   queryClient.invalidateQueries({ queryKey: ['getAllTeams'] });
-    // },
   });
 };

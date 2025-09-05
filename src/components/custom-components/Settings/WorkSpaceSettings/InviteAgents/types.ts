@@ -1,14 +1,15 @@
 import { Control } from 'react-hook-form';
+import { AddOrEditAgentFormSchema } from './FormSchema';
 
 // ADD OR EDIT AGENT FORM
 
 export type AddorEditFormValues = {
-  role_ids: number;
+  role_ids?: number[];
   email: string;
   fullName: string;
-  role: string | string[];
+  role: string[];
   clientHandled: string;
-  day: string | null;
+  days: string[];
   shift: string;
   startTime: string;
   endTime: string;
@@ -140,8 +141,10 @@ type RolePermissionGroupResponse = {
 };
 
 export type FieldProps = {
-  control: Control<AddorEditFormValues>;
+  control: Control<AddOrEditAgentFormSchema>;
   roleTableData?: {
     data?: RolePermission[]; // <- allow undefined
+    errorMessage?: string;
   };
+  errorMessage?: string;
 };

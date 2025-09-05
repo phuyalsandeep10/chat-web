@@ -48,7 +48,7 @@ const TeamEdit: React.FC<TeamEditProps> = ({
   };
 
   // delete members from team
-  const { mutate: deleteMembersFromTeam } = useDeleteTeamFromTeam();
+  const { mutate: deleteMembersFromTeams } = useDeleteTeamFromTeam();
 
   // prefilled the data if avaiable
   useEffect(() => {
@@ -86,7 +86,7 @@ const TeamEdit: React.FC<TeamEditProps> = ({
     // if (!teamId && !memberIdToDelete) return;
     if (teamId == null || memberIdToDelete == null) return;
 
-    deleteMembersFromTeam(
+    deleteMembersFromTeams(
       { team_id: teamId, member_id: memberIdToDelete },
       {
         onError: (error: any) => {
@@ -164,27 +164,13 @@ const TeamEdit: React.FC<TeamEditProps> = ({
                             </ToggleGroup>
                             <Icons.ri_delete_bin_5_line
                               className="text-alert-prominent cursor-pointer"
-                              onClick={() => {
-                                field.onChange({
-                                  ...field.value,
-                                  [member_id]: '', // clear access level for this member
-                                });
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 setSelectedMemberId(member_id);
                                 setOpenDeleteMember(true);
                               }}
                             />
-                            {/* delete modal for delete team */}
-                            <DeleteModal
-                              open={OpenDeleteMember}
-                              onOpenChange={setOpenDeleteMember}
-                              title="Delete Team "
-                              description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
-                              confirmText="Confirm & Delete"
-                              onCancel={() => {}}
-                              onConfirm={handleDeleteTeam}
-                            >
-                              {/* <DeleteModal /> */}
-                            </DeleteModal>
                           </div>
                         </div>
                       );
@@ -192,6 +178,18 @@ const TeamEdit: React.FC<TeamEditProps> = ({
                   </div>
                 )}
               />
+              {/* delete modal for delete team */}
+              <DeleteModal
+                open={OpenDeleteMember}
+                onOpenChange={setOpenDeleteMember}
+                title="Delete Team "
+                description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
+                confirmText="Confirm & Delete"
+                onCancel={() => {}}
+                onConfirm={handleDeleteTeam}
+              >
+                {/* <DeleteModal /> */}
+              </DeleteModal>
             </div>
 
             {/* Add Member button */}

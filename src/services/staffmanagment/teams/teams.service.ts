@@ -75,7 +75,7 @@ export class TeamsService {
   static async deleteMemberFromTeam(team_id: number, member_id: number) {
     try {
       const res = await axiosInstance.delete(
-        `${baseURL}/teams/team/${team_id}/member/${member_id}/access-level`,
+        `${baseURL}/teams/${team_id}/member/${member_id}/access-level`,
       );
       return res.data;
     } catch (error) {

@@ -66,45 +66,6 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
     });
   };
 
-  // handle edit click
-  // const handleEditClick = (row: any) => {
-  //   setOpenRole(true);
-  //   //convert changebaleIds to sets
-
-  //   // for (const permission of changebaleIds ) {
-  //   //   if (permission.is_changeable) {
-  //   //     setChangeableIds((prev) => [...prev, permission.permission_id]);
-  //   //   }
-  //   // }
-  //   GetAllRolesPermissionsForEdit(
-  //     { role_id: row.id },
-  //     {
-  //       onSuccess: (res) => {
-  //         const mappedPermissions = (res.role_permissions || []).map(
-  //           (perm: any) => ({
-  //             permission_id: perm.permission_id,
-  //             is_changeable: perm.is_changeable ?? false,
-  //             is_viewable: perm.is_viewable ?? false,
-  //             is_deletable: perm.is_deletable ?? false,
-  //           }),
-  //         );
-
-  //         setSelectedRole({
-  //           id: row.id,
-  //           RoleName: row.RoleName,
-  //           permissions: mappedPermissions,
-  //           groups: {
-  //             Setting: res.Setting || [],
-  //             Channels: res.Channels || [],
-  //             'Inbox & Contact': res['Inbox & Contact'] || [],
-  //             Analystics: res.Analystics || [],
-  //             'Section Access': res['Section Access'] || [],
-  //           },
-  //         });
-  //       },
-  //     },
-  //   );
-  // };
   const handleEditClick = (row: any) => {
     setOpenRole(true);
 
@@ -153,6 +114,8 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
       },
     );
   };
+
+  console.log('selectedRole', selectedRole);
 
   const columns: RoleColumn<RoleTableOrderRow>[] = [
     { key: 'RoleName', label: 'Role Name' },

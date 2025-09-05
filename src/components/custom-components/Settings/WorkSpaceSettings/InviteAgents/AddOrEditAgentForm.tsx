@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Control, SubmitHandler } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { InputField } from '@/components/common/hook-form/InputField';
 import Label from '@/components/common/hook-form/Label';
@@ -29,15 +29,29 @@ import DayField from '@/components/custom-components/Settings/WorkSpaceSettings/
 import ClientField from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/utils/ClientField';
 import RoleField from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/utils/RoleField';
 import ShiftField from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/utils/ShiftField';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AddOrEditAgentSchema, AddOrEditAgentFormSchema } from './FormSchema';
 
 const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   defaultValues,
   onSubmit,
-  submitButton = 'Add Agent',
+  submitButton = defaultValues ? 'Edit Agent' : 'Add Agent',
   onClose,
 }) => {
-  const form = useForm<AddorEditFormValues>({
-    defaultValues: { ...defaultValues },
+  const form = useForm<AddOrEditAgentFormSchema>({
+    resolver: zodResolver(AddOrEditAgentSchema),
+    defaultValues: {
+      email: defaultValues?.email ?? '',
+      fullName: defaultValues?.fullName ?? '',
+      role: defaultValues?.role ?? [], // array
+      clientHandled: defaultValues?.clientHandled ?? '', // string
+      days: defaultValues?.days ?? [], // array
+      shift: defaultValues?.shift ?? '',
+      startTime: defaultValues?.startTime ?? '',
+      endTime: defaultValues?.endTime ?? '',
+      totalHours: defaultValues?.totalHours ?? '',
+      team: defaultValues?.team ?? '',
+    },
   });
 
   // components states
@@ -65,6 +79,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   } = useGetAllRolePermissionGroup();
 
   const savedTime = useTimeStore((state) => state.savedTime);
+
   const { control, setValue, getValues, reset, watch } = form; // Get setValue from the main form instance
 
   // reset from after submit
@@ -76,7 +91,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
     setOpenInviteMember(false);
   };
 
-  const handleSubmit = (data: AddorEditFormValues) => {
+  const handleSubmit: SubmitHandler<AddOrEditAgentFormSchema> = (data) => {
     // find team
     const selectedTeam = teamsData?.data?.find(
       (team: any) => team.name === data.team,
@@ -92,10 +107,17 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
 
     const total_minutes = diffInMinutes(data.startTime, data.endTime);
 
+    console.log('total_minutes', total_minutes);
+    console.log('data', data);
+
+    // convert dat into array
+    const dayArray = Array.isArray(data.days) ? data.days : [data.days];
+    const day = dayArray.map(capitalize); // <-- map each element
+
     const payload = {
       role_ids: selectedRoles?.map((r: any) => r.role_id) || [],
       client_handled: data.clientHandled,
-      day: capitalize(data.day || ''),
+      day,
       shift: data.shift,
       start_time: to24Hour(data.startTime),
       end_time: to24Hour(data.endTime),
@@ -134,6 +156,27 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
     }
   }, [watch('startTime'), watch('endTime')]);
 
+  useEffect(() => {
+    if (defaultValues) {
+      // Convert 24-hour time to 12-hour format with AM/PM
+      const formatWithAmPm = (time24?: string): string => {
+        if (!time24) return '';
+        const [hoursStr, minutes] = time24.split(':');
+        let hours = Number(hoursStr);
+        const period = hours >= 12 ? 'PM' : 'AM';
+        if (hours > 12) hours -= 12;
+        if (hours === 0) hours = 12;
+        return `${hours.toString().padStart(2, '0')}:${minutes} ${period}`;
+      };
+
+      reset({
+        ...defaultValues,
+        startTime: formatWithAmPm(defaultValues.startTime),
+        endTime: formatWithAmPm(defaultValues.endTime),
+      });
+    }
+  }, [defaultValues, reset]);
+
   return (
     <>
       <Form {...form}>
@@ -149,9 +192,8 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
               inputClassName="!text-xs leading-[21px] font-normal !text-black"
               labelClassName=" text-base leading-[26px] font-medium"
               control={control}
-              required
-              readOnly
-              disabled
+              // readOnly
+              // disabled
             />
           </div>
 
@@ -163,22 +205,35 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
               control={control}
               label="Full Name"
               labelClassName="text-base leading-[26px] font-medium"
-              readOnly
-              disabled
+              // readOnly
+              // disabled
             />
           </div>
 
           {/* Role Field */}
-          <RoleField control={control} roleTableData={roleTableData} />
+          <RoleField
+            control={control}
+            roleTableData={roleTableData}
+            errorMessage={form.formState.errors.role?.message}
+          />
 
           {/* Client Handled Field */}
-          <ClientField control={control} />
+          <ClientField
+            control={control}
+            errorMessage={form.formState.errors.clientHandled?.message}
+          />
 
           {/* Day Picker */}
-          <DayField control={control} />
+          <DayField
+            control={control}
+            errorMessage={form.formState.errors.days?.message}
+          />
 
           {/* Shift Field */}
-          <ShiftField control={control} />
+          <ShiftField
+            control={control}
+            errorMessage={form.formState.errors.shift?.message}
+          />
 
           {/* Work Schedule */}
           <div className="col-span-full">
@@ -197,15 +252,17 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                 setOpen={setOpenStartTime}
                 open={openStartTime}
                 control={control}
+                errorMessage={form.formState.errors.startTime?.message}
               />
 
               <TimeField
                 name="endTime"
                 label="End Time"
-                onChange={(val: string) => setValue('endTime', val)}
+                onChange={(val: string) => setValue('endTime', val || '')}
                 setOpen={setOpenEndTime}
                 open={openEndTime}
                 control={control}
+                errorMessage={form.formState.errors.endTime?.message}
               />
 
               <div className="w-full">
@@ -227,6 +284,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
             teamsData={teamsData}
             control={control}
             setOpenInviteMember={setOpenInviteMember}
+            errorMessage={form.formState.errors.team?.message}
           />
 
           <Button

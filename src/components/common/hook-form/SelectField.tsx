@@ -76,14 +76,17 @@ export function SelectField<T extends FieldValues>({
                   if (isMulti) {
                     const newValues = [...selectedValues];
                     const idx = newValues.indexOf(val);
-                    if (idx > -1) newValues.splice(idx, 1);
-                    else newValues.push(val);
-                    field.onChange(newValues);
+
+                    if (idx === -1) {
+                      // Only add if not already selected
+                      newValues.push(val);
+                      field.onChange(newValues);
+                    }
+                    // If already selected → do nothing (disable deselect from dropdown)
                   } else {
                     field.onChange(val);
                   }
                 }}
-                // isMulti={isMulti}
               >
                 <SelectTrigger className="w-[100%]">
                   {selectedValues.length > 0 ? (
