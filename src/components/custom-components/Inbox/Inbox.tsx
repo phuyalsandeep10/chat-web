@@ -41,7 +41,7 @@ const Inbox = () => {
     editMessage,
     joinConversation,
     updateConversationLastMessage,
-    updateCustomerConversationDetails,
+    updateCustomerDetails,
   } = useAgentConversationStore();
   const params: any = useParams();
   const chatId = params?.userId;
@@ -81,7 +81,7 @@ const Inbox = () => {
   };
 
   const updatEmail = (data: any) => {
-    updateCustomerConversationDetails(data?.customer);
+    updateCustomerDetails(data?.customer);
   };
 
   const cleanupSocketListeners = () => {
@@ -119,6 +119,43 @@ const Inbox = () => {
 
     return () => cleanupSocketListeners();
   }, [socket, userId]);
+
+  useEffect(() => {
+    if (!chatId) return;
+
+    const savedDraft = localStorage.getItem(`draft-${chatId}`);
+    if (savedDraft) {
+      try {
+        const parsedDraft = JSON.parse(savedDraft);
+
+        if (parsedDraft.message) {
+          setMessage(parsedDraft.message);
+          editorRef.current?.commands?.setContent(parsedDraft.message);
+        }
+
+        if (parsedDraft.replyingTo) {
+          setReplyingTo(parsedDraft.replyingTo);
+        }
+      } catch (err) {
+        console.error('Failed to parse draft:', err);
+      }
+    }
+  }, [chatId]);
+
+  // Save draft when message changes
+  useEffect(() => {
+    if (!chatId) return;
+
+    if (message || replyingTo) {
+      const draft = {
+        message,
+        replyingTo,
+      };
+      localStorage.setItem(`draft-${chatId}`, JSON.stringify(draft));
+    } else {
+      localStorage.removeItem(`draft-${chatId}`);
+    }
+  }, [message, replyingTo, chatId]);
 
   const emitTyping = (msg: string) => {
     if (!socket || isSending || !chatId) return;
@@ -165,6 +202,7 @@ const Inbox = () => {
         setReplyingTo(null);
       }
       setMessage(null);
+      localStorage.removeItem(`draft-${chatId}`);
       editorRef.current?.onClear();
     } catch (error) {
     } finally {

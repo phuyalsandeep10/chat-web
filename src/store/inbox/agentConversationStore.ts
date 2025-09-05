@@ -124,7 +124,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
       };
     }),
 
-  updateCustomerConversationDetails: (conversationData) =>
+  updateCustomerDetails: (conversationData) =>
     set((state) => {
       return {
         all_conversations: state.all_conversations.map((el) =>
