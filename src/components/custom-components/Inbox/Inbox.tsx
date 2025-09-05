@@ -14,6 +14,7 @@ import ChatEmptyScreen from './ChatEmptyScreen/ChatEmptyScreen';
 import InboxChatInfo from './InboxChatInfo/InboxChatInfo';
 import InboxChatSection from './InboxChatSection/InboxChatSection';
 import InboxSubSidebar from './InboxSidebar/InboxSubSidebar';
+import InboxChatInfoDetails from './InboxChatInfo/InboxChatInfoDetails';
 
 const Inbox = () => {
   const editorRef = useRef<any>(null);
@@ -308,9 +309,12 @@ const Inbox = () => {
           </div>
 
           {showChatInfo && (
-            <div className="w-[400px]">
-              <InboxChatInfo />
-            </div>
+            // <div className="w-[400px]">
+            //   <InboxChatInfo />
+            // </div>
+            <>
+              <InboxChatInfoDetails />
+            </>
           )}
         </>
       ) : (

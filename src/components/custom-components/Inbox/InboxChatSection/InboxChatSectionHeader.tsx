@@ -23,7 +23,10 @@ const InboxChatSectionHeader = () => {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-b bg-white p-4 pt-0">
-      <div className="flex items-center space-x-3">
+      <div
+        className="flex cursor-pointer items-center space-x-3"
+        onClick={openChatInfo}
+      >
         <div className="bg-gray-light flex h-10 w-10 items-center justify-center rounded-full">
           <span className="text-brand-dark text-sm font-medium">
             {customer?.name?.substring(0, 2)?.toUpperCase()}
@@ -94,7 +97,10 @@ const InboxChatSectionHeader = () => {
           </DropdownMenu>
         </div>
 
-        <button className="text-gray-light" onClick={openChatInfo}>
+        <button
+          className="text-gray-light cursor-pointer"
+          onClick={openChatInfo}
+        >
           <Icons.chevron_left className="h-5 w-5" />
         </button>
       </div>
