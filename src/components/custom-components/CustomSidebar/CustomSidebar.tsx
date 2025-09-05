@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -15,10 +15,6 @@ import UserSidebarHeader from './SidebarHeader';
 import MainSidebar from '@/components/custom-components/MainSidebar/MainSideBar';
 import { cn } from '@/lib/utils';
 const CustomSidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
-
-  // Step 2: Toggle function
-  const toggleCollapsed = () => setCollapsed((prev) => !prev);
   return (
     <div>
       <Sidebar>

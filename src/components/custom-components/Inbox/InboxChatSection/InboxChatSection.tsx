@@ -5,6 +5,7 @@ import { useUiStore } from '@/store/UiStore/useUiStore';
 import { Message } from '@/store/inbox/types';
 import DottedAnimation from './MessageList/DottedAnimation';
 import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
+import { cn } from '@/lib/utils';
 
 interface InboxChatSectionProps {
   messages: Message[];
@@ -12,6 +13,7 @@ interface InboxChatSectionProps {
   handleEditMessage: (messageText: string) => void;
   showTyping: boolean;
   typingmessage: string;
+  replyingTo?: any;
 }
 
 const InboxChatSection = ({
@@ -20,6 +22,7 @@ const InboxChatSection = ({
   handleEditMessage,
   showTyping,
   typingmessage,
+  replyingTo,
 }: InboxChatSectionProps) => {
   const { customer }: any = useAgentConversationStore();
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
@@ -66,7 +69,14 @@ const InboxChatSection = ({
     <div className="flex-1 p-4">
       <InboxChatSectionHeader />
       {/* <LanguageSelector /> */}
-      <div className="max-h-[calc(100vh-280px)] min-h-[calc(100vh-280px)] space-y-4 overflow-y-auto py-10">
+      <div
+        className={cn(
+          'space-y-4 overflow-y-auto py-10',
+          replyingTo
+            ? 'max-h-[calc(100vh-320px)] min-h-[calc(100vh-320px)]'
+            : 'max-h-[calc(100vh-290px)] min-h-[calc(100vh-290px)]',
+        )}
+      >
         {sortedDays.map((day) => (
           <div key={day}>
             <div className="flex items-center gap-1.5">

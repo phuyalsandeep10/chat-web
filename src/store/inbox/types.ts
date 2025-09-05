@@ -143,4 +143,5 @@ export interface ConversationState {
   setConversationUnresolved: (data: any) => void;
   updateConversationLastMessage: (data: any) => void;
   insertConversation: (data: any) => void;
+  updateCustomerDetails: (data: any) => void;
 }

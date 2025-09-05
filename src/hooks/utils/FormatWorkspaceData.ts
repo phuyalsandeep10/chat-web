@@ -3,7 +3,7 @@ import WorkspaceData from '@/store/WorkspaceStore/useWorkspaceStore';
 
 export const buildWorkspacePayload = (updatedData: Partial<WorkspaceData>) => {
   const defaultValues: WorkspaceData = {
-    owner_image: '',
+    logo: '',
     workspace_owner: '',
     name: '',
     domain: '',

@@ -14,6 +14,7 @@ import ChatEmptyScreen from './ChatEmptyScreen/ChatEmptyScreen';
 import InboxChatInfo from './InboxChatInfo/InboxChatInfo';
 import InboxChatSection from './InboxChatSection/InboxChatSection';
 import InboxSubSidebar from './InboxSidebar/InboxSubSidebar';
+import InboxChatInfoDetails from './InboxChatInfo/InboxChatInfoDetails';
 
 const Inbox = () => {
   const editorRef = useRef<any>(null);
@@ -41,6 +42,7 @@ const Inbox = () => {
     editMessage,
     joinConversation,
     updateConversationLastMessage,
+    updateCustomerDetails,
   } = useAgentConversationStore();
   const params: any = useParams();
   const chatId = params?.userId;
@@ -76,9 +78,11 @@ const Inbox = () => {
   };
 
   const handleMessageSeen = (data: any) => {
-    console.log('seen message', 'message seen');
-
     updateMessageSeen(data?.message_id);
+  };
+
+  const updatEmail = (data: any) => {
+    updateCustomerDetails(data?.customer);
   };
 
   const cleanupSocketListeners = () => {
@@ -112,9 +116,47 @@ const Inbox = () => {
     socket.on(CHAT_EVENTS.receive_typing, handleTyping);
     socket.on(CHAT_EVENTS.message_seen, handleMessageSeen);
     socket.on(CHAT_EVENTS.stop_typing, handleStopTyping);
+    socket.on(CHAT_EVENTS.customer_email_update, updatEmail);
 
     return () => cleanupSocketListeners();
   }, [socket, userId]);
+
+  useEffect(() => {
+    if (!chatId) return;
+
+    const savedDraft = localStorage.getItem(`draft-${chatId}`);
+    if (savedDraft) {
+      try {
+        const parsedDraft = JSON.parse(savedDraft);
+
+        if (parsedDraft.message) {
+          setMessage(parsedDraft.message);
+          editorRef.current?.commands?.setContent(parsedDraft.message);
+        }
+
+        if (parsedDraft.replyingTo) {
+          setReplyingTo(parsedDraft.replyingTo);
+        }
+      } catch (err) {
+        console.error('Failed to parse draft:', err);
+      }
+    }
+  }, [chatId]);
+
+  // Save draft when message changes
+  useEffect(() => {
+    if (!chatId) return;
+
+    if (message || replyingTo) {
+      const draft = {
+        message,
+        replyingTo,
+      };
+      localStorage.setItem(`draft-${chatId}`, JSON.stringify(draft));
+    } else {
+      localStorage.removeItem(`draft-${chatId}`);
+    }
+  }, [message, replyingTo, chatId]);
 
   const emitTyping = (msg: string) => {
     if (!socket || isSending || !chatId) return;
@@ -161,10 +203,18 @@ const Inbox = () => {
         setReplyingTo(null);
       }
       setMessage(null);
+      localStorage.removeItem(`draft-${chatId}`);
       editorRef.current?.onClear();
     } catch (error) {
     } finally {
       setIsSending(false);
+    }
+  };
+  const debounceFocus = () => {
+    if (editorRef.current) {
+      setTimeout(() => {
+        editorRef.current.focus();
+      }, 500);
     }
   };
 
@@ -174,6 +224,7 @@ const Inbox = () => {
     }
     setReplyingTo({ ...replyToMessage });
     setEditedMessage(null);
+    debounceFocus();
   };
 
   const handleEditMessage = (messageToEdit: any) => {
@@ -187,6 +238,7 @@ const Inbox = () => {
 
     if (editorRef.current) {
       editorRef?.current?.commands?.setContent(messageToEdit.content);
+      debounceFocus();
     }
   };
 
@@ -221,16 +273,17 @@ const Inbox = () => {
 
       {chatId ? (
         <>
-          <div className="flex-1">
+          <div className="border-gray-light flex-1 border-r">
             <InboxChatSection
               messages={messages}
               onReply={handleReply}
               handleEditMessage={handleEditMessage}
               showTyping={showTyping}
               typingmessage={typingMessage}
+              replyingTo={replyingTo}
             />
             {replyingTo && (
-              <div className="bg bg-brand-disable relative -top-12 left-4 z-30 flex w-fit items-center justify-between rounded-md border px-4 py-2 text-black">
+              <div className="bg bg-brand-disable relative ml-4 flex w-fit items-center justify-between rounded-md border px-4 py-2 text-black">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-black">Replying to:</span>
                   <span className="text-theme-text-primary max-w-[200px] truncate text-xs font-medium">
@@ -245,7 +298,7 @@ const Inbox = () => {
                 </button>
               </div>
             )}
-            <div className="relative m-4">
+            <div className="relative m-4 mt-2">
               <Editor
                 value={message}
                 ref={editorRef}
@@ -256,9 +309,12 @@ const Inbox = () => {
           </div>
 
           {showChatInfo && (
-            <div className="w-[400px]">
-              <InboxChatInfo />
-            </div>
+            // <div className="w-[400px]">
+            //   <InboxChatInfo />
+            // </div>
+            <>
+              <InboxChatInfoDetails />
+            </>
           )}
         </>
       ) : (

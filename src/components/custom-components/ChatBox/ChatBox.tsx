@@ -59,6 +59,7 @@ export default function ChatBox() {
   const [isOpen, setIsOpen] = useState(false);
   const [expand, setExpand] = useState(false);
   const messageBoxOpenRef = useRef<any>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [isOnline, setIsOnline] = useState(false);
 
@@ -285,6 +286,9 @@ export default function ChatBox() {
 
       setMessages((prev) => [...prev, res?.data]);
       setMessage('');
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'; // 👈 reset height
+      }
     } catch (error) {
       console.error('Failed to send message:', error);
     }
@@ -396,13 +400,10 @@ export default function ChatBox() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // if (!visitor?.customer?.email) {
-  //   return (
-  //     <div className="mx-auto flex h-screen max-w-2xl flex-col items-center justify-center p-4">
-  //       <CustomerUpdateForm />
-  //     </div>
-  //   );
-  // }
+  const autoResize = (textarea: any) => {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  };
 
   return (
     <>
@@ -481,147 +482,155 @@ export default function ChatBox() {
               </div>
             </div>
 
-            <div
-              className={cn(
-                `max-h-[50vh] min-h-[50vh] overflow-auto px-6 py-4`,
-                expand && 'h-[70vh] max-h-[70vh] overflow-auto',
-              )}
-            >
-              {/* Date  */}
-              {/* email input here */}
+            <div className="relative">
+              <div
+                className={cn(
+                  `max-h-[50vh] min-h-[50vh] overflow-auto px-6 py-4 pb-[80px]`,
+                  expand && 'h-[70vh] max-h-[70vh] overflow-auto',
+                )}
+              >
+                {/* Date  */}
+                {/* email input here */}
 
-              <EmailInput />
+                <EmailInput />
 
-              {!isConnected && (
-                <div className="mt-8 text-center text-gray-500">
-                  Please connect to a socket server to start chatting
-                </div>
-              )}
-              {loading && (
-                <div className="text-center text-gray-500">
-                  Loading conversations...
-                </div>
-              )}
-              {error && <div className="text-center text-red-500">{error}</div>}
-              {!loading && !error && messages.length === 0 && (
-                <div className="mt-8 text-center text-gray-500">
-                  No messages yet.
-                </div>
-              )}
-
-              {sortedGroups.map(([dateLabel, msgs]) => (
-                <div key={dateLabel}>
-                  {/* Date Divider */}
-                  <p className="font-inter mt-4 text-center text-xs font-normal">
-                    {dateLabel}
-                  </p>
-
-                  {/* Messages for this date */}
-                  {msgs.map((msg) => (
-                    <MessageItem
-                      message={msg}
-                      key={msg?.id}
-                      socket={socket}
-                      organization_id={visitor?.conversation?.organization_id}
-                    />
-                  ))}
-                </div>
-              ))}
-
-              {otherTyping && (
-                <div className="mt-4 flex items-center space-x-1">
-                  <div className="flex space-x-1">
-                    <span className="h-[6px] w-[6px] animate-bounce rounded-full bg-gray-400 [animation-delay:-0.3s]"></span>
-                    <span className="h-[6px] w-[6px] animate-bounce rounded-full bg-gray-400 [animation-delay:-0.15s]"></span>
-                    <span className="h-[6px] w-[6px] animate-bounce rounded-full bg-gray-400 [animation-delay:-0.15s]"></span>
-                    <span className="h-[6px] w-[6px] animate-bounce rounded-full bg-gray-400"></span>
+                {!isConnected && (
+                  <div className="mt-8 text-center text-gray-500">
+                    Please connect to a socket server to start chatting
                   </div>
+                )}
+                {loading && (
+                  <div className="text-center text-gray-500">
+                    Loading conversations...
+                  </div>
+                )}
+                {error && (
+                  <div className="text-center text-red-500">{error}</div>
+                )}
+                {!loading && !error && messages.length === 0 && (
+                  <div className="mt-8 text-center text-gray-500">
+                    No messages yet.
+                  </div>
+                )}
 
-                  <p className="text-xs font-normal text-[#1E1E1E]">
-                    ChatBoq is typing....
-                  </p>
-                </div>
-              )}
+                {sortedGroups.map(([dateLabel, msgs]) => (
+                  <div key={dateLabel}>
+                    {/* Date Divider */}
+                    <p className="font-inter mt-4 text-center text-xs font-normal">
+                      {dateLabel}
+                    </p>
 
-              <div ref={messagesEndRef} />
-            </div>
+                    {/* Messages for this date */}
+                    {msgs.map((msg) => (
+                      <MessageItem
+                        message={msg}
+                        key={msg?.id}
+                        socket={socket}
+                        organization_id={visitor?.conversation?.organization_id}
+                      />
+                    ))}
+                  </div>
+                ))}
 
-            {/* <Input Section  */}
-            <div className="font-inter border border-[rgba(170,170,170,0.10)] bg-white px-6 py-2 text-xs text-[#6D6D6D]">
-              <form className="flex" onSubmit={handleSubmit}>
-                <input
-                  type="text"
-                  placeholder="Compose your message"
-                  className="font-inter flex-1 pr-2 focus:border-0 focus:ring-0 focus:outline-none"
-                  value={message}
-                  onChange={(e: any) => {
-                    setMessage(e.target.value);
+                {otherTyping && (
+                  <div className="mt-4 flex items-center space-x-1">
+                    <div className="flex space-x-1">
+                      <span className="h-[6px] w-[6px] animate-bounce rounded-full bg-gray-400 [animation-delay:-0.3s]"></span>
+                      <span className="h-[6px] w-[6px] animate-bounce rounded-full bg-gray-400 [animation-delay:-0.15s]"></span>
+                      <span className="h-[6px] w-[6px] animate-bounce rounded-full bg-gray-400 [animation-delay:-0.15s]"></span>
+                      <span className="h-[6px] w-[6px] animate-bounce rounded-full bg-gray-400"></span>
+                    </div>
 
-                    if (!socket || !isConnected) return;
+                    <p className="text-xs font-normal text-[#1E1E1E]">
+                      ChatBoq is typing....
+                    </p>
+                  </div>
+                )}
 
-                    // Debounce emitTyping (fires after 400ms of no input)
-                    // if (typingTimeoutRef.current)
-                    //   clearTimeout(typingTimeoutRef.current);
-                    if (e.target.value.trim()) {
-                      setIsTyping(true);
-                      typingTimeoutRef.current = setTimeout(() => {
-                        emitTyping(e.target.value);
-                      }, 200);
-                    }
+                <div ref={messagesEndRef} />
+              </div>
 
-                    // Debounce emitStopTyping (fires after 1000ms of no input)
-                    // if (stopTypingTimeoutRef.current)
-                    //   clearTimeout(stopTypingTimeoutRef.current);
-                    // if (e.target.value.trim()) {
-                    //   // stopTypingTimeoutRef.current = setTimeout(() => {
-                    //   //   setIsTyping(false);
-                    //   //   emitStopTyping();
-                    //   // }, 1000);
-                    // } else {
-                    //   // If input is cleared, stop typing immediately
-                    //   emitStopTyping();
-                    //   setIsTyping(false);
-                    // }
-                  }}
-                  onBlur={() => {
-                    emitStopTyping();
-                  }}
-                />
-                <div className="flex items-center gap-[14px]">
-                  {/* <button>
+              {/* <Input Section  */}
+              <div className="font-inter absolute right-0 bottom-0 left-0 border border-[rgba(170,170,170,0.10)] bg-white px-6 py-2 text-xs text-[#6D6D6D]">
+                <form
+                  className="flex items-start justify-between"
+                  onSubmit={handleSubmit}
+                >
+                  <textarea
+                    ref={textareaRef}
+                    placeholder="Compose your message "
+                    className="font-inter max-h-[120px] min-h-[20px] w-[calc(80%)] flex-1 resize-none overflow-y-auto pt-3 pr-2 focus:border-0 focus:ring-0 focus:outline-none"
+                    value={message}
+                    rows={1}
+                    onChange={(e: any) => {
+                      setMessage(e.target.value);
+
+                      // Auto-resize textarea
+                      autoResize(e.target);
+
+                      if (!socket || !isConnected) return;
+
+                      if (e.target.value.trim()) {
+                        setIsTyping(true);
+                        typingTimeoutRef.current = setTimeout(() => {
+                          emitTyping(e.target.value);
+                        }, 200);
+                      }
+                    }}
+                    onKeyDown={(e: any) => {
+                      if (e.key === 'Enter') {
+                        if (e.shiftKey) {
+                          // Shift + Enter: Allow new line (default behavior)
+                          return;
+                        } else {
+                          // Enter only: Submit form
+                          e.preventDefault();
+                          if (message.trim() && isConnected) {
+                            handleSubmit(e);
+                          }
+                        }
+                      }
+                    }}
+                    onBlur={() => {
+                      emitStopTyping();
+                    }}
+                  />
+                  <div className="flex items-center gap-[14px]">
+                    {/* <button>
                     <AttachmentIcon />
                   </button>
                   <button>
                     <MicIcon />
                   </button> */}
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <div ref={emojiBtnRef}>
-                        <Smile />
-                      </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="mr-5 p-0" side="top">
-                      <EmojiPicker
-                        onEmojiClick={(emojiData) => {
-                          setMessage((prev) => prev + emojiData.emoji);
-                        }}
-                      />
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <div ref={emojiBtnRef}>
+                          <Smile />
+                        </div>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="mr-5 p-0" side="top">
+                        <EmojiPicker
+                          onEmojiClick={(emojiData) => {
+                            setMessage((prev) => prev + emojiData.emoji);
+                          }}
+                        />
+                      </DropdownMenuContent>
+                    </DropdownMenu>
 
-                  <button
-                    disabled={!message.trim() || !isConnected}
-                    type="submit"
-                    className={cn(
-                      `flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#8A53E1]`,
-                      !message.trim() || (!isConnected && 'bg-[#E2D4F7]'),
-                    )}
-                  >
-                    <SendIcon />
-                  </button>
-                </div>
-              </form>
+                    <button
+                      disabled={!message.trim() || !isConnected}
+                      type="submit"
+                      className={cn(
+                        `flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#8A53E1]`,
+                        !message.trim() || (!isConnected && 'bg-[#E2D4F7]'),
+                      )}
+                    >
+                      <SendIcon />
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
 
             {/* Tab Section  */}
@@ -689,13 +698,26 @@ const MessageItem = ({ socket, message, organization_id }: any) => {
               </div>
             </div>
             <div className="font-inter -ml-6 space-y-2 rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
-              {/* input email field */}
+              {message?.reply_to && message?.reply_to_id && (
+                <div className="relative rounded-lg border-l-[2px] border-l-[#6D28D9] bg-[#F6F2FF] p-2">
+                  <h3 className="font-inter text-xs leading-[18px] font-normal text-[#16082B]">
+                    Replied
+                  </h3>
+
+                  <div
+                    className="font-inter mt-2 min-w-[100px] text-[11px] font-normal text-black"
+                    dangerouslySetInnerHTML={{
+                      __html: message?.reply_to?.content,
+                    }}
+                  />
+                </div>
+              )}
 
               <div
                 dangerouslySetInnerHTML={{
                   __html: message?.content,
                 }}
-                className="text-xs leading-[18px] font-normal break-all text-black"
+                className="text-xs leading-[18px] font-normal break-all text-black [&_ol]:list-decimal [&_ol]:pl-2 [&_ul]:list-disc [&_ul]:pl-2"
               />
 
               <p className="mt-[5px] text-xs font-normal text-[#6D6D6D]">

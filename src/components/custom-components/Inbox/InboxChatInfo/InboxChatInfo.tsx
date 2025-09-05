@@ -18,9 +18,9 @@ const InboxChatInfo: React.FC = () => {
 
   return (
     <div>
-      <div className="font-outfit max-h-screen overflow-y-auto border-l bg-white">
+      <div className="font-outfit max-h-screen overflow-y-auto bg-white">
         {/* Header */}
-        <InboxChatInfoHeader onClose={closeChatInfo} />
+        {/* <InboxChatInfoHeader onClose={closeChatInfo} /> */}
         <div className="px-10 py-7">
           {/* Profile Section */}
           <InboxChatInfoProfileInfo />
@@ -35,11 +35,11 @@ const InboxChatInfo: React.FC = () => {
           <DeviceInfo />
 
           {/* Tags */}
-          <TagsInfo />
+          {/* <TagsInfo /> */}
 
           {/* Recently Viewed Pages */}
-          <RecentlyViewPagesInfo />
-
+          {/* <RecentlyViewPagesInfo /> */}
+          {/* 
           <TitleReasonInfo
             icon={<Icons.user_check className="text-brand-dark h-4 w-4" />}
             title="Agent Memo"
@@ -50,16 +50,16 @@ const InboxChatInfo: React.FC = () => {
             icon={<Icons.message className="h-4 w-4" />}
             title="Related Conversations/Tickets"
             content="Investigating file upload issue. Might be a network problem."
-          />
+          /> */}
 
           {/* participants */}
           <Participants />
 
           {/* Recent Activity */}
-          <RecentActivityInfo />
+          {/* <RecentActivityInfo /> */}
 
           {/* Social Media */}
-          <SocialMedia />
+          {/* <SocialMedia /> */}
         </div>
       </div>
     </div>

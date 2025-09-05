@@ -91,7 +91,7 @@ const Integration: React.FC = () => {
         )}
       >
         <ChannelSection
-          channels={recommendedChannels}
+          channels={recommendedChannels.slice(0, 3)}
           heading="Recommended Channel"
           selectedTab={selectedTab}
           connectionStatus={connectionStatus}
@@ -109,7 +109,7 @@ const Integration: React.FC = () => {
         )}
       >
         <ChannelSection
-          channels={crmChannels}
+          channels={crmChannels.slice(0, 3)}
           heading="CRM"
           selectedTab={selectedTab}
           connectionStatus={connectionStatus}
@@ -127,7 +127,7 @@ const Integration: React.FC = () => {
         )}
       >
         <ChannelSection
-          channels={marketingChannels}
+          channels={marketingChannels.slice(0, 3)}
           heading="Marketing"
           selectedTab={selectedTab}
           connectionStatus={connectionStatus}
@@ -145,7 +145,7 @@ const Integration: React.FC = () => {
         )}
       >
         <ChannelSection
-          channels={messagingChannels}
+          channels={messagingChannels.slice(0, 3)}
           heading="Messaging"
           selectedTab={selectedTab}
           connectionStatus={connectionStatus}

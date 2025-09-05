@@ -63,7 +63,7 @@ const LoginForm = () => {
         };
         AuthService.setAuthTokens(authToken);
         toast.success(data?.message || 'Logged in successfully');
-        router.replace(ROUTES.DASHBOARD);
+        router.replace(ROUTES.YOUR_INBOXES.MAIN_INBOX); //re-route directly to inbox for now
       },
       onError: (error: any) => {
         toast.error(error?.response?.data?.message || 'Login failed');
@@ -88,7 +88,7 @@ const LoginForm = () => {
         refreshToken,
       };
       AuthService.setAuthTokens(authTokens);
-      router.replace(ROUTES.DASHBOARD);
+      router.replace(ROUTES.YOUR_INBOXES.MAIN_INBOX);
     }
   }, [accessToken, refreshToken, router]);
 

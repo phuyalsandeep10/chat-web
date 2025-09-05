@@ -5,6 +5,7 @@ export type CardComponentProps = {
   price?: string;
   websiteUrl: string;
   isConnected: boolean;
+  route?: string;
   onConnectionChange: (isConnected: boolean) => void;
 };
 
@@ -18,6 +19,7 @@ export type Channel = {
   description: string;
   price?: string;
   websiteUrl: string;
+  route?: string;
 };
 
 export type SectionWrapperProps = {
@@ -38,6 +40,7 @@ export type ChannelProps = {
   heading?: string;
   showViewDetails?: boolean;
   viewMoreLink?: string;
+  showAll?: boolean;
 };
 
 export type ViewDetailsProps = {

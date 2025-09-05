@@ -123,6 +123,27 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
         all_conversations: [conversationData, ...state.all_conversations],
       };
     }),
+
+  updateCustomerDetails: (conversationData) =>
+    set((state) => {
+      return {
+        all_conversations: state.all_conversations.map((el) =>
+          el?.customer?.id === conversationData?.id
+            ? {
+                ...el,
+                customer: {
+                  ...el.customer,
+                  ...conversationData,
+                },
+              }
+            : el,
+        ),
+        customer: {
+          ...state.customer,
+          ...conversationData,
+        },
+      };
+    }),
   updateConversationLastMessage: (message) =>
     set((state) => {
       const updatedConversations = state.all_conversations.map((conv) =>

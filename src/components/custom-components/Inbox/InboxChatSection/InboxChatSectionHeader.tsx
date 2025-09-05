@@ -23,14 +23,17 @@ const InboxChatSectionHeader = () => {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-b bg-white p-4 pt-0">
-      <div className="flex items-center space-x-3">
+      <div
+        className="flex cursor-pointer items-center space-x-3"
+        onClick={openChatInfo}
+      >
         <div className="bg-gray-light flex h-10 w-10 items-center justify-center rounded-full">
           <span className="text-brand-dark text-sm font-medium">
             {customer?.name?.substring(0, 2)?.toUpperCase()}
           </span>
         </div>
         <div>
-          <h2 className="text-theme-text-dark text-base font-semibold">
+          <h2 className="text-brand-dark text-base font-semibold">
             {customer?.name}
           </h2>
           <p className="text-gray-primary text-xs font-normal">
@@ -80,21 +83,24 @@ const InboxChatSectionHeader = () => {
                       resolveConversation(Number(conversation?.id));
                       // router.push('/inbox');
                     }}
-                    className="text-brand-dark hover:bg-gray-50"
+                    className="text-brand-dark text-xs hover:bg-gray-50"
                   >
                     Resolve
                   </DropdownMenuItem>
                 </>
               )}
 
-              <DropdownMenuItem className="text-red-600 hover:bg-red-50">
+              <DropdownMenuItem className="text-error text-xs hover:bg-red-50">
                 Block
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        <button className="text-gray-light" onClick={openChatInfo}>
+        <button
+          className="text-gray-light cursor-pointer"
+          onClick={openChatInfo}
+        >
           <Icons.chevron_left className="h-5 w-5" />
         </button>
       </div>
