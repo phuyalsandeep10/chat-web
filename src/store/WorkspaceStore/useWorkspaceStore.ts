@@ -2,32 +2,32 @@ import { create } from 'zustand';
 
 export default interface WorkspaceData {
   logo: string | null;
-  workspace_owner: string;
+  owner: string;
   name: string;
   domain: string;
-  phone_code: string;
-  email: string;
+  contact_dial_code: string;
+  contact_email: string;
   phone?: string;
-  facebook: string;
-  telegram: string;
-  twitter: string;
-  whatsapp: string;
+  facebook_username: string;
+  telegram_username: string;
+  twitter_username: string;
+  whatsapp_number: string;
   timezone_id?: number;
   contact_phone: string;
   owner_id?: number;
 }
 const defaultValues: Partial<WorkspaceData> = {
   logo: '',
-  workspace_owner: '',
+  owner: '',
   name: '',
   domain: '',
-  phone_code: '',
-  email: '',
+  contact_dial_code: '',
+  contact_email: '',
   phone: '',
-  facebook: '',
-  telegram: '',
-  twitter: '',
-  whatsapp: '',
+  facebook_username: '',
+  telegram_username: '',
+  twitter_username: '',
+  whatsapp_number: '',
   timezone_id: 0,
   contact_phone: '',
 };
