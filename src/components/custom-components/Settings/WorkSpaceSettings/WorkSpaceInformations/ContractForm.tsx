@@ -106,7 +106,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
                   const value = e.target.value;
                   const valid = await trigger('email');
                   if (valid) {
-                    setData({ email: value });
+                    setData({ contact_email: value });
                   }
                 },
               })}
@@ -139,8 +139,8 @@ const ContactForm: React.FC<ContactFormProps> = ({
 
                       if (phone) {
                         setData({
-                          phone_code: `+${phone.countryCallingCode}`,
-                          phone: phone.nationalNumber,
+                          contact_dial_code: `+${phone.countryCallingCode}`,
+                          contact_phone: phone.nationalNumber,
                         });
                       }
                     } catch {
@@ -166,7 +166,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               placeholder="Messenger username"
               className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('messenger')}
-              onChange={(e) => setData({ facebook: e.target.value })}
+              onChange={(e) => setData({ facebook_username: e.target.value })}
             />
             {errors.messenger && (
               <p className={cn('text-alert-prominent text-xs')}>
@@ -186,7 +186,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               placeholder="Telegram username"
               className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('telegram')}
-              onChange={(e) => setData({ telegram: e.target.value })}
+              onChange={(e) => setData({ telegram_username: e.target.value })}
             />
             {errors.telegram && (
               <p className={cn('text-alert-prominent text-xs')}>
@@ -209,7 +209,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               placeholder="X username"
               className={cn('font-outfit h-9 text-sm font-medium')}
               {...register('twitter')}
-              onChange={(e) => setData({ twitter: e.target.value })}
+              onChange={(e) => setData({ twitter_username: e.target.value })}
             />
             {errors.twitter && (
               <p className={cn('text-alert-prominent text-xs')}>
@@ -229,7 +229,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
               className={cn('font-outfit h-9 text-sm font-medium')}
               placeholder="+977 9824830624"
               {...register('whatsapp')}
-              onChange={(e) => setData({ whatsapp: e.target.value })}
+              onChange={(e) => setData({ whatsapp_number: e.target.value })}
             />
             {errors.whatsapp && (
               <p className={cn('text-alert-prominent text-xs')}>
