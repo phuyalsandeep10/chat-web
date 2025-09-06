@@ -51,20 +51,20 @@ const EmailInput = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="font-outfit mt-4 flex gap-4"
+      className="font-outfit mt-4 flex gap-2"
     >
       <div className="flex items-end">
         <div className="flex items-center justify-center rounded-full">
           <Image
-            src="/widget-logo-bottom.svg"
-            height={12}
-            width={12}
-            className="-ml-5 h-16 w-16 shrink-0"
+            src="/widget-logo-message.svg"
+            height={32}
+            width={32}
+            className="shrink-0"
             alt="bot icon"
           />
         </div>
       </div>
-      <div className="font-inter -ml-6 w-full rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
+      <div className="font-inter w-full rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
         {visitor?.customer?.email || success ? (
           <p className="text-[11px] leading-[18px] font-normal text-black">
             Your email has been submitted we will contact{' '}
