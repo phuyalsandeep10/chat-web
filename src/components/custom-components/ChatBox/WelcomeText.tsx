@@ -1,16 +1,8 @@
+import { getCurrentTime } from '@/lib/timeFormatUtils';
 import Image from 'next/image';
 import React from 'react';
 
 const WelcomeText = () => {
-  const now = new Date();
-  let hours = now.getHours();
-  const minutes = now.getMinutes();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-
-  hours = hours % 12 || 12; // convert 0 to 12 for 12-hour format
-  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-
-  const currentTime = `${hours}:${formattedMinutes} ${ampm}`;
   return (
     <div className="flex gap-2">
       <div className="flex items-center justify-center rounded-full">
@@ -27,7 +19,7 @@ const WelcomeText = () => {
           Hi there! Welcome to ChatBoq! What would you like to do today?{' '}
         </p>
         <p className="mt-[5px] text-xs font-normal text-[#6D6D6D]">
-          {currentTime}
+          {getCurrentTime()}
         </p>
       </div>
     </div>
