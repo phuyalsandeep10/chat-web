@@ -80,10 +80,13 @@ const ContactInfo = () => {
         <div className="space-y-2">
           {/* Email Section */}
           <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-1">
+            <div className="flex flex-1 items-center gap-1">
               <Icons.mail className="h-4 w-4" />
               {editingField === 'email' ? (
-                <form onSubmit={saveChanges}>
+                <form
+                  onSubmit={saveChanges}
+                  className="mr-2 flex flex-1 flex-col gap-1"
+                >
                   <input
                     type="email"
                     className={clsx(
@@ -125,7 +128,11 @@ const ContactInfo = () => {
                       <Icons.check className="h-4 w-4 text-green-500" />
                     )}
                   </button>
-                  <button type="button" onClick={cancelEditing}>
+                  <button
+                    type="button"
+                    onClick={cancelEditing}
+                    className="cursor-pointer"
+                  >
                     <Icons.x className="text-error h-4 w-4" />
                   </button>
                 </>
@@ -142,6 +149,7 @@ const ContactInfo = () => {
                     )}
                   </button>
                   <button
+                    className="cursor-pointer"
                     onClick={() => startEditing('email', customer?.email ?? '')}
                   >
                     <Icons.pencil className="h-4 w-4 text-gray-400" />
@@ -153,10 +161,13 @@ const ContactInfo = () => {
 
           {/* Phone Section */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
+            <div className="flex flex-1 items-center gap-1">
               <Icons.phone className="h-4 w-4" />
               {editingField === 'phone' ? (
-                <form onSubmit={saveChanges} className="flex flex-col gap-1">
+                <form
+                  onSubmit={saveChanges}
+                  className="mr-2 flex flex-1 flex-col gap-1"
+                >
                   <input
                     type="text"
                     className={clsx(
