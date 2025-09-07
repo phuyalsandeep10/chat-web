@@ -20,6 +20,8 @@ import { io, Socket } from 'socket.io-client';
 import { useChatBox } from './chatbox.provider';
 import { HomeIcon, InfoIcon, MaximizeIcon, SendIcon } from './ChatBoxIcons';
 import EmailInput from './EmailInput';
+import WelcomeText from './WelcomeText';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Message {
   content: string;
@@ -489,7 +491,7 @@ export default function ChatBox() {
                   expand && 'h-[70vh] max-h-[70vh] overflow-auto',
                 )}
               >
-                {/* Date  */}
+                <WelcomeText />
                 {/* email input here */}
 
                 <EmailInput />
@@ -680,24 +682,26 @@ const MessageItem = ({ socket, message, organization_id }: any) => {
     }
   }, [message, socket, organization_id]);
 
+  console.log(message);
   return (
     <div>
       {!!message?.user_id ? (
         <>
           {/* Agent/Bot Message  */}
-          <div className="mt-4 flex gap-4">
+          <div className="mt-4 flex gap-2">
             <div className="flex items-end">
-              <div className="flex items-center justify-center rounded-full">
-                <Image
-                  src="/widget-logo-bottom.svg"
-                  height={10}
-                  width={10}
-                  className="-ml-5 h-16 w-16 shrink-0"
-                  alt="bot icon"
-                />
-              </div>
+              <Avatar className="h-8 w-8">
+                {message?.user && message?.user?.image ? (
+                  <AvatarImage src={message?.user?.image} alt="bot icon" />
+                ) : (
+                  <AvatarFallback className="text-brand-dark text-xs font-medium">
+                    {message?.user?.name?.substring(0, 2)?.toLocaleUpperCase()}
+                  </AvatarFallback>
+                )}
+              </Avatar>
             </div>
-            <div className="font-inter -ml-6 space-y-2 rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
+
+            <div className="font-inter space-y-2 rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
               {message?.reply_to && message?.reply_to_id && (
                 <div className="relative rounded-lg border-l-[2px] border-l-[#6D28D9] bg-[#F6F2FF] p-2">
                   <h3 className="font-inter text-xs leading-[18px] font-normal text-[#16082B]">

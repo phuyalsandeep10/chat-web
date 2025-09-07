@@ -173,7 +173,7 @@ const Editor = forwardRef<any, TiptapProps>(
         ListItem,
       ],
       immediatelyRender: false,
-      autofocus: true,
+      autofocus: 'end',
       editable: true,
       injectCSS: true,
       content: value || '<p></p>',

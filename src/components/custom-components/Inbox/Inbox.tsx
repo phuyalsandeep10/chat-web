@@ -11,27 +11,32 @@ import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import SubSidebarContentWrapper from '../CustomSidebar/SubSidebarContentWrapper';
 import ChatEmptyScreen from './ChatEmptyScreen/ChatEmptyScreen';
-import InboxChatInfo from './InboxChatInfo/InboxChatInfo';
 import InboxChatSection from './InboxChatSection/InboxChatSection';
 import InboxSubSidebar from './InboxSidebar/InboxSubSidebar';
 import InboxChatInfoDetails from './InboxChatInfo/InboxChatInfoDetails';
+import { debounceFocus } from './helper';
+import ReplyToMessageItem from './ReplyToMessageItem/ReplyToMessageItem';
+import { useDraftMessage } from '../../../hooks/inbox/useDraftMessage';
 
 const Inbox = () => {
   const editorRef = useRef<any>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [replyingTo, setReplyingTo] = useState<any>(null);
   const [editedMessage, setEditedMessage] = useState<any>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [showTyping, setShowTyping] = useState(false);
   const [typingMessage, setTypingMessage] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
 
   const { showChatInfo } = useUiStore();
   const { socket } = useSocket();
   const { playSound } = useMessageAudio();
   const { authData } = useAuthStore();
+
+  const params: any = useParams();
+  const chatId = params?.userId;
+  const userId = authData?.data?.user?.id;
+
   const {
     messages,
     setConversationData,
@@ -44,9 +49,9 @@ const Inbox = () => {
     updateConversationLastMessage,
     updateCustomerDetails,
   } = useAgentConversationStore();
-  const params: any = useParams();
-  const chatId = params?.userId;
-  const userId = authData?.data?.user?.id;
+
+  const { message, setMessage, replyingTo, setReplyingTo, clearDraft } =
+    useDraftMessage(Number(chatId), editorRef);
 
   const handleReceiveMessage = (data: any) => {
     const isSenderMessage = data?.user_id === userId;
@@ -81,7 +86,7 @@ const Inbox = () => {
     updateMessageSeen(data?.message_id);
   };
 
-  const updatEmail = (data: any) => {
+  const handleUpadateCustomerEmail = (data: any) => {
     updateCustomerDetails(data?.customer);
   };
 
@@ -116,47 +121,10 @@ const Inbox = () => {
     socket.on(CHAT_EVENTS.receive_typing, handleTyping);
     socket.on(CHAT_EVENTS.message_seen, handleMessageSeen);
     socket.on(CHAT_EVENTS.stop_typing, handleStopTyping);
-    socket.on(CHAT_EVENTS.customer_email_update, updatEmail);
+    socket.on(CHAT_EVENTS.customer_email_update, handleUpadateCustomerEmail);
 
     return () => cleanupSocketListeners();
   }, [socket, userId]);
-
-  useEffect(() => {
-    if (!chatId) return;
-
-    const savedDraft = localStorage.getItem(`draft-${chatId}`);
-    if (savedDraft) {
-      try {
-        const parsedDraft = JSON.parse(savedDraft);
-
-        if (parsedDraft.message) {
-          setMessage(parsedDraft.message);
-          editorRef.current?.commands?.setContent(parsedDraft.message);
-        }
-
-        if (parsedDraft.replyingTo) {
-          setReplyingTo(parsedDraft.replyingTo);
-        }
-      } catch (err) {
-        console.error('Failed to parse draft:', err);
-      }
-    }
-  }, [chatId]);
-
-  // Save draft when message changes
-  useEffect(() => {
-    if (!chatId) return;
-
-    if (message || replyingTo) {
-      const draft = {
-        message,
-        replyingTo,
-      };
-      localStorage.setItem(`draft-${chatId}`, JSON.stringify(draft));
-    } else {
-      localStorage.removeItem(`draft-${chatId}`);
-    }
-  }, [message, replyingTo, chatId]);
 
   const emitTyping = (msg: string) => {
     if (!socket || isSending || !chatId) return;
@@ -203,18 +171,11 @@ const Inbox = () => {
         setReplyingTo(null);
       }
       setMessage(null);
-      localStorage.removeItem(`draft-${chatId}`);
+      clearDraft();
       editorRef.current?.onClear();
     } catch (error) {
     } finally {
       setIsSending(false);
-    }
-  };
-  const debounceFocus = () => {
-    if (editorRef.current) {
-      setTimeout(() => {
-        editorRef.current.focus();
-      }, 500);
     }
   };
 
@@ -224,7 +185,7 @@ const Inbox = () => {
     }
     setReplyingTo({ ...replyToMessage });
     setEditedMessage(null);
-    debounceFocus();
+    debounceFocus(editorRef);
   };
 
   const handleEditMessage = (messageToEdit: any) => {
@@ -238,7 +199,7 @@ const Inbox = () => {
 
     if (editorRef.current) {
       editorRef?.current?.commands?.setContent(messageToEdit.content);
-      debounceFocus();
+      debounceFocus(editorRef);
     }
   };
 
@@ -283,20 +244,10 @@ const Inbox = () => {
               replyingTo={replyingTo}
             />
             {replyingTo && (
-              <div className="bg bg-brand-disable relative ml-4 flex w-fit items-center justify-between rounded-md border px-4 py-2 text-black">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-black">Replying to:</span>
-                  <span className="text-theme-text-primary max-w-[200px] truncate text-xs font-medium">
-                    {replyingTo?.content}
-                  </span>
-                </div>
-                <button
-                  onClick={clearReply}
-                  className="text-theme-text-primary hover:text-brand-dark ml-2 text-sm"
-                >
-                  ×
-                </button>
-              </div>
+              <ReplyToMessageItem
+                replyingTo={replyingTo}
+                clearReply={clearReply}
+              />
             )}
             <div className="relative m-4 mt-2">
               <Editor
@@ -309,9 +260,6 @@ const Inbox = () => {
           </div>
 
           {showChatInfo && (
-            // <div className="w-[400px]">
-            //   <InboxChatInfo />
-            // </div>
             <>
               <InboxChatInfoDetails />
             </>

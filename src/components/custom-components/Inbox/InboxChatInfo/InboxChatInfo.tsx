@@ -18,7 +18,7 @@ const InboxChatInfo: React.FC = () => {
 
   return (
     <div>
-      <div className="font-outfit max-h-screen overflow-y-auto bg-white">
+      <div className="font-outfit max-h-[90vh] overflow-y-auto bg-white">
         {/* Header */}
         {/* <InboxChatInfoHeader onClose={closeChatInfo} /> */}
         <div className="px-10 py-7">
