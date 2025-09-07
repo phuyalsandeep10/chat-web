@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { ConversationService } from '@/services/inbox/agentCoversation.service';
-import { ConversationResponse, ConversationState, Message } from './types';
 import axiosInstance from '@/apiConfigs/axiosInstance';
+import { ConversationService } from '@/services/inbox/agentCoversation.service';
+import { create } from 'zustand';
+import { ConversationResponse, ConversationState, Message } from './types';
 
 export const useAgentConversationStore = create<ConversationState>((set) => ({
   conversation: null,
@@ -107,7 +107,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
       );
       // console.log(updatedConversations);
       return {
-        messages: [...state.messages, message],
+        messages: [message, ...state.messages],
         all_conversations: updatedConversations,
       };
     }),
@@ -126,6 +126,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
 
   updateCustomerDetails: (conversationData) =>
     set((state) => {
+      console.log('conversationData', conversationData);
       return {
         all_conversations: state.all_conversations.map((el) =>
           el?.customer?.id === conversationData?.id
@@ -369,7 +370,7 @@ export const useAgentConversationStore = create<ConversationState>((set) => ({
             : conv,
         );
         return {
-          messages: [...state.messages, response?.data],
+          messages: [response?.data, ...state.messages],
           all_conversations: updatedConversations,
           req_success: {
             fetch_messages: false,

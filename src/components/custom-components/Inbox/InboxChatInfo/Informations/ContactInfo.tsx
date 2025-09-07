@@ -1,13 +1,13 @@
 'use client';
 
-import { Icons } from '@/components/ui/Icons';
-import React, { useState } from 'react';
-import InformationsWrapper from './InformationsWrapper';
-import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
-import { useCopyToClipboard } from '@/hooks/utils/useCopyToClipboard';
 import axiosInstance from '@/apiConfigs/axiosInstance';
-import { useForm } from 'react-hook-form';
+import { Icons } from '@/components/ui/Icons';
+import { useCopyToClipboard } from '@/hooks/utils/useCopyToClipboard';
+import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import clsx from 'clsx';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import InformationsWrapper from './InformationsWrapper';
 
 type FormValues = {
   email?: string;
@@ -52,10 +52,12 @@ const ContactInfo = () => {
           ...payload,
         },
       );
+      console.log({ res });
 
       // Update customer details in store
       updateCustomerDetails({
         ...customer,
+        name: res?.data?.data?.name,
         [editingField]: data[editingField],
       });
 

@@ -1,5 +1,6 @@
 'use client';
 import { baseURL } from '@/apiConfigs/axiosInstance';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +22,6 @@ import { useChatBox } from './chatbox.provider';
 import { HomeIcon, InfoIcon, MaximizeIcon, SendIcon } from './ChatBoxIcons';
 import EmailInput from './EmailInput';
 import WelcomeText from './WelcomeText';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Message {
   content: string;
@@ -134,7 +134,7 @@ export default function ChatBox() {
         if (!data?.user_id) return;
         setOtherTyping(false);
         console.log('Received message:', data);
-        setMessages((prev) => [...prev, data]);
+        setMessages((prev) => [data, ...prev]);
         playSound();
         if (!messageBoxOpenRef.current) {
           console.log('hiii', isOpen);
@@ -286,7 +286,7 @@ export default function ChatBox() {
           { content: message },
         );
 
-      setMessages((prev) => [...prev, res?.data]);
+      setMessages((prev) => [res?.data, ...prev]);
       setMessage('');
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto'; // 👈 reset height
@@ -342,7 +342,8 @@ export default function ChatBox() {
   };
 
   const groupedMessages = useMemo(() => {
-    return messages.reduce((acc: { [key: string]: Message[] }, msg) => {
+    const reversed = [...messages].reverse();
+    return reversed.reduce((acc: { [key: string]: Message[] }, msg) => {
       const dateKey = formatDateForGroup(msg.updated_at);
       if (!acc[dateKey]) {
         acc[dateKey] = [];
