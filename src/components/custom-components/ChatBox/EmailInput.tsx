@@ -65,15 +65,7 @@ const EmailInput = () => {
         </div>
       </div>
       <div className="font-inter w-full rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[2px] border border-[rgba(170,170,170,0.10)] bg-white px-2.5 py-2">
-        {visitor?.customer?.email || success ? (
-          <p className="text-[11px] leading-[18px] font-normal text-black">
-            Your email has been submitted we will contact{' '}
-            <span className="text-brand-primary">
-              {visitor?.customer?.email}
-            </span>{' '}
-            you later.{' '}
-          </p>
-        ) : (
+        {visitor?.customer?.email || success ? null : ( // </p>: //   you later.{' '} //   </span>{' '} //     {visitor?.customer?.email} //   <span className="text-brand-primary"> //   Your email has been submitted we will contact{' '} // <p className="text-[11px] leading-[18px] font-normal text-black">
           <>
             <p className="text-[11px]">
               Thank you for your message!😄 <br />

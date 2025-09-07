@@ -47,7 +47,7 @@ interface socketOptions {
 }
 
 export default function ChatBox() {
-  const { visitor, setVisitor } = useChatBox();
+  const { visitor, setVisitor, error: visitVisitorError } = useChatBox();
   const [socketUrl, setSocketUrl] = useState(`${baseURL}/chat`);
   const [authToken, setAuthToken] = useState('');
   const [isConnected, setIsConnected] = useState(false);
@@ -244,13 +244,18 @@ export default function ChatBox() {
           message: message,
         });
       }
-    }, 300); // 300ms debounce delay
+    }, 200); // 300ms debounce delay
   };
 
-  const emitStopTyping = async () => {
+  const emitStopTyping = () => {
+    //bug fix ==> faster enter causes the typing animation to load forever
+    if (emitTypingTimeoutRef.current) {
+      clearTimeout(emitTypingTimeoutRef.current);
+    }
+
     if (!socket || !isConnected || !visitor?.conversation?.id) return;
     console.log('stop typing....');
-    await socket.emit('stop_typing', {
+    socket.emit('stop_typing', {
       conversation_id: visitor.conversation.id,
       organization_id: visitor.conversation.organization_id,
     });
@@ -317,7 +322,7 @@ export default function ChatBox() {
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
     }
-    await emitStopTyping();
+    emitStopTyping();
 
     try {
       if (!visitor?.conversation?.id) {
@@ -514,6 +519,17 @@ export default function ChatBox() {
               </div>
             </div>
 
+            {visitVisitorError && (
+              <div className="absolute z-50 flex min-h-[50vh] w-full flex-col items-center justify-center space-y-4 bg-white/80 text-center text-3xl font-semibold text-red-500 backdrop-blur-sm">
+                <p>No Access</p>
+                <p className="text-2xl font-semibold">
+                  Visit our site:{' '}
+                  <a href="http://dev.chatboq.com" target="_blank">
+                    <span className="underline">chatboq.com</span>
+                  </a>
+                </p>
+              </div>
+            )}
             <div className="relative">
               <div
                 className={cn(
@@ -604,8 +620,8 @@ export default function ChatBox() {
 
                       if (e.target.value.trim()) {
                         setIsTyping(true);
-                        emitTyping(e.target.value);
                       }
+                      emitTyping(e.target.value.trim());
                     }}
                     onKeyDown={(e: any) => {
                       if (e.key === 'Enter') {

@@ -5,11 +5,13 @@ import { createContext, useContext } from 'react';
 
 type ChatBoxContextType = {
   visitor: any | null;
+  error: boolean;
   setVisitor: (any: any) => void;
 };
 
 const ChatBoxContext = createContext<ChatBoxContextType>({
   visitor: null,
+  error: false,
   setVisitor: () => {},
 });
 
@@ -18,7 +20,7 @@ export const ChatBoxProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { visitor, setVisitor, loading } = useVisitor();
+  const { visitor, setVisitor, loading, error } = useVisitor();
 
   const isItHide = loading || !visitor;
   return (
@@ -26,6 +28,7 @@ export const ChatBoxProvider = ({
       value={{
         visitor,
         setVisitor,
+        error,
       }}
     >
       {!isItHide ? children : <></>}

@@ -9,6 +9,7 @@ export const useVisitor = () => {
   const orgId = searchParams.get('orgId');
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const createVisitor = useCallback(async () => {
     console.log('create customer');
@@ -25,12 +26,16 @@ export const useVisitor = () => {
     }
     console.log('Creating visitor...');
   }, []);
+
   const customerVisit = useCallback(async (customerId: number) => {
+    console.log(customerId);
+
     if (!customerId) return;
     setLoading(true);
     try {
       await chatBoxAxiosInstance.post(`/customers/${customerId}/visit`);
     } catch (error) {
+      setError(true);
       console.error('Failed to create visitor:', error);
     } finally {
       setLoading(false);
@@ -61,5 +66,5 @@ export const useVisitor = () => {
     }
   }, [initVisitor, orgId]);
 
-  return { visitor, loading, setVisitor };
+  return { visitor, loading, setVisitor, error };
 };
