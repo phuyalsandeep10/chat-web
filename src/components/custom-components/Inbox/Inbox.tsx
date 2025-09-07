@@ -9,14 +9,14 @@ import { useAgentConversationStore } from '@/store/inbox/agentConversationStore'
 import { useUiStore } from '@/store/UiStore/useUiStore';
 import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { useDraftMessage } from '../../../hooks/inbox/useDraftMessage';
 import SubSidebarContentWrapper from '../CustomSidebar/SubSidebarContentWrapper';
 import ChatEmptyScreen from './ChatEmptyScreen/ChatEmptyScreen';
+import { debounceFocus } from './helper';
+import InboxChatInfoDetails from './InboxChatInfo/InboxChatInfoDetails';
 import InboxChatSection from './InboxChatSection/InboxChatSection';
 import InboxSubSidebar from './InboxSidebar/InboxSubSidebar';
-import InboxChatInfoDetails from './InboxChatInfo/InboxChatInfoDetails';
-import { debounceFocus } from './helper';
 import ReplyToMessageItem from './ReplyToMessageItem/ReplyToMessageItem';
-import { useDraftMessage } from '../../../hooks/inbox/useDraftMessage';
 
 const Inbox = () => {
   const editorRef = useRef<any>(null);

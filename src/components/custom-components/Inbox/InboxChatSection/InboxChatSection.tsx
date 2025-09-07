@@ -1,11 +1,10 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-import MessageItem from './MessageList/MessageItem';
-import InboxChatSectionHeader from './InboxChatSectionHeader';
-import { useUiStore } from '@/store/UiStore/useUiStore';
-import { Message } from '@/store/inbox/types';
-import DottedAnimation from './MessageList/DottedAnimation';
-import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
 import { cn } from '@/lib/utils';
+import { useAgentConversationStore } from '@/store/inbox/agentConversationStore';
+import { Message } from '@/store/inbox/types';
+import { useEffect, useMemo, useRef } from 'react';
+import InboxChatSectionHeader from './InboxChatSectionHeader';
+import DottedAnimation from './MessageList/DottedAnimation';
+import MessageItem from './MessageList/MessageItem';
 
 interface InboxChatSectionProps {
   messages: Message[];
@@ -37,8 +36,9 @@ const InboxChatSection = ({
   }, [showTyping]);
 
   const groupedMessages = useMemo(() => {
+    const reversed = [...messages].reverse(); // oldest → newest
     const groups: { [key: string]: Message[] } = {};
-    messages.forEach((message) => {
+    reversed.forEach((message) => {
       const date = new Date(message.created_at);
       if (isNaN(date.getTime())) return; // Skip invalid dates
       const dayKey = date.toLocaleDateString('en-US', { weekday: 'short' }); // e.g., "Sun"
