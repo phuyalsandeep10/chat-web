@@ -1,5 +1,6 @@
 'use client';
 import { baseURL } from '@/apiConfigs/axiosInstance';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +22,6 @@ import { useChatBox } from './chatbox.provider';
 import { HomeIcon, InfoIcon, MaximizeIcon, SendIcon } from './ChatBoxIcons';
 import EmailInput from './EmailInput';
 import WelcomeText from './WelcomeText';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Message {
   content: string;
@@ -47,7 +47,7 @@ interface socketOptions {
 }
 
 export default function ChatBox() {
-  const { visitor, setVisitor } = useChatBox();
+  const { visitor, setVisitor, error: visitVisitorError } = useChatBox();
   const [socketUrl, setSocketUrl] = useState(`${baseURL}/chat`);
   const [authToken, setAuthToken] = useState('');
   const [isConnected, setIsConnected] = useState(false);
@@ -68,6 +68,7 @@ export default function ChatBox() {
   // Use refs for independent timeouts
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const stopTypingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const emitTypingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -134,7 +135,7 @@ export default function ChatBox() {
         if (!data?.user_id) return;
         setOtherTyping(false);
         console.log('Received message:', data);
-        setMessages((prev) => [...prev, data]);
+        setMessages((prev) => [data, ...prev]);
         playSound();
         if (!messageBoxOpenRef.current) {
           console.log('hiii', isOpen);
@@ -225,6 +226,59 @@ export default function ChatBox() {
     }
   };
 
+  const emitTyping = (message: string) => {
+    if (!socket || !isConnected || !visitor?.conversation?.id) return;
+
+    // Clear any existing timeout to prevent multiple rapid calls
+    if (emitTypingTimeoutRef.current) {
+      clearTimeout(emitTypingTimeoutRef.current);
+    }
+
+    // Set a new timeout for debouncing
+    emitTypingTimeoutRef.current = setTimeout(() => {
+      if (socket && isConnected && visitor?.conversation?.id) {
+        socket.emit('typing', {
+          mode: 'typing',
+          conversation_id: visitor.conversation.id,
+          organization_id: visitor.conversation.organization_id,
+          message: message,
+        });
+      }
+    }, 200); // 300ms debounce delay
+  };
+
+  const emitStopTyping = () => {
+    //bug fix ==> faster enter causes the typing animation to load forever
+    if (emitTypingTimeoutRef.current) {
+      clearTimeout(emitTypingTimeoutRef.current);
+    }
+
+    if (!socket || !isConnected || !visitor?.conversation?.id) return;
+    console.log('stop typing....');
+    socket.emit('stop_typing', {
+      conversation_id: visitor.conversation.id,
+      organization_id: visitor.conversation.organization_id,
+    });
+  };
+
+  const initializeConversation = async (data: any) => {
+    try {
+      const res = await CustomerConversationService.initializeConversation(
+        visitor?.customer?.id,
+        data,
+      );
+      const payload = { ...visitor, conversation: res?.data?.conversation };
+      setVisitor(payload);
+      localStorage.setItem('visitor', JSON.stringify(payload));
+      setMessage('');
+      setMessages((prev) => [...prev, res?.data?.message]);
+      return res;
+    } catch (error) {
+      console.error('Failed to initialize conversation:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     const cleanup = connectSocket();
     getConversations();
@@ -244,76 +298,56 @@ export default function ChatBox() {
     }
   }, [isOpen]);
 
-  const initializeConversation = async (data: any) => {
-    try {
-      const res = await CustomerConversationService.initializeConversation(
-        visitor?.customer?.id,
-        data,
-      );
-      const payload = { ...visitor, conversation: res?.data?.conversation };
-      setVisitor(payload);
-      localStorage.setItem('visitor', JSON.stringify(payload));
+  useEffect(() => {
+    return () => {
+      // Clear all timeouts when component unmounts
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      if (stopTypingTimeoutRef.current)
+        clearTimeout(stopTypingTimeoutRef.current);
+      if (emitTypingTimeoutRef.current)
+        clearTimeout(emitTypingTimeoutRef.current);
 
-      setMessage('');
-      setMessages((prev) => [...prev, res?.data?.message]);
-    } catch (error) {
-      console.error('Failed to initialize conversation:', error);
-    }
-  };
+      // Disconnect socket if it exists
+      if (socket) {
+        socket.disconnect();
+      }
+    };
+  }, [socket]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!socket || !message.trim()) return;
-    if (!visitor?.conversation?.id) {
-      await initializeConversation({
-        customer_id: visitor?.customer?.id,
-        organization_id: visitor?.customer?.organization_id,
-        content: message,
-      });
-      return;
-    }
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
     }
-    await emitStopTyping();
+    emitStopTyping();
 
     try {
+      if (!visitor?.conversation?.id) {
+        await initializeConversation({
+          customer_id: visitor?.customer?.id,
+          organization_id: visitor?.customer?.organization_id,
+          content: message,
+        });
+        return;
+      }
+
       const res =
         await CustomerConversationService.createCustomerConversationWithAgent(
-          visitor?.conversation?.id,
+          visitor.conversation.id,
           { content: message },
         );
 
-      setMessages((prev) => [...prev, res?.data]);
+      setMessages((prev) => [res?.data, ...prev]);
       setMessage('');
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto'; // 👈 reset height
+        textareaRef.current.style.height = 'auto';
       }
     } catch (error) {
       console.error('Failed to send message:', error);
     }
-  };
-
-  const emitTyping = (message: string) => {
-    if (!socket || !isConnected || !visitor?.conversation?.id) return;
-    console.log('typing.... chat widget');
-    socket.emit('typing', {
-      mode: 'typing',
-      conversation_id: visitor.conversation.id,
-      organization_id: visitor.conversation.organization_id,
-      message: message,
-    });
-  };
-
-  const emitStopTyping = async () => {
-    if (!socket || !isConnected || !visitor?.conversation?.id) return;
-    console.log('stop typing....');
-    await socket.emit('stop_typing', {
-      conversation_id: visitor.conversation.id,
-      organization_id: visitor.conversation.organization_id,
-    });
   };
 
   const formatDateForGroup = (dateString: string | undefined) => {
@@ -342,7 +376,8 @@ export default function ChatBox() {
   };
 
   const groupedMessages = useMemo(() => {
-    return messages.reduce((acc: { [key: string]: Message[] }, msg) => {
+    const reversed = [...messages].reverse();
+    return reversed.reduce((acc: { [key: string]: Message[] }, msg) => {
       const dateKey = formatDateForGroup(msg.updated_at);
       if (!acc[dateKey]) {
         acc[dateKey] = [];
@@ -484,6 +519,17 @@ export default function ChatBox() {
               </div>
             </div>
 
+            {visitVisitorError && (
+              <div className="absolute z-50 flex min-h-[50vh] w-full flex-col items-center justify-center space-y-4 bg-white/80 text-center text-3xl font-semibold text-red-500 backdrop-blur-sm">
+                <p>No Access</p>
+                <p className="text-2xl font-semibold">
+                  Visit our site:{' '}
+                  <a href="http://dev.chatboq.com" target="_blank">
+                    <span className="underline">chatboq.com</span>
+                  </a>
+                </p>
+              </div>
+            )}
             <div className="relative">
               <div
                 className={cn(
@@ -574,10 +620,8 @@ export default function ChatBox() {
 
                       if (e.target.value.trim()) {
                         setIsTyping(true);
-                        typingTimeoutRef.current = setTimeout(() => {
-                          emitTyping(e.target.value);
-                        }, 200);
                       }
+                      emitTyping(e.target.value.trim());
                     }}
                     onKeyDown={(e: any) => {
                       if (e.key === 'Enter') {
