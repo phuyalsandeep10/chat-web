@@ -102,7 +102,7 @@ const LoginForm = () => {
     }
   }, [form]);
 
-  // useRedirectIfAuthenticated()
+  useRedirectIfAuthenticated();
 
   return (
     <>
