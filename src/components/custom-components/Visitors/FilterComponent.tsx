@@ -11,6 +11,8 @@ interface FilterComponentProps {
   sortLabel: string;
   className?: string;
   getSortIcon?: (option: string, isSelected: boolean) => React.ReactNode;
+  hideFilter?: string; //added by rahul
+  showDivider?: string; //added by rahul
   statusFilters: string[];
   sortOption: string;
 }
@@ -26,6 +28,8 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
   getSortIcon,
   statusFilters,
   sortOption,
+  hideFilter,
+  showDivider,
 }) => {
   const [isStatusOpen, setIsStatusOpen] = useState(true);
   const [isSortOpen, setIsSortOpen] = useState(true);
@@ -78,9 +82,8 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
         )}
       </div>
 
-      <div className="bg-brand-light h-12 w-[1px]" />
-
-      <div className="w-[178px]">
+      <div className={`bg-brand-light h-12 w-[1px] ${showDivider}`} />
+      <div className={`w-[178px] ${hideFilter}`}>
         <div
           className="border-grey-light text-theme-text-primary mb-2 flex cursor-pointer items-center justify-between rounded border px-3 py-2 text-xs font-semibold"
           onClick={() => setIsSortOpen((prev) => !prev)}
@@ -91,10 +94,11 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
           ) : (
             <Icons.chevron_down className="text-theme-text-primary h-4 w-4" />
           )}
+          \
         </div>
         {isSortOpen && (
           <div className="border-grey-light space-y-3 rounded border p-3">
-            {sortOptions.map((option) => {
+            {sortOptions?.map((option) => {
               const isSelected = sortOption === option;
               return (
                 <label

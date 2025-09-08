@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { InputField } from '@/components/common/hook-form/InputField';
 import Label from '@/components/common/hook-form/Label';
 import { SelectField } from '@/components/common/hook-form/SelectField';
 import { Form } from '@/components/ui/form';
+import { useGetAllRolePermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllRolePermissionGroup';
 
 import {
   Card,
@@ -14,23 +15,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { TeamsFormValues, AddTeamsMemberProps } from './types';
 
-type FormValues = {
-  email: string;
-  fullName: string;
-  role: string;
-};
-
-interface AddMemberProps {
-  defaultValues?: Partial<FormValues>;
-  onSubmit: (data: FormValues) => void;
-}
-
-const AddMember: React.FC<AddMemberProps> = ({
+const AddMember: React.FC<AddTeamsMemberProps> = ({
   defaultValues = {},
   onSubmit,
 }) => {
-  const form = useForm<FormValues>({
+  const form = useForm<TeamsFormValues>({
     defaultValues: {
       email: '',
       fullName: '',
@@ -38,6 +29,13 @@ const AddMember: React.FC<AddMemberProps> = ({
       ...defaultValues,
     },
   });
+
+  // get team members
+  const {
+    data: roleTableData,
+    isPending: roleDataPending,
+    isSuccess: roleSuccess,
+  } = useGetAllRolePermissionGroup();
 
   return (
     <Card className="w-full max-w-full border-0 p-0 shadow-none">
@@ -60,46 +58,43 @@ const AddMember: React.FC<AddMemberProps> = ({
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {/* Email Field */}
               <div>
-                <Label
+                <InputField
+                  name="email"
+                  control={form.control}
+                  label="Enter agent’s Email"
+                  labelClassName="text-base leading-[26px] font-medium"
                   required
-                  htmlFor="email"
-                  className="pb-3 text-base leading-[26px] font-medium"
-                >
-                  Enter agent’s Email
-                </Label>
-                <InputField name="email" control={form.control} />
+                />
               </div>
 
               {/* Full Name Field */}
               <div>
-                <Label
+                <InputField
+                  name="fullName"
+                  control={form.control}
+                  label="Full Name"
+                  labelClassName="text-base leading-[26px] font-medium"
                   required
-                  htmlFor="fullName"
-                  className="pb-3 text-base leading-[26px] font-medium"
-                >
-                  Full Name
-                </Label>
-                <InputField name="fullName" control={form.control} />
+                />
               </div>
 
               {/* Role Select Field */}
               <div className="col-span-full">
-                <Label
-                  required
-                  htmlFor="role"
-                  className="pb-3 text-base leading-[26px] font-medium"
-                >
-                  Role
-                </Label>
                 <SelectField
                   name="role"
                   control={form.control}
-                  placeholder="Select Role"
-                  options={[
-                    { value: 'admin', label: 'Admin' },
-                    { value: 'editor', label: 'Editor' },
-                    { value: 'viewer', label: 'Viewer' },
-                  ]}
+                  placeholder="Select Role(s)"
+                  label="Role"
+                  required
+                  isMulti={true} // enable multiple selection
+                  options={
+                    Array.isArray(roleTableData?.data)
+                      ? roleTableData.data.map((item: any) => ({
+                          value: item.role_id.toString(),
+                          label: item.role_name,
+                        }))
+                      : []
+                  }
                 />
               </div>
             </div>

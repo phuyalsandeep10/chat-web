@@ -14,6 +14,7 @@ export const ROUTES = {
     PERSONALIZATION: '/settings/personalization',
     // Workspace Setting
     INFORMATION: '/settings/workspace-settings/workspace-information',
+    INVITE_AGENTS: '/settings/workspace-settings/invite-agents',
     TRANSPARENCY_LOGS: '/settings/workspace/transparency-logs',
     OPERATOR_TEAMS: '/settings/workspace/operator-teams',
     ADVANCE_CONFIGURATION: '/settings/workspace/advance-configuration',

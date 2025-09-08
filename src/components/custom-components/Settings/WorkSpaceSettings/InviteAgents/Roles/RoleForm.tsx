@@ -1,11 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { InputField } from '@/components/common/hook-form/InputField';
-import Label from '@/components/common/hook-form/Label';
-import { SelectField } from '@/components/common/hook-form/SelectField';
 import { Form } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,51 +16,125 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
-import { DialogClose } from '@/components/ui/dialog'; // to close dialog on cancel
-
-type FormValues = {
-  role: string;
-};
-
-interface RoleFormProps {
-  defaultValues?: Partial<FormValues>;
-  onSubmit: (data: FormValues) => void;
-  roleHead: string;
-}
-
-type OrderRow = {
-  permissions: string;
-  id?: number;
-};
-
-type Column<T> = {
-  key: string;
-  label: string;
-  render?: (row: T) => React.ReactNode;
-};
+import { DialogClose } from '@/components/ui/dialog';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { RoleSchema } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Roles/RoleSchema';
+import { useGetAllPermissionGroup } from '@/hooks/staffmanagment/roles/useGetAllPermissionGroup';
+import { toast } from 'sonner';
+import {
+  PermissionState,
+  RoleFormValues,
+  RoleFormProps,
+  RoleOrderRow,
+  RoleColumn,
+} from './types';
 
 const RoleForm: React.FC<RoleFormProps> = ({
   defaultValues,
   onSubmit,
   roleHead,
+  setOpenCreateRole,
 }) => {
-  const form = useForm<FormValues>({
-    defaultValues: defaultValues || {
-      role: '',
-    },
+  const isEdit = !!defaultValues?.id;
+
+  const form = useForm<RoleFormValues>({
+    resolver: zodResolver(RoleSchema),
+    defaultValues: defaultValues || { name: '' },
   });
+  console.log('defaultValues', defaultValues);
 
-  const orders: OrderRow[] = [
-    { permissions: 'Canned Response' },
-    { permissions: 'Workflows' },
-    { permissions: 'Tags & Properties' },
-    { permissions: 'Billings' },
-    { permissions: 'Project preferences' },
-    { permissions: 'Project reports' },
-    { permissions: 'Service Level Agreement' },
-  ];
+  useEffect(() => {
+    if (defaultValues) {
+      form.reset({
+        name: defaultValues.name || '',
+      });
+    }
+  }, [defaultValues, form]);
 
-  const columns: Column<OrderRow>[] = [
+  const { data } = useGetAllPermissionGroup();
+
+  useEffect(() => {
+    if (data) console.log('laknefakenf', data);
+  }, [data]);
+
+  const [changeableIds, setChangeableIds] = React.useState<Set<number>>(
+    new Set(),
+  );
+  const [selectedTab, setSelectedTab] = useState('Setting');
+
+  const orders: RoleOrderRow[] = React.useMemo(() => {
+    const tabData =
+      (data as any)?.[
+        selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)
+      ] || [];
+    return tabData.map((perm: any) => ({
+      permissions: perm.name,
+      id: perm.id,
+      is_changeable: perm.is_changeable,
+      is_viewable: perm.is_viewable,
+      is_deletable: perm.is_deletable,
+    }));
+  }, [data, selectedTab]);
+
+  const [permissionsState, setPermissionsState] = React.useState<
+    PermissionState[]
+  >([]);
+
+  const pushPermissionId = (permission_id: number) => {
+    setChangeableIds((prev) => new Set(prev).add(permission_id));
+  };
+
+  React.useEffect(() => {
+    if (orders.length === 0) return;
+
+    let mergedPermissions: PermissionState[] = orders.map((order) => ({
+      permission_id: order.id || 0,
+      is_changeable: order.is_changeable || false,
+      is_viewable: order.is_viewable || false,
+      is_deletable: order.is_deletable || false,
+    }));
+
+    if (defaultValues?.permissions?.length) {
+      mergedPermissions = mergedPermissions.map((perm) => {
+        const match = defaultValues.permissions!.find(
+          (p) => p.permission_id === perm.permission_id,
+        );
+        return match ? { ...perm, ...match } : perm;
+      });
+    }
+
+    setPermissionsState(mergedPermissions);
+  }, [orders, defaultValues]);
+
+  const handleSubmit = (formData: RoleFormValues) => {
+    // const permissions = permissionsState.filter((p) =>
+    //   changeableIds.has(p.permission_id),
+    // );
+
+    const permissions = permissionsState;
+
+    // Get the active tab name with first letter capitalized
+    const activeTabName =
+      selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1);
+
+    // Get the permissions of that tab
+    const tabPermissions = (data as any)?.[activeTabName] || [];
+
+    // Get the group_id of the first permission in this tab (all permissions in the same tab share the same group_id)
+    const groupId = tabPermissions[0]?.group_id || null;
+
+    const payload = {
+      id: defaultValues?.id,
+      name: formData.name,
+      description: '',
+      permission_group: groupId,
+      permissions: permissions,
+    };
+
+    onSubmit(payload);
+  };
+
+  const columns: RoleColumn<RoleOrderRow>[] = [
     {
       key: 'permissions',
       label: 'Permissions',
@@ -72,6 +144,20 @@ const RoleForm: React.FC<RoleFormProps> = ({
       label: 'Able to edit',
       render: (row) => (
         <Checkbox
+          checked={
+            permissionsState.find((p) => p.permission_id === row.id)
+              ?.is_changeable || false
+          }
+          onCheckedChange={(checked) => {
+            pushPermissionId(row.id!);
+            setPermissionsState((prev) =>
+              prev.map((p) =>
+                p.permission_id === row.id
+                  ? { ...p, is_changeable: checked === true }
+                  : p,
+              ),
+            );
+          }}
           aria-label={`Edit ${row.permissions}`}
           className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
         />
@@ -82,6 +168,19 @@ const RoleForm: React.FC<RoleFormProps> = ({
       label: 'Able to view',
       render: (row) => (
         <Checkbox
+          checked={
+            permissionsState.find((p) => p.permission_id === row.id)
+              ?.is_viewable || false
+          }
+          onCheckedChange={(checked) => {
+            setPermissionsState((prev) =>
+              prev.map((p) =>
+                p.permission_id === row.id
+                  ? { ...p, is_viewable: checked === true }
+                  : p,
+              ),
+            );
+          }}
           aria-label={`View ${row.permissions}`}
           className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
         />
@@ -92,6 +191,19 @@ const RoleForm: React.FC<RoleFormProps> = ({
       label: 'Able to delete',
       render: (row) => (
         <Checkbox
+          checked={
+            permissionsState.find((p) => p.permission_id === row.id)
+              ?.is_deletable || false
+          }
+          onCheckedChange={(checked) => {
+            setPermissionsState((prev) =>
+              prev.map((p) =>
+                p.permission_id === row.id
+                  ? { ...p, is_deletable: checked === true }
+                  : p,
+              ),
+            );
+          }}
           aria-label={`Delete ${row.permissions}`}
           className="data-[state=checked]:bg-brand-primary bg-gray-primary border-gray-300"
         />
@@ -113,74 +225,48 @@ const RoleForm: React.FC<RoleFormProps> = ({
 
       <CardContent className="p-0">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            {/* Role Input */}
+          <form onSubmit={form.handleSubmit(handleSubmit)}>
             <div className="pb-[49px]">
-              <Label
-                htmlFor="role"
-                required
-                className="pb-3 text-base leading-[26px] font-medium"
-              >
-                Role Name
-              </Label>
               <InputField
-                name="role"
+                name="name"
                 placeholder="Moderator"
                 control={form.control}
-                className="border-brand-primary rounded-sm border"
-                inputClassName="border-brand-primary rounded-sm placeholder:text-sm placeholder:leading-[21px] placeholder:font-normal placeholder:text-black"
+                label="Role Name"
+                labelClassName="text-sm"
+                required
               />
             </div>
 
-            {/* Permissions Section */}
             <div className="flex h-full w-full gap-5">
-              {/* Tabs */}
               <div className="h-auto w-auto">
                 <Tabs
                   defaultValue="setting"
+                  value={selectedTab}
+                  onValueChange={setSelectedTab}
                   className="flex w-full flex-col gap-[12px]"
                 >
                   <div className="border-brand-dark flex h-[201px] flex-col items-start border-r-4 pr-6 pb-3">
                     <p className="text-sm leading-[21px] font-semibold">
                       Set Permission
                     </p>
-                    <TabsList className="flex h-[201px] flex-col items-start bg-transparent">
-                      <TabsTrigger
-                        value="setting"
-                        className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
-                      >
-                        Setting
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="channels"
-                        className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
-                      >
-                        Channels
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="inbox"
-                        className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
-                      >
-                        Inbox & Contact
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="analytics"
-                        className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
-                      >
-                        Analytics
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="access"
-                        className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
-                      >
-                        Section Access
-                      </TabsTrigger>
-                    </TabsList>
+                    {data &&
+                      Object.entries(data).map(([groupName]) => (
+                        <TabsList
+                          key={groupName}
+                          className="flex h-[201px] flex-col items-start bg-transparent"
+                        >
+                          <TabsTrigger
+                            value={groupName}
+                            className="data-[state=active]:text-brand-primary p-0 text-sm leading-[21px] font-normal !shadow-none"
+                          >
+                            {groupName}
+                          </TabsTrigger>
+                        </TabsList>
+                      ))}
                   </div>
                 </Tabs>
               </div>
 
-              {/* Permissions Table */}
               <ReuseableTable
                 columns={columns}
                 data={orders}
@@ -189,7 +275,6 @@ const RoleForm: React.FC<RoleFormProps> = ({
               />
             </div>
 
-            {/* Footer Buttons */}
             <CardFooter className="flex justify-end gap-4 px-0 pt-6">
               <DialogClose asChild>
                 <Button
@@ -204,7 +289,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
                 className="bg-brand-primary h-[36px] w-full max-w-[130px] rounded-lg px-4 py-3 text-xs leading-4 font-semibold text-white"
                 type="submit"
               >
-                Save Changes
+                Save
               </Button>
             </CardFooter>
           </form>
