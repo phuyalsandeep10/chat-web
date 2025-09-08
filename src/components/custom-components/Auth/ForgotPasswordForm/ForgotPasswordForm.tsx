@@ -14,6 +14,7 @@ import { InputField } from '@/components/common/hook-form/InputField';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import SuccessScreen from '../ForgotPasswordVerifyForm/ForgotPasswordSuccess';
+import { ROUTES } from '@/routes/routes';
 
 const ForgotPasswordForm = () => {
   const [verifySuccess, setVerifySuccess] = useState(false);
@@ -106,6 +107,7 @@ const ForgotPasswordForm = () => {
         <SuccessScreen
           text="SUCCESSFUL"
           subText="Password reset link sent. Please check your email."
+          redirectLink={ROUTES.LOGIN}
         />
       )}
     </>
