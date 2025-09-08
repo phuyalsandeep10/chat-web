@@ -1,10 +1,12 @@
 'use client';
+import { useRedirectIfAuthenticated } from '@/hooks/auth/useRedirectIfAuthenticated';
 import Link from 'next/link';
 
 import { redirect } from 'next/navigation';
 
 export default function Home() {
-  redirect('/login');
+  // redirect('/login');
+  useRedirectIfAuthenticated();
   return (
     <div>
       <h1>Home page</h1>

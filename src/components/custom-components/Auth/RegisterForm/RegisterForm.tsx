@@ -43,7 +43,7 @@ const RegisterForm = () => {
   const accessToken = searchParams.get('access_token');
   const refreshToken = searchParams.get('refresh_token');
 
-  useRedirectIfAuthenticated();
+  // useRedirectIfAuthenticated();
 
   const { mutate: register, isPending: registerLoading } = useRegisterUser();
   const form = useForm<z.infer<typeof registerFormSchema>>({
