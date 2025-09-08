@@ -93,7 +93,7 @@ const VisitorTable = () => {
       if (!data?.data?.visitors) return;
 
       const visitorsData = data.data.visitors.map((v: any) => ({
-        id: v.customer_id,
+        id: v.id,
         visitor: v.visitor_name,
         status: v.status,
         lastActive: v.last_active,
@@ -247,6 +247,7 @@ const VisitorTable = () => {
               className="text-alert-prominent h-4 w-4 cursor-pointer"
               onClick={() => {
                 setDeleteTargetVisitor(row.original);
+                console.log(row.original);
                 setIsDeleteModalOpen(true);
               }}
             />

@@ -107,7 +107,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
                         </span>
                       </div>
                     ) : (
-                      <span>{placeholder}</span>
+                      <span className="text-gray-light">{placeholder}</span>
                     )}
                     <div className="text-gray-light ml-2">
                       <Icons.chevron_down
@@ -122,7 +122,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
               <DropdownMenuContent
                 align="start"
                 sideOffset={4}
-                className="min-w-[var(--radix-dropdown-menu-trigger-width)]"
+                className="relative z-400 min-w-[var(--radix-dropdown-menu-trigger-width)]"
               >
                 {countries.map((country) => (
                   <DropdownMenuItem
