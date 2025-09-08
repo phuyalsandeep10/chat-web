@@ -2,9 +2,8 @@ import axiosInstance from '@/apiConfigs/axiosInstance';
 
 export const deleteVisitors = async (logId: number) => {
   try {
-    const response = await axiosInstance.post(`/customers/delete-logs`, null, {
-      params: { log_id: logId },
-    });
+    console.log(logId);
+    const response = await axiosInstance.delete(`/customers/${logId}`);
 
     if (!response) {
       throw new Error("The log couldn't be deleted.");
