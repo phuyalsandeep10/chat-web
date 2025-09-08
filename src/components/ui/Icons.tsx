@@ -115,6 +115,8 @@ import {
   RiPieChart2Fill,
   RiDragMoveFill,
   RiFileListLine,
+  RiArrowDropUpLine,
+  RiTimeLine,
 } from '@remixicon/react';
 
 // register your icons here as your requirements
@@ -234,4 +236,6 @@ export const Icons = {
   drag_move_fill: RiDragMoveFill,
   vector: RiFileListLine,
   folderPlus: FolderPlus,
+  ri_arrow_drop_up_line: RiArrowDropUpLine,
+  ri_time_line: RiTimeLine,
 };

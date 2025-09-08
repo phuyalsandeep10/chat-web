@@ -1,55 +1,179 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
-import ReusableDialog from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReusableDialog';
-import AddAgent from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AddAgent';
+import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
 import { ReuseableTable } from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/ReuseableTable';
 import AddMember from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/AddMember';
 import CreateTeam from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/CreateTeam';
-import TeamEdit from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamEdit';
 import TeamView from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamView';
-
-export interface OrderRow {
-  TeamName: string;
-  Lead: string;
-  Status: string;
-  Actions: string;
-}
-
-interface Column<T> {
-  key: keyof T | 'actions';
-  label: string;
-  render?: (row: T) => React.ReactNode;
-}
-
-interface TeamTableProps {
-  handleOpenDialog: (options: {
-    heading: string;
-    subheading: string;
-    onAction: () => void;
-    headericon: React.ReactNode;
-  }) => void;
-}
+import DeleteModal from '@/components/modal/DeleteModal';
+import { useCreateTeams } from '@/hooks/staffmanagment/teams/useCreateTeams';
+import { useInvitesMembers } from '@/hooks/staffmanagment/teams/useInvitesMembers';
+import { useDeleteTeam } from '@/hooks/staffmanagment/teams/useDeleteTeam';
+import { useGetTeams } from '@/hooks/staffmanagment/teams/useGetTeams';
+import TeamEdit from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/Teams/TeamEdit';
+import { useGetTeamMembersById } from '@/hooks/staffmanagment/teams/useGetTeamMembersById';
+import { useUpdateTeamMembersById } from '@/hooks/staffmanagment/teams/useUpdateTeamMemberById';
+import {
+  TeamTableOrderRow,
+  TeamTableColumn,
+  TeamTableProps,
+  TeamFormValues,
+  MemberAccess,
+  EditTeamMemberHandler,
+} from './types';
+import { toast } from 'sonner';
 
 const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
-  const orders: OrderRow[] = [
-    {
-      TeamName: 'Team A',
-      Lead: 'Joshna Khadka',
-      Status: 'Admin',
-      Actions: '',
-    },
-    {
-      TeamName: 'Team B',
-      Lead: 'Joshna Khadka',
-      Status: 'Admin',
-      Actions: '',
-    },
-  ];
+  // states to toggle modal
+  const [open, setOpen] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  // const [openTeamView, setOpenTeamView] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [openCreateTeam, setOpenCreateTeam] = useState(false);
+  const [openTeamView, setOpenTeamView] = useState(false);
+  const [openInviteMember, setOpenInviteMember] = useState(false);
+  const [teamDeleteId, setTeamDeleteId] = useState<string | null>(null);
+  const [teamId, setTeamId] = useState<number | undefined>(undefined);
 
-  const columns: Column<OrderRow>[] = [
+  //create new team
+  const { mutate: createRoles, isPending, isSuccess } = useCreateTeams();
+
+  //invite new member to the team
+  const { mutate: inviteMembers } = useInvitesMembers();
+
+  //get all teams
+  const {
+    data: teamsData,
+    isPending: isTeamsPending,
+    isSuccess: isTeamsSuccess,
+    refetch,
+  } = useGetTeams();
+
+  // delete teams
+
+  const {
+    mutate: deleteTeams,
+    isPending: deletePending,
+    isSuccess: deleteSuccess,
+  } = useDeleteTeam();
+
+  //fetch team members by id
+
+  const { data: teamMembersById } = useGetTeamMembersById(teamId);
+
+  //update member by id
+  const { mutate: updateTeamMemberById } = useUpdateTeamMembersById();
+
+  // onsubit functions
+  const handleSubmit = (formData?: TeamFormValues) => {
+    const payload = {
+      name: formData?.newteam,
+      // description: 'New team created',
+    };
+
+    // Creating a new role
+    createRoles(payload, {
+      onSuccess: (response) => {
+        console.log('Create Team response:', response);
+        setOpenCreateTeam(false);
+      },
+      onError: (error) => {
+        console.error('Create Team error:', error);
+      },
+    });
+  };
+
+  //invie new member
+  const handleInviteMember = (InviteData: TeamFormValues) => {
+    const payload = {
+      email: InviteData.email,
+      name: InviteData.fullName,
+      role_ids: Array.isArray(InviteData.role)
+        ? InviteData.role.map((id) => Number(id)).filter((id) => !isNaN(id))
+        : [],
+    };
+    console.log('Payload being sent to inviteMembers:', payload);
+
+    inviteMembers(payload, {
+      onSuccess: () => {
+        console.log('Invite member response:', payload);
+        setOpenInviteMember((prev) => !prev);
+      },
+      onError: (error) => {
+        console.error('failed to Invite member:', error);
+      },
+    });
+  };
+
+  // handle delete Teams
+
+  const handleDeleteTeams = (teamId?: any) => {
+    if (!teamDeleteId) return;
+    deleteTeams(teamDeleteId, {
+      onSuccess: () => {
+        setOpenDeleteModal(false);
+        refetch();
+        // Optionally, you can refetch the teams data or update the UI accordingly
+      },
+      onError: (error) => {
+        console.error('Failed to delete team:', error);
+        // Optionally show error message/toast
+      },
+    });
+  };
+  // handle edit team member by id
+  const handleEditTeamMemberById: EditTeamMemberHandler = (formData) => {
+    if (!teamId) return;
+
+    const membersPayload: MemberAccess[] = Object.entries(
+      formData.members || {},
+    )
+      .filter(([_, access_level]) => access_level)
+      .map(([member_id, access_level]) => ({
+        member_id: Number(member_id),
+        access_level: String(access_level),
+      }));
+
+    if (!membersPayload.length) return;
+
+    console.log('membersPayload', membersPayload);
+
+    const leadCount = membersPayload.filter(
+      (memberItems) => memberItems.access_level.toUpperCase() === 'LEAD',
+    ).length;
+
+    console.log('leadCount', leadCount);
+
+    if (leadCount < 2) {
+      setOpenEdit(false); // close if no LEAD present
+      return; // stop here, don’t call updateTeamMemberById
+    }
+
+    updateTeamMemberById(
+      { teamId, members: membersPayload },
+      {
+        onError: (error: any) => {
+          toast.error(error?.response?.data?.data);
+        },
+      },
+    );
+  };
+  const orders: TeamTableOrderRow[] = React.useMemo(() => {
+    return (
+      teamsData?.data?.map((teamsDataItems: any) => ({
+        id: teamsDataItems.id,
+        TeamName: teamsDataItems.name,
+        Lead: teamsDataItems.lead_name,
+        Status: teamsDataItems.status,
+        Actions: '',
+      })) || []
+    );
+  }, [teamsData]);
+
+  const columns: TeamTableColumn<TeamTableOrderRow>[] = [
     { key: 'TeamName', label: 'Team Name' },
     {
       key: 'Lead',
@@ -67,45 +191,41 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
     {
       key: 'actions',
       label: 'Actions',
-      render: () => (
+      render: (row) => (
         <div className="flex items-center gap-[10px]">
-          <ReusableDialog
-            trigger={
-              <button aria-label="Edit team">
-                <Icons.ri_edit2_fill className="text-black" />
-              </button>
-            }
-            dialogClass="!max-w-[768px] gap-0 px-5 py-10"
+          {/* edit form */}
+          <div
+            className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+            onClick={() => {
+              setTeamId(Number(row.id)); //based on id open edit modal
+              setOpenEdit(true);
+            }}
           >
-            <TeamEdit onSubmit={() => {}} />
-          </ReusableDialog>
-          <ReusableDialog
-            trigger={
-              <button aria-label="View team">
-                <Icons.ri_eye_fill />
-              </button>
-            }
-            dialogClass="!max-w-[411px] gap-0 inline-block"
+            <Icons.ri_edit2_fill className="text-black" />
+          </div>
+
+          {/* view team */}
+          <div
+            className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+            onClick={() => {
+              setTeamId(Number(row.id));
+              setOpenTeamView(true);
+            }}
           >
-            <TeamView />
-          </ReusableDialog>
-          <button
-            aria-label="Delete team"
-            onClick={() =>
-              handleOpenDialog({
-                heading: 'Delete Team',
-                subheading:
-                  'Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding.',
-                onAction: () => {
-                  console.log('Team deleted');
-                },
-                headericon: <Icons.ri_delete_bin_7_fill />,
-              })
-            }
-            className="text-[#F61818]"
+            <Icons.ri_eye_fill className="text-black" />
+          </div>
+
+          {/* delete modal */}
+          <div
+            className="h-full max-h-[36px] w-auto rounded text-xs leading-4 font-semibold"
+            onClick={() => {
+              setTeamDeleteId(row.id);
+              setOpenDeleteModal(true);
+            }}
           >
-            <Icons.ri_delete_bin_5_line />
-          </button>
+            <Icons.ri_delete_bin_5_line className="text-red-500" />
+            {/* <Icons.ri_edit2_fill /> */}
+          </div>
         </div>
       ),
     },
@@ -123,39 +243,87 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
           control access.
         </span>
       </div>
-
       {/* Action Buttons */}
       <div className="flex justify-end gap-4 pb-[13px]">
-        <ReusableDialog
-          trigger={
-            <Button className="h-[36px] rounded px-[22px] py-2.5 text-xs leading-4 font-semibold">
-              <Icons.plus_circle />
-              Create New Team
-            </Button>
-          }
-          dialogClass="!max-w-[387px] py-10 w-full px-5 gap-0 inline-block"
-        >
-          <CreateTeam onSubmit={(data) => console.log('Team created:', data)} />
-        </ReusableDialog>
+        {/* create new team */}
+        <div>
+          <Button
+            className="h-[36px] rounded px-[22px] py-2.5 text-xs leading-4 font-semibold"
+            onClick={() => setOpenCreateTeam(true)}
+          >
+            <Icons.plus_circle />
+            Create New Team
+          </Button>
+          <AgentInviteModal
+            open={openCreateTeam}
+            onOpenChange={setOpenCreateTeam}
+            dialogClass="!max-w-[387px] py-10 w-full px-5 gap-0 inline-block"
+          >
+            <CreateTeam
+              onSubmit={handleSubmit}
+              onCancel={() => setOpenCreateTeam(false)}
+            />
+          </AgentInviteModal>
+        </div>
 
-        <ReusableDialog
-          trigger={
-            <Button
-              variant="outline"
-              className="bg-brand-primary h-[36px] rounded px-[22px] py-2.5 text-xs leading-4 font-semibold text-white"
-            >
-              <Icons.plus_circle />
-              Invite New Member
-            </Button>
-          }
-          dialogClass="!max-w-[768px] py-[27px] px-10 gap-0"
-        >
-          <AddMember onSubmit={(data) => console.log('Team created:', data)} />
-        </ReusableDialog>
+        {/* invite new member */}
+        <div>
+          <Button
+            variant="outline"
+            className="bg-brand-primary h-[36px] rounded px-[22px] py-2.5 text-xs leading-4 font-semibold text-white"
+            onClick={() => setOpenInviteMember(true)}
+          >
+            <Icons.plus_circle />
+            Invite New Member
+          </Button>
+          <AgentInviteModal
+            open={openInviteMember}
+            onOpenChange={setOpenInviteMember}
+            dialogClass="!max-w-[768px] py-[27px] px-10 gap-0"
+          >
+            <AddMember onSubmit={handleInviteMember} />
+          </AgentInviteModal>
+        </div>
       </div>
-
-      {/* Team table */}
+      {/* Team table from order */}
       <ReuseableTable columns={columns} data={orders} />
+      {/* edit modal for edit team */}
+      <AgentInviteModal
+        open={openEdit}
+        onOpenChange={setOpenEdit}
+        dialogTitle="Edit Information"
+        dialogClass="!max-w-[768px]"
+      >
+        <TeamEdit
+          // onSubmit={handleEditTeamMemberById}
+          // onSubmit={handleEditTeamMemberById as unknown as (data: any) => void}
+          onSubmit={handleEditTeamMemberById as EditTeamMemberHandler}
+          data={teamMembersById}
+          teamId={teamId}
+          // defaultValues={teamsData?.data?.find((t) => t.id === teamId)}
+        />
+      </AgentInviteModal>
+      {/* view modal for view team */}
+      <AgentInviteModal
+        open={openTeamView}
+        onOpenChange={setOpenTeamView}
+        dialogTitle="Edit Information"
+        dialogClass="!max-w-[768px]"
+      >
+        <TeamView teamId={teamId!} data={teamMembersById} />
+      </AgentInviteModal>
+      {/* delete modal for delete team */}
+      <DeleteModal
+        open={openDeleteModal}
+        onOpenChange={setOpenDeleteModal}
+        title="Delete Team "
+        description="Delete this team and revoke member access. All related settings will be lost. Confirm before proceeding."
+        confirmText="Confirm & Delete"
+        onCancel={() => {}}
+        onConfirm={handleDeleteTeams}
+      >
+        {/* <DeleteModal /> */}
+      </DeleteModal>
     </>
   );
 };

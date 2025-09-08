@@ -41,7 +41,16 @@ const InboxChatSection = ({
     reversed.forEach((message) => {
       const date = new Date(message.created_at);
       if (isNaN(date.getTime())) return; // Skip invalid dates
-      const dayKey = date.toLocaleDateString('en-US', { weekday: 'short' }); // e.g., "Sun"
+      const today = new Date();
+      const isToday =
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear();
+
+      const dayKey = isToday
+        ? 'Today'
+        : date.toLocaleDateString('en-US', { weekday: 'short' });
+
       if (!groups[dayKey]) {
         groups[dayKey] = [];
       }

@@ -18,6 +18,8 @@ type InputFieldProps<T extends FieldValues> = {
   placeholder?: string;
   labelClassName?: string;
   error?: string;
+  readOnly?: boolean;
+  onChange?: (val: any) => void;
 };
 
 export function InputField<T extends FieldValues>({
@@ -32,6 +34,7 @@ export function InputField<T extends FieldValues>({
   placeholder,
   labelClassName,
   error,
+  readOnly,
 }: InputFieldProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = type === 'password';
@@ -78,6 +81,7 @@ export function InputField<T extends FieldValues>({
                   inputClassName,
                   'border-grey-light h-[36px] border-[1px] px-3 placeholder:text-[14px] focus:outline-none',
                 )}
+                readOnly={readOnly}
                 value={
                   type === 'number'
                     ? (field.value ?? '')
@@ -108,9 +112,9 @@ export function InputField<T extends FieldValues>({
                   onClick={() => setShowPassword((prev) => !prev)}
                 >
                   {showPassword ? (
-                    <Icons.eye_off className="h-4 w-4" />
-                  ) : (
                     <Icons.Eye className="h-4 w-4" />
+                  ) : (
+                    <Icons.eye_off className="h-4 w-4" />
                   )}
                 </span>
               )}

@@ -41,6 +41,7 @@ export default function ProfileSection({
   country,
   language,
   image,
+  phoneCode,
 }: UpdateProfileFormValues) {
   const [imageUrl, setImageUrl] = useState<string | null>(image);
 
@@ -209,7 +210,9 @@ export default function ProfileSection({
           </div>
 
           <div className="text-brand-dark flex w-[314px] flex-col gap-2">
-            <h2 className="text-[40px] leading-[48px] font-bold">{name}</h2>
+            <h2 className="text-[40px] leading-[48px] font-bold break-all">
+              {name}
+            </h2>
             <p className="text-[18px] font-normal">{email}</p>
           </div>
         </div>
@@ -224,7 +227,10 @@ export default function ProfileSection({
           {mobile && (
             <div className="flex items-center gap-2">
               <PhoneIcon className="h-3.5 w-3.5" />
-              <span className="text-right">{mobile}</span>
+              <span className="text-right">
+                {phoneCode}
+                {mobile}
+              </span>
             </div>
           )}
         </div>

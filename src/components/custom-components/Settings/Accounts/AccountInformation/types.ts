@@ -7,6 +7,7 @@ export type UpdateProfileFormValues = {
   language?: string;
   email?: string;
   phone_code_id?: number;
+  phoneCode?: string;
 };
 
 export type FetchProfileFormValues = {

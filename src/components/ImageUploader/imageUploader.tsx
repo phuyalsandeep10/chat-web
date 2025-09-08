@@ -15,7 +15,7 @@ interface ImageUploaderProps {
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
   onImageSelect,
-  wrapperClassName = 'flex h-[181px] w-[383px] flex-col items-center justify-center rounded-md border',
+  wrapperClassName = 'flex h-[181px] w-[383px] flex-col items-center justify-center rounded-md border cursor-pointer',
   labelClickText = 'Click to upload',
   labelRestText = 'or drag and drop SVG, PNG, JPG.',
   descriptionText = 'Upload a PNG and JPG, up to 10 MB.',

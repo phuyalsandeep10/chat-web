@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 
 const AccountInformation = () => {
   const authData = useAuthStore((state) => state.authData);
+  console.log(authData);
   return (
     <div className="font-outfit max-h-40 w-full bg-white">
       <ProfileSection
@@ -19,6 +20,7 @@ const AccountInformation = () => {
         mobile={authData?.data?.user?.mobile ?? ''}
         image={authData?.data?.user?.image ?? ''}
         language={authData?.data?.user?.language ?? ''}
+        phoneCode={authData?.data?.user?.phone_code ?? ''}
       />
 
       {/* <PublicProfile /> */}

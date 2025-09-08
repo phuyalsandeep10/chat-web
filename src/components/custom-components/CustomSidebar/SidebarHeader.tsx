@@ -8,6 +8,14 @@ import Image from 'next/image';
 import { useGetOrganizationById } from '@/hooks/organizations/useGetorganizations';
 import { useSidebar } from '@/components/ui/sidebar';
 import { RiMenu2Fill } from '@remixicon/react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { CustomTooltip } from '@/shared/CustomTooltip';
+
 const SidebarHeader: React.FC = () => {
   const { toggleSidebar } = useSidebar();
 
@@ -86,12 +94,19 @@ const SidebarHeader: React.FC = () => {
             'overflow-hidden transition-all duration-300 ease-in-out',
           )}
         >
-          <h1 className="from-theme-text-dark via-brand-text to-brand-primary font-outfit truncate bg-gradient-to-r bg-clip-text text-lg leading-[29px] font-medium text-transparent">
-            {workspace?.name || 'Org Name'}
-          </h1>
-          <p className="text-theme-text-primary font-outfit truncate text-xs leading-[17px] font-normal">
-            {workspace?.domain || 'example.com'}
-          </p>
+          {/* Workspace Name */}
+          <CustomTooltip
+            data={workspace?.name || ''}
+            as="h1"
+            className="from-theme-text-dark via-brand-text to-brand-primary font-outfit w-40 bg-gradient-to-r bg-clip-text text-lg leading-[29px] font-medium text-transparent"
+          />
+
+          {/* Workspace Domain */}
+          <CustomTooltip
+            data={workspace?.domain || ''}
+            as="p"
+            className="text-theme-text-primary font-outfit w-40 text-xs leading-[17px] font-normal"
+          />
         </div>
       </Link>
     </div>
