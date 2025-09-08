@@ -24,6 +24,18 @@ export const to24Hour = (time12h: string) => {
   }
 };
 
+export const to12Hour = (time24h: string) => {
+  if (!time24h) return '';
+  try {
+    // Parse 24-hour time string into a Date object
+    const parsed = parse(time24h, 'HH:mm', new Date());
+    // Format it into 12-hour format with AM/PM
+    return format(parsed, 'hh:mm a');
+  } catch (error) {
+    return ''; // fallback
+  }
+};
+
 // helper (handles overnight shifts too)
 export const diffInMinutes = (start: string, end: string): number => {
   try {

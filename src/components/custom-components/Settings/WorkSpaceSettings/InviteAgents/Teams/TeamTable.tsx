@@ -139,9 +139,18 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
 
     if (!membersPayload.length) return;
 
+    console.log('membersPayload', membersPayload);
+
     const leadCount = membersPayload.filter(
-      (memberItems) => memberItems.access_level.toLowerCase() === 'lead',
+      (memberItems) => memberItems.access_level.toUpperCase() === 'LEAD',
     ).length;
+
+    console.log('leadCount', leadCount);
+
+    if (leadCount < 2) {
+      setOpenEdit(false); // close if no LEAD present
+      return; // stop here, don’t call updateTeamMemberById
+    }
 
     updateTeamMemberById(
       { teamId, members: membersPayload },
@@ -151,7 +160,6 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
         },
       },
     );
-    setOpenEdit(false);
   };
   const orders: TeamTableOrderRow[] = React.useMemo(() => {
     return (
@@ -222,10 +230,6 @@ const TeamTable: React.FC<TeamTableProps> = ({ handleOpenDialog }) => {
       ),
     },
   ];
-
-  useEffect(() => {
-    if (teamMembersById) console.log('teamMembersById', teamMembersById);
-  }, [teamMembersById]);
 
   return (
     <>

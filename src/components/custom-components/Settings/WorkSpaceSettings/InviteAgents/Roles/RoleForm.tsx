@@ -113,11 +113,6 @@ const RoleForm: React.FC<RoleFormProps> = ({
 
     const permissions = permissionsState;
 
-    const isAllPermissionsValid = permissionsState.some(
-      ({ is_changeable, is_viewable, is_deletable }) =>
-        is_changeable || is_viewable || is_deletable,
-    );
-
     // Get the active tab name with first letter capitalized
     const activeTabName =
       selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1);
@@ -128,8 +123,6 @@ const RoleForm: React.FC<RoleFormProps> = ({
     // Get the group_id of the first permission in this tab (all permissions in the same tab share the same group_id)
     const groupId = tabPermissions[0]?.group_id || null;
 
-    console.log('groupId', groupId);
-
     const payload = {
       id: defaultValues?.id,
       name: formData.name,
@@ -139,9 +132,6 @@ const RoleForm: React.FC<RoleFormProps> = ({
     };
 
     onSubmit(payload);
-
-    // prevent modal from closing without selecting one permission
-    if (isAllPermissionsValid) setOpenCreateRole?.(false);
   };
 
   const columns: RoleColumn<RoleOrderRow>[] = [

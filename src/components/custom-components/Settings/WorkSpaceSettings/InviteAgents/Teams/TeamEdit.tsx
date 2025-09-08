@@ -147,20 +147,18 @@ const TeamEdit: React.FC<TeamEditProps> = ({
                                 })
                               }
                             >
-                              {['LEAD', 'ADMIN', 'MODERATOR', 'MEMBER'].map(
-                                (role) => (
-                                  <ToggleGroupItem
-                                    key={role}
-                                    value={role}
-                                    className={cn(
-                                      'rounded-[4px] px-[15px] py-[2px] text-black', // default text
-                                      'data-[state=on]:bg-brand-primary data-[state=on]:text-white', // active state handled automatically
-                                    )}
-                                  >
-                                    {role}
-                                  </ToggleGroupItem>
-                                ),
-                              )}
+                              {['LEAD', 'MODERATOR', 'MEMBER'].map((role) => (
+                                <ToggleGroupItem
+                                  key={role}
+                                  value={role}
+                                  className={cn(
+                                    'rounded-[4px] px-[15px] py-[2px] text-black', // default text
+                                    'data-[state=on]:bg-brand-primary data-[state=on]:text-white', // active state handled automatically
+                                  )}
+                                >
+                                  {role}
+                                </ToggleGroupItem>
+                              ))}
                             </ToggleGroup>
                             <Icons.ri_delete_bin_5_line
                               className="text-alert-prominent cursor-pointer"
@@ -191,17 +189,16 @@ const TeamEdit: React.FC<TeamEditProps> = ({
                 {/* <DeleteModal /> */}
               </DeleteModal>
             </div>
-
-            {/* Add Member button */}
-            <Button
-              type="submit"
-              className="bg-brand-disable text-brand-primary hover:bg-brand-disable h-full max-h-[36px] w-full rounded-sm px-[22px] py-3 text-xs leading-4 font-semibold"
-            >
-              <Icons.plus />
-              Add Member
-            </Button>
           </form>
         </Form>
+        {/* Add Member button */}
+        <Button
+          // type="submit"
+          className="bg-brand-disable text-brand-primary hover:bg-brand-disable h-full max-h-[36px] w-full rounded-sm px-[22px] py-3 text-xs leading-4 font-semibold"
+        >
+          <Icons.plus />
+          Add Member
+        </Button>
       </CardContent>
 
       {/* Save Change button */}

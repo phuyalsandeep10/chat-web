@@ -24,10 +24,12 @@ const TimeField: React.FC<TimeFieldProps> = ({
     return { hours, minutes, period: period as 'AM' | 'PM' };
   };
 
+  console.log('defaultValueTImefied', defaultValue);
+
   const [time, setTime] = useState<TimeType>(
     defaultValue
       ? parseTime(defaultValue)
-      : { hours: 7, minutes: 0, period: 'AM' },
+      : { hours: 12, minutes: 0, period: 'AM' },
   );
 
   useEffect(() => {
@@ -67,11 +69,11 @@ const TimeField: React.FC<TimeFieldProps> = ({
         <InputField
           name={name}
           control={control}
-          // placeholder={inputValue}
+          placeholder={inputValue}
           inputClassName="!text-xs leading-[21px] font-normal"
           labelClassName="text-base leading-[26px] font-medium"
           label={label}
-          // value={inputValue}
+          value={inputValue}
           onChange={handleInputChange}
           required
           readOnly

@@ -27,7 +27,7 @@ const ShiftField: React.FC<FieldProps> = ({ control }) => {
                 onValueChange={field.onChange}
               >
                 <ToggleGroupItem
-                  className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] text-xs leading-[21px] font-normal data-[state=on]:border data-[state=on]:text-white"
+                  className="data-[state=on]:bg-brand-primary data-[state=on]:hover:bg-brand-primary rounded-[4px] px-[15px] py-[2px] data-[state=on]:border data-[state=on]:text-white"
                   value="morning"
                 >
                   Morning

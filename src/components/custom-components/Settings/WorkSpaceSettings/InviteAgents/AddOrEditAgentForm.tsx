@@ -54,6 +54,8 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
     },
   });
 
+  console.log('defaultValues', defaultValues);
+
   // components states
   const [openInviteMember, setOpenInviteMember] = useState(false);
   // toggle time picker/clock dial
@@ -92,6 +94,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   };
 
   const handleSubmit: SubmitHandler<AddOrEditAgentFormSchema> = (data) => {
+    console.log('formData', data);
     // find team
     const selectedTeam = teamsData?.data?.find(
       (team: any) => team.name === data.team,
@@ -106,9 +109,6 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
     );
 
     const total_minutes = diffInMinutes(data.startTime, data.endTime);
-
-    console.log('total_minutes', total_minutes);
-    console.log('data', data);
 
     // convert dat into array
     const dayArray = Array.isArray(data.days) ? data.days : [data.days];
@@ -133,49 +133,20 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
   };
 
   // Calculate totalHours whenever startTime or endTime changes
+
   useEffect(() => {
     const startTime = getValues('startTime');
     const endTime = getValues('endTime');
 
-    const timeRegex = /^([0]?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/i;
-
-    if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) return;
+    if (!startTime || !endTime) return;
 
     try {
-      // Difference in minutes
-      const start = parse(startTime, 'hh:mm a', new Date());
-      const end = parse(endTime, 'hh:mm a', new Date());
-      const diffInMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
-
-      setValue(
-        'totalHours',
-        diffInMinutes > 0 ? diffInMinutes.toString() : '0',
-      );
+      const minutes = diffInMinutes(startTime, endTime);
+      setValue('totalHours', minutes > 0 ? minutes.toString() : '0');
     } catch {
       setValue('totalHours', '0');
     }
   }, [watch('startTime'), watch('endTime')]);
-
-  useEffect(() => {
-    if (defaultValues) {
-      // Convert 24-hour time to 12-hour format with AM/PM
-      const formatWithAmPm = (time24?: string): string => {
-        if (!time24) return '';
-        const [hoursStr, minutes] = time24.split(':');
-        let hours = Number(hoursStr);
-        const period = hours >= 12 ? 'PM' : 'AM';
-        if (hours > 12) hours -= 12;
-        if (hours === 0) hours = 12;
-        return `${hours.toString().padStart(2, '0')}:${minutes} ${period}`;
-      };
-
-      reset({
-        ...defaultValues,
-        startTime: formatWithAmPm(defaultValues.startTime),
-        endTime: formatWithAmPm(defaultValues.endTime),
-      });
-    }
-  }, [defaultValues, reset]);
 
   return (
     <>
@@ -249,6 +220,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                 name="startTime"
                 label="Start Time"
                 onChange={(val: string) => setValue('startTime', val)}
+                defaultValue={getValues('startTime')}
                 setOpen={setOpenStartTime}
                 open={openStartTime}
                 control={control}
@@ -259,6 +231,7 @@ const AddOrEditAgentForm: React.FC<AddOrEditAgentFormProps> = ({
                 name="endTime"
                 label="End Time"
                 onChange={(val: string) => setValue('endTime', val || '')}
+                defaultValue={getValues('endTime')}
                 setOpen={setOpenEndTime}
                 open={openEndTime}
                 control={control}

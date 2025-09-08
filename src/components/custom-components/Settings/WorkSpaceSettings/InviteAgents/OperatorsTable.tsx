@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icons } from '@/components/ui/Icons';
 import AgentInviteModal from '@/components/custom-components/Settings/WorkSpaceSettings/InviteAgents/AgentInviteModal';
 // import { ReuseableTable } from './ReuseableTable';
@@ -16,6 +16,7 @@ import {
   OperatorColumn,
   OperatorsTableProps,
 } from './types';
+import { to12Hour } from './utils/AddorEditFormUtils';
 
 export default function OperatorsTable({
   handleOpenDialog,
@@ -33,8 +34,6 @@ export default function OperatorsTable({
   const [membersToDeleteID, setMembersToDeleteID] = useState<string | null>(
     null,
   );
-
-  console.log('selectedOperator', selectedOperator);
 
   // table columbe header field and row data
   const columns: OperatorColumn<OperatorsOrderRow>[] = [
@@ -135,26 +134,50 @@ export default function OperatorsTable({
     isSuccess: deleteSuccess,
   } = useDeleteMember();
 
+  useEffect(() => {
+    if (allOperators) {
+      console.log('allOperators', allOperators);
+    }
+  }, [allOperators]);
+
   // row data of operators table
   const orders: OperatorsOrderRow[] = React.useMemo(() => {
     return (
       allOperators?.data?.map((allOperators: any) => ({
         id: allOperators.id,
-        FullName: allOperators.user_name,
-        Shift: allOperators.shift,
+        FullName: allOperators.user.name,
+        Shift: allOperators.shifts.length > 0 && (
+          <span>{allOperators.shifts[0].shift}</span>
+        ),
         // invite: inviteMemberItems.email,
-        Invitedon: allOperators.created_at
-          ? format(new Date(allOperators.created_at), 'dd MMMM, yyyy')
-          : 'N/A',
+        Invitedon:
+          allOperators.member_roles.length > 0
+            ? format(
+                new Date(allOperators.member_roles[0].role.created_at),
+                'dd MMMM, yyyy',
+              )
+            : 'N/A',
+
         // status: inviteMemberItems.status,
-        Roles: allOperators.roles
-          .map((roleItems: any) => roleItems.role_name)
+        Roles: allOperators.member_roles
+          .map((roleItems: any) => roleItems.role.name)
           .join(', '),
-        OperatingHours: allOperators.operating_hour,
+        OperatingHours:
+          allOperators.shifts.length > 0 ? (
+            <>
+              <span>{allOperators.shifts[0].start_time}</span>
+              <span> - </span>
+              <span>{allOperators.shifts[0].end_time}</span>
+            </>
+          ) : (
+            'N/A'
+          ),
         Actions: '',
       })) || []
     );
   }, [allOperators]);
+
+  console.log('orders', orders);
 
   // New function to handle delete confirmation
   const handleDeleteConfirm = () => {
@@ -183,18 +206,18 @@ export default function OperatorsTable({
         <AddOrEditAgentForm
           defaultValues={{
             id: selectedOperator?.id,
-            email: selectedOperator?.email,
-            fullName: selectedOperator?.user_name,
+            email: selectedOperator?.user.email,
+            fullName: selectedOperator?.user.name,
             role:
-              selectedOperator?.roles?.map(
-                (r: { role_name: string }) => r.role_name,
+              selectedOperator?.member_roles?.map(
+                (r: { role: { name: string } }) => r.role.name,
               ) || [],
-            shift: selectedOperator?.shift || '',
-            startTime: selectedOperator?.start_time || '',
-            endTime: selectedOperator?.end_time || '',
-            clientHandled: selectedOperator?.client_handled || '',
-            totalHours: selectedOperator?.total_hours || '',
-            team: selectedOperator?.team_name || '',
+            shift: selectedOperator?.shifts[0].shift || '',
+            startTime: to12Hour(selectedOperator?.shifts[0].start_time) || '',
+            endTime: to12Hour(selectedOperator?.shifts[0].end_time) || '',
+            clientHandled: selectedOperator?.shifts[0].client_handled || '',
+            totalHours: selectedOperator?.shifts[0].total_hours || '',
+            team: selectedOperator?.team.name || '',
             days: selectedOperator?.days || [],
           }}
           onClose={() => setOpenEdit(false)}

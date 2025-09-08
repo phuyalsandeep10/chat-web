@@ -115,8 +115,6 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
     );
   };
 
-  console.log('selectedRole', selectedRole);
-
   const columns: RoleColumn<RoleTableOrderRow>[] = [
     { key: 'RoleName', label: 'Role Name' },
     { key: 'agents', label: 'No. of Agents' },
@@ -201,7 +199,11 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
           >
             <RoleForm
               onSubmit={(data) => {
-                createRole(data);
+                createRole(data, {
+                  onSuccess: () => {
+                    setOpenCreateRole(false);
+                  },
+                });
                 // setOpenCreateRole(false);
               }}
               roleHead="Create Role"
@@ -229,9 +231,14 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
               groups: selectedRole.groups,
             }}
             onSubmit={(data) => {
-              updateRole({ role_id: selectedRole.id, payload: data });
-              setOpenRole(false);
-              setSelectedRole(null);
+              updateRole(
+                { role_id: selectedRole.id, payload: data },
+                {
+                  onSuccess: () => {
+                    setOpenRole(false);
+                  },
+                },
+              );
             }}
             roleHead="Edit Role"
           />
