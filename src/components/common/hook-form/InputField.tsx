@@ -108,9 +108,9 @@ export function InputField<T extends FieldValues>({
                   onClick={() => setShowPassword((prev) => !prev)}
                 >
                   {showPassword ? (
-                    <Icons.eye_off className="h-4 w-4" />
-                  ) : (
                     <Icons.Eye className="h-4 w-4" />
+                  ) : (
+                    <Icons.eye_off className="h-4 w-4" />
                   )}
                 </span>
               )}
