@@ -14,6 +14,7 @@ import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { ROUTES } from '@/routes/routes';
 import { useRouter } from 'next/navigation';
 import { AuthService } from '@/services/auth/auth';
+import { CustomTooltip } from '@/shared/CustomTooltip';
 
 const SidebarFooterMenu = () => {
   const router = useRouter();
@@ -50,20 +51,17 @@ const SidebarFooterMenu = () => {
 
           {/* Name & Email */}
           <div className={cn('flex w-full flex-col')}>
-            <span
-              className={cn(
-                'text-theme-text-dark font-outfit text-lg font-medium text-wrap break-all',
-              )}
-            >
-              {authData?.data?.user?.name}
-            </span>
-            <span
-              className={cn(
-                'text-theme-text-primary font-outfit text-xs font-normal text-wrap break-all',
-              )}
-            >
-              {authData?.data?.user?.email}
-            </span>
+            <CustomTooltip
+              data={authData?.data?.user?.name || ''}
+              as="span"
+              className="text-theme-text-dark font-outfit w-40 text-lg font-medium"
+            />
+
+            <CustomTooltip
+              data={authData?.data?.user?.email || ''}
+              as="span"
+              className="text-theme-text-primary font-outfit w-40 text-xs font-normal"
+            />
           </div>
 
           {/* Right arrow */}
