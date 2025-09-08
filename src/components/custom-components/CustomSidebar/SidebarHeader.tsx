@@ -14,6 +14,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { CustomTooltip } from '@/shared/CustomTooltip';
 
 const SidebarHeader: React.FC = () => {
   const { toggleSidebar } = useSidebar();
@@ -94,32 +95,18 @@ const SidebarHeader: React.FC = () => {
           )}
         >
           {/* Workspace Name */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <h1 className="from-theme-text-dark via-brand-text to-brand-primary font-outfit w-40 cursor-pointer truncate bg-gradient-to-r bg-clip-text text-lg leading-[29px] font-medium text-transparent">
-                  {workspace?.name || ''}
-                </h1>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{workspace?.name || ''}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <CustomTooltip
+            data={workspace?.name || ''}
+            as="h1"
+            className="from-theme-text-dark via-brand-text to-brand-primary font-outfit w-40 bg-gradient-to-r bg-clip-text text-lg leading-[29px] font-medium text-transparent"
+          />
 
           {/* Workspace Domain */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <p className="text-theme-text-primary font-outfit w-40 cursor-pointer truncate text-xs leading-[17px] font-normal">
-                  {workspace?.domain || ''}
-                </p>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{workspace?.domain || ''}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <CustomTooltip
+            data={workspace?.domain || ''}
+            as="p"
+            className="text-theme-text-primary font-outfit w-40 text-xs leading-[17px] font-normal"
+          />
         </div>
       </Link>
     </div>

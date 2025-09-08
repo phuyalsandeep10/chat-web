@@ -209,7 +209,9 @@ export default function ProfileSection({
           </div>
 
           <div className="text-brand-dark flex w-[314px] flex-col gap-2">
-            <h2 className="text-[40px] leading-[48px] font-bold">{name}</h2>
+            <h2 className="text-[40px] leading-[48px] font-bold break-all">
+              {name}
+            </h2>
             <p className="text-[18px] font-normal">{email}</p>
           </div>
         </div>
