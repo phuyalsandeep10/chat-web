@@ -520,7 +520,12 @@ export default function ChatBox() {
             </div>
 
             {visitVisitorError && (
-              <div className="absolute z-50 flex min-h-[50vh] w-full flex-col items-center justify-center space-y-4 bg-white/80 text-center text-3xl font-semibold text-red-500 backdrop-blur-sm">
+              <div
+                className={cn(
+                  'text-error absolute z-50 flex min-h-[50vh] w-full flex-col items-center justify-center space-y-4 bg-white/80 text-center text-3xl font-semibold backdrop-blur-sm',
+                  expand && 'min-h-[70vh]',
+                )}
+              >
                 <p>No Access</p>
                 <p className="text-2xl font-semibold">
                   Visit our site:{' '}
