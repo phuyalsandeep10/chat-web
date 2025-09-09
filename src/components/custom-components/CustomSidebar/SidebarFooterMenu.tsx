@@ -35,7 +35,7 @@ const SidebarFooterMenu = () => {
             )}
           >
             <div className={cn('min-h-8 min-w-8 rounded-full bg-white')}>
-              <Image
+              <img
                 src={
                   authData?.data?.user?.image
                     ? authData?.data?.user?.image

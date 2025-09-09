@@ -75,13 +75,12 @@ const SidebarHeader: React.FC = () => {
         {/* Fix logo container width to avoid shifting */}
         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center">
           {logoSrc ? (
-            <Image
+            <img
               width={32}
               height={32}
               src={logoSrc}
               alt={workspace?.owner_name || 'logo'}
               className={cn('h-10 w-10 rounded-full object-cover')}
-              priority
             />
           ) : (
             <Logo />

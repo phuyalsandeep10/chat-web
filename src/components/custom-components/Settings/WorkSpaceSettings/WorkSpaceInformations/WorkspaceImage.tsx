@@ -102,13 +102,12 @@ const WorkspaceImage = ({ organization }: any) => {
             'bg-gray-light relative h-[250px] w-[250px] overflow-hidden rounded-full',
           )}
         >
-          <Image
+          <img
             src={logoSrc}
             alt="Profile"
             width={250}
             height={250}
             className="h-full w-full object-cover"
-            priority
           />
           <div
             className={cn(

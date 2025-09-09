@@ -188,10 +188,9 @@ export default function ProfileSection({
       <div className="mt-11 flex items-center gap-[126px]">
         <div className="flex items-center gap-6">
           <div className="relative h-[167px] w-[167px] overflow-hidden rounded-[175px]">
-            <Image
+            <img
               src={imageUrl ? imageUrl : '/profile-placeholder.jpeg'}
               alt="Profile Image"
-              fill
               className="object-cover"
             />
             <div className="bg-gray-bg-light absolute bottom-0 flex h-12 w-full items-center justify-center">
