@@ -1,17 +1,36 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  reactStrictMode: false,
   images: {
-    domains: [
-      'flagcdn.com',
-      'lh3.googleusercontent.com',
-      'res.cloudinary.com',
-      'i.ibb.co',
-      'imgbb.com',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'flagcdn.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.ibb.co',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'imgbb.com',
+        pathname: '/**',
+      },
     ],
   },
-  reactStrictMode: false,
 };
 
 export default nextConfig;
