@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 export default function Home() {
-  redirect(ROUTES.YOUR_INBOXES.MAIN_INBOX);
+  redirect(ROUTES.DASHBOARD);
   // useRedirectIfAuthenticated();
   return (
     <div>
