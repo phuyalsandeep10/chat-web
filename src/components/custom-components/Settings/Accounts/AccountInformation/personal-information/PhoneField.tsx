@@ -139,7 +139,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
         >
           {selectedCountry && (
             <>
-              <Image
+              <img
                 width={24}
                 height={18}
                 src={selectedCountry?.flagUrl}
@@ -218,7 +218,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
                     onClick={() => handleCountrySelect(country.code)}
                     className="flex cursor-pointer items-center gap-2 px-3 py-1 hover:bg-gray-100"
                   >
-                    <Image
+                    <img
                       width={24}
                       height={18}
                       src={country.flagUrl}
