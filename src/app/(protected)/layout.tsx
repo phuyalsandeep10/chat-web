@@ -45,14 +45,15 @@ export default function ProtectedDashboardLayout({
   };
 
   useEffect(() => {
+    if (isLoading) return;
+
     if (!authTokens) {
       router.replace(ROUTES.LOGIN);
+      return;
     }
-    if (!isLoading) {
-      const user = authData?.data?.user;
-      if (!user) {
-        router.replace(ROUTES.LOGIN);
-      }
+
+    if (authData && !authData.data?.user) {
+      router.replace(ROUTES.LOGIN);
     }
   }, [authData, isLoading, router, authTokens]);
 
