@@ -31,7 +31,7 @@ const countries: Country[] = allCountries.map((c) => ({
   name: c.name,
   code: c.iso2.toUpperCase(),
   dialCode: `+${c.dialCode}`,
-  flagUrl: `https://flagcdn.com/24x18/${c.iso2}.png`,
+  flagUrl: `https://flagcdn.com/24x18/${c.iso2?.toLowerCase()}.png`,
 }));
 
 type PhoneInputProps = {
@@ -58,7 +58,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
   }, []);
 
   useEffect(() => {
-    if (data.length === 0) return;
+    if (data?.length === 0) return;
 
     let matchedPhoneCode: PhoneCode | undefined;
 
@@ -142,8 +142,8 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
               <Image
                 width={24}
                 height={18}
-                src={selectedCountry.flagUrl}
-                alt={selectedCountry.code}
+                src={selectedCountry?.flagUrl}
+                alt={selectedCountry?.code}
                 className="h-4 w-6 object-cover"
               />
               <span className="text-sm">{selectedCountry.dialCode}</span>
@@ -210,24 +210,27 @@ const PhoneInput: React.FC<PhoneInputProps> = ({ field, storeDialCode }) => {
                     .includes(searchTerm.toLowerCase()) ||
                   country.dialCode.includes(searchTerm),
               )
-              .map((country) => (
-                <li
-                  key={country.code}
-                  onClick={() => handleCountrySelect(country.code)}
-                  className="flex cursor-pointer items-center gap-2 px-3 py-1 hover:bg-gray-100"
-                >
-                  <Image
-                    width={24}
-                    height={18}
-                    src={country.flagUrl}
-                    alt={country.code}
-                    className="h-4 w-6 object-cover"
-                  />
-                  <span>
-                    {country.name} ({country.dialCode})
-                  </span>
-                </li>
-              ))}
+              .map((country) => {
+                console.log(country);
+                return (
+                  <li
+                    key={country.code}
+                    onClick={() => handleCountrySelect(country.code)}
+                    className="flex cursor-pointer items-center gap-2 px-3 py-1 hover:bg-gray-100"
+                  >
+                    <Image
+                      width={24}
+                      height={18}
+                      src={country.flagUrl}
+                      alt={country.code}
+                      className="h-4 w-6 object-cover"
+                    />
+                    <span>
+                      {country.name} ({country.dialCode})
+                    </span>
+                  </li>
+                );
+              })}
           </ul>
         </div>
       )}
