@@ -102,7 +102,7 @@ const Inbox = () => {
   };
 
   useEffect(() => {
-    if (!socket || !userId) return;
+    if (!socket || !userId || !chatId) return;
 
     // Fetch data
     fetchMessages(Number(chatId));
@@ -124,7 +124,7 @@ const Inbox = () => {
     socket.on(CHAT_EVENTS.customer_email_update, handleUpadateCustomerEmail);
 
     return () => cleanupSocketListeners();
-  }, [socket, userId]);
+  }, [socket, userId, chatId]);
 
   const emitTyping = (msg: string) => {
     if (!socket || isSending || !chatId) return;
