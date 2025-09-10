@@ -59,7 +59,7 @@ const sidebarSectionsData: {
     ],
   },
   {
-    title: 'Workspace Setting',
+    title: 'Workspace Settings',
     items: [
       {
         label: 'Workspace Information',

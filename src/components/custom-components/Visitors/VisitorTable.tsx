@@ -9,12 +9,9 @@ import VisitorDetailModal from '@/components/custom-components/Visitors/VisitorD
 import profile from '@/assets/images/MenProfile.svg';
 import FilterComponent from './FilterComponent';
 import DeleteModal from '@/components/modal/DeleteModal';
-import {
-  getVisitors,
-  getVisitorsDetails,
-} from '@/services/visitors/getVisitors';
-import { deleteVisitors } from '@/services/visitors/deleteVisitors'; // ✅ import delete service
+
 import { parseISO, format } from 'date-fns';
+import { VisitorsService } from '@/services/visitors/visitors';
 
 type VisitorData = {
   id: number;
@@ -85,7 +82,7 @@ const VisitorTable = () => {
   const fetchVisitorsData = async () => {
     try {
       const mappedStatuses = statusFilters.map((status) => statusMap[status]);
-      const data = await getVisitors({
+      const data = await VisitorsService.getVisitors({
         statusFilters: mappedStatuses,
         sortBy: sortMap[sortOption] || '',
       });
@@ -136,7 +133,7 @@ const VisitorTable = () => {
     setSelectedVisitor(visitor);
 
     try {
-      const details = await getVisitorsDetails(visitor.id);
+      const details = await VisitorsService.getVisitorsDetailsById(visitor.id);
       setVisitorDetails(details.data);
     } catch (err) {
       console.error('Error fetching visitor details:', err);
@@ -152,10 +149,10 @@ const VisitorTable = () => {
   const handleDeleteConfirm = async () => {
     if (!deleteTargetVisitor) return;
     try {
-      await deleteVisitors(deleteTargetVisitor.id); // ✅ API call
+      await VisitorsService.deleteVisitors(deleteTargetVisitor.id);
       setVisitors((prev) =>
         prev.filter((v) => v.id !== deleteTargetVisitor.id),
-      ); // ✅ remove from table instantly
+      );
       setDeleteTargetVisitor(null);
       setIsDeleteModalOpen(false);
     } catch (err) {
