@@ -4,20 +4,15 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
 import TransferOwnershipModal from '@/components/modal/TransferOwnership';
+import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWorkspaceInformation';
 
-interface InformationProps {
-  workspace_owner?: string | null;
-  creation_date?: string | null;
-}
-
-const Information: React.FC<InformationProps> = ({
-  workspace_owner,
-  creation_date,
-}) => {
+const Information = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const formattedDate = creation_date
-    ? new Date(creation_date).toLocaleDateString('en-US')
+  const { workspace } = useWorkspaceInformationStore((state) => state);
+
+  const formattedDate = workspace?.created_at
+    ? new Date(workspace?.created_at).toLocaleDateString('en-US')
     : '';
 
   return (
@@ -54,7 +49,7 @@ const Information: React.FC<InformationProps> = ({
                   'font-outfit text-disabled-foreground h-9 w-[330px] items-center border py-2 pl-2 text-sm',
                 )}
               >
-                {workspace_owner || ''}
+                {workspace?.owner_name || ''}
               </p>
               <Button
                 variant={'link'}

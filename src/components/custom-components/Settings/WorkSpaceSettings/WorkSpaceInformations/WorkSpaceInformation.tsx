@@ -19,18 +19,15 @@ export default function WorkspaceInformation() {
         <WorkSpaceHeader />
         {/* Profile Section */}
         <div className={cn('mt-11 mb-15 ml-16 flex items-start space-x-24')}>
-          <WorkspaceImage organization={organization} />
+          <WorkspaceImage />
 
-          <WorkspaceProfile organization={organization} />
+          <WorkspaceProfile />
         </div>
         {/* Workspace Details */}
-        <WorkSpaceDetails workspace_identifier={organization?.identifier} />
+        <WorkSpaceDetails />
         {/* Workspace Information */}
         <div className={cn('mt-10 mb-9')}>
-          <Information
-            workspace_owner={organization?.owner?.name}
-            creation_date={organization?.created_at}
-          />
+          <Information />
         </div>
         {/* Contact Information */}
         <ContactForm

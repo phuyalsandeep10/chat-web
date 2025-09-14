@@ -315,6 +315,13 @@ export default function ChatBox() {
     };
   }, [socket]);
 
+  const focusAfterSubmit = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.focus();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!socket || !message.trim()) return;
@@ -333,6 +340,7 @@ export default function ChatBox() {
           organization_id: visitor?.customer?.organization_id,
           content: message,
         });
+        focusAfterSubmit();
         return;
       }
 
@@ -344,9 +352,7 @@ export default function ChatBox() {
 
       setMessages((prev) => [res?.data, ...prev]);
       setMessage('');
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-      }
+      focusAfterSubmit();
     } catch (error) {
       console.error('Failed to send message:', error);
     } finally {
@@ -649,7 +655,7 @@ export default function ChatBox() {
                     onBlur={() => {
                       emitStopTyping();
                     }}
-                    disabled={sendMessageLoading}
+                    // disabled={sendMessageLoading}
                   />
                   <div className="flex items-center gap-[14px]">
                     {/* <button>
