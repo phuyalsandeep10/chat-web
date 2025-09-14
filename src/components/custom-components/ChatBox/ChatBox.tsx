@@ -55,6 +55,7 @@ export default function ChatBox() {
   const [message, setMessage] = useState('');
   const [socketId, setSocketId] = useState<string | undefined>('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [sendMessageLoading, setSendMessageLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [otherTyping, setOtherTyping] = useState(false);
 
@@ -317,6 +318,7 @@ export default function ChatBox() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!socket || !message.trim()) return;
+    setSendMessageLoading(true);
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
@@ -347,6 +349,8 @@ export default function ChatBox() {
       }
     } catch (error) {
       console.error('Failed to send message:', error);
+    } finally {
+      setSendMessageLoading(false);
     }
   };
 
@@ -629,7 +633,7 @@ export default function ChatBox() {
                       emitTyping(e.target.value.trim());
                     }}
                     onKeyDown={(e: any) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === 'Enter' && !sendMessageLoading) {
                         if (e.shiftKey) {
                           // Shift + Enter: Allow new line (default behavior)
                           return;
@@ -645,6 +649,7 @@ export default function ChatBox() {
                     onBlur={() => {
                       emitStopTyping();
                     }}
+                    disabled={sendMessageLoading}
                   />
                   <div className="flex items-center gap-[14px]">
                     {/* <button>
@@ -670,11 +675,16 @@ export default function ChatBox() {
                     </DropdownMenu>
 
                     <button
-                      disabled={!message.trim() || !isConnected}
+                      disabled={
+                        !message.trim() || !isConnected || sendMessageLoading
+                      }
                       type="submit"
                       className={cn(
                         `flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#8A53E1]`,
-                        !message.trim() || (!isConnected && 'bg-[#E2D4F7]'),
+                        (!message.trim() ||
+                          sendMessageLoading ||
+                          !isConnected) &&
+                          'bg-[#E2D4F7]',
                       )}
                     >
                       <SendIcon />
