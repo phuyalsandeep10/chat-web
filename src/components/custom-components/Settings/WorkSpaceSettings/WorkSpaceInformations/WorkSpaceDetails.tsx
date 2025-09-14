@@ -1,29 +1,24 @@
-import axiosInstance from '@/apiConfigs/axiosInstance';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/Icons';
 import { cn } from '@/lib/utils';
+import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWorkspaceInformation';
 import { Label } from '@radix-ui/react-dropdown-menu';
 import React, { useState } from 'react';
 
-interface WorkspaceDetailsProps {
-  workspace_identifier?: string | null;
-}
-const WorkSpaceDetails: React.FC<WorkspaceDetailsProps> = ({
-  workspace_identifier,
-}) => {
+const WorkSpaceDetails = () => {
   const [copied, setCopied] = useState(false);
-  const [identifier, setIdentifier] = useState(null);
+
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  const workspaceURL = 'https://Product-ChartingTrade-id1001-1377.zsh.com';
+
+  const { workspace } = useWorkspaceInformationStore();
 
   const handleOpenLink = () => {
-    window.open(workspaceURL, '_blank');
+    window.open(workspace?.domain, '_blank');
   };
-
   return (
     <div>
       <div className="w-full">
@@ -52,7 +47,7 @@ const WorkSpaceDetails: React.FC<WorkspaceDetailsProps> = ({
                     'border-gray-light font-outfit text-gray-light h-9 w-full border pt-2 pr-52 pl-5 text-sm',
                   )}
                 >
-                  {workspace_identifier || ''}
+                  {workspace?.identifier || ''}
                 </p>
               </div>
             </div>
@@ -86,7 +81,7 @@ const WorkSpaceDetails: React.FC<WorkspaceDetailsProps> = ({
                   'font-outfit text-disabled-foreground h-9 border py-1 pr-13 pl-2 text-sm font-medium',
                 )}
               >
-                Product—ChartingTrade-id1001-1377.zsh...
+                {workspace?.domain}
               </p>
             </div>
             <Button

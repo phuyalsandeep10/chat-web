@@ -11,20 +11,18 @@ import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganizati
 import useDebouncedEffect from '@/hooks/useDebounceEffect';
 import { useGetTimeZones } from '@/hooks/organizations/useGetTimeZones';
 import WorkspaceCountrySelect from './WorkspaceCountrySelect';
-import {
-  useWorkspaceInformationStore,
-  WorkspaceInformationData,
-} from '@/store/WorkspaceInformation/useWorkspaceInformation';
+import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWorkspaceInformation';
 
-const WorkspaceProfile = ({ organization }: any) => {
-  const { updatedData, setData } = useWorkspaceStore();
-  const [rawValue, setRawValue] = useState(''); // user input
+const WorkspaceProfile = () => {
+  const [rawValue, setRawValue] = useState('');
   const [error, setError] = useState('');
   const [selectedTimeZone, setSelectedTimeZone] = useState<TimeZone | null>(
     null,
   );
+  const { updatedData, setData } = useWorkspaceStore();
   const prevUpdatedData = useRef<Partial<WorkspaceData>>(updatedData);
-  const { updateWorkspace } = useWorkspaceInformationStore();
+  const { workspace: organization, updateWorkspace } =
+    useWorkspaceInformationStore();
 
   const { data: TimeZones, isLoading, isError } = useGetTimeZones();
   const { mutate: updateOrganization } = useUpdateOrganization();

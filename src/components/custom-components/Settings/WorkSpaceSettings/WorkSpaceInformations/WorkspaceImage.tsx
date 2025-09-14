@@ -25,11 +25,12 @@ function dataURLtoFile(dataurl: string, filename: string): File {
   return new File([u8arr], filename, { type: mime });
 }
 
-const WorkspaceImage = ({ organization }: any) => {
+const WorkspaceImage = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showChangePhotoModal, setShowChangePhotoModal] = useState(false);
-  const { updateWorkspace } = useWorkspaceInformationStore();
+  const { updateWorkspace, workspace: organization } =
+    useWorkspaceInformationStore();
 
   const { setData } = useWorkspaceStore();
 

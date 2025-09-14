@@ -150,7 +150,7 @@ const RolesTable: React.FC<RolesTableProps> = ({ handleOpenDialog }) => {
       },
     },
   ];
-
+  console.log(roleTableData);
   const orders: RoleTableOrderRow[] = React.useMemo(() => {
     return (
       roleTableData?.data?.map((roleTableDataItems: any) => ({

@@ -19,6 +19,8 @@ import { useAuthStore } from '@/store/AuthStore/useAuthStore';
 import { useSendOwnershipInvitation } from '@/hooks/organizations/useSendOwnershipInvitation';
 import { useUpdateOrganization } from '@/hooks/organizations/useUpdateOrganization';
 import { useQueryClient } from '@tanstack/react-query';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { queryClient } from '@/providers/query-provider';
 
 interface TransferOwnershipModalProps {
   open: boolean;
@@ -31,7 +33,7 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
 }) => {
   const { data: organizationMembers } = useGetMembers();
 
-  const queryClient = useQueryClient();
+  console.log(organizationMembers);
 
   const sendOwnershipInvitation = useUpdateOrganization();
 
@@ -76,21 +78,21 @@ const TransferOwnershipModal: React.FC<TransferOwnershipModalProps> = ({
             {organizationMembers?.map((user) => (
               <div
                 key={user?.id}
-                className="hover:bg-light-blue font-outfit text-gray-primary flex cursor-pointer items-center justify-between p-2 text-xs leading-[16px] font-semibold"
+                className="hover:bg-light-blue font-outfit text-gray-primary flex cursor-pointer items-center justify-between rounded-[2px] p-2 text-xs leading-[16px] font-semibold"
                 onClick={() => handleInvite(user?.user_id)}
               >
                 <div className="flex items-center gap-1">
+                  <Avatar className="h-8 w-8">
+                    {user?.user?.image ? (
+                      <AvatarImage src={user?.user?.image} alt="bot icon" />
+                    ) : (
+                      <AvatarFallback className="text-brand-dark text-xs font-medium">
+                        {user?.user?.name?.substring(0, 2)?.toLocaleUpperCase()}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
                   <div>
-                    <Image
-                      src={user?.image}
-                      alt="user"
-                      width={24}
-                      height={24}
-                      className="h-10 w-10 rounded-full"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{user?.user_name}</p>
+                    <p className="text-sm font-medium">{user?.user?.name}</p>
                     {/* <p className="text-muted-foreground text-xs">
                       {user.email}
                     </p> */}
