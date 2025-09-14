@@ -90,7 +90,7 @@ export function EmailSelectorField<T extends FieldValues>({
                 <Command>
                   <CommandInput placeholder="Search email..." />
                   <CommandEmpty>No customer found.</CommandEmpty>
-                  <CommandGroup>
+                  <CommandGroup className="max-h-60 overflow-y-auto">
                     {options.map((opt) => (
                       <CommandItem
                         key={opt.value}
@@ -108,7 +108,7 @@ export function EmailSelectorField<T extends FieldValues>({
                     <Button
                       type="button"
                       variant="ghost"
-                      className="bg-brand-primary hover:bg-brand-primary font-outfit justify-centergap-1 flex w-full cursor-pointer items-center text-center text-base font-medium text-white"
+                      className="bg-brand-primary hover:bg-brand-primary font-outfit flex w-full cursor-pointer items-center justify-center gap-1 text-center text-base font-medium text-white"
                       onClick={() => {
                         setOpen(false);
                         setIsAddingNew(true);
