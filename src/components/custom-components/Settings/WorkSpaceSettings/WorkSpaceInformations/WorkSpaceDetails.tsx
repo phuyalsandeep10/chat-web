@@ -5,14 +5,9 @@ import { useWorkspaceInformationStore } from '@/store/WorkspaceInformation/useWo
 import { Label } from '@radix-ui/react-dropdown-menu';
 import React, { useState } from 'react';
 
-interface WorkspaceDetailsProps {
-  workspace_identifier?: string | null;
-}
-const WorkSpaceDetails: React.FC<WorkspaceDetailsProps> = ({
-  workspace_identifier,
-}) => {
+const WorkSpaceDetails = () => {
   const [copied, setCopied] = useState(false);
-  const [identifier, setIdentifier] = useState(null);
+
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);

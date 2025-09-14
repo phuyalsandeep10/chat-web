@@ -49,7 +49,7 @@ const Information = () => {
                   'font-outfit text-disabled-foreground h-9 w-[330px] items-center border py-2 pl-2 text-sm',
                 )}
               >
-                {workspace?.owner_name || ''}
+                {workspace?.owner?.name || ''}
               </p>
               <Button
                 variant={'link'}
