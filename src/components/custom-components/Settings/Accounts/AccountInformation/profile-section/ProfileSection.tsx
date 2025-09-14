@@ -220,7 +220,7 @@ export default function ProfileSection({
           {address && (
             <div className="flex items-center justify-end gap-2">
               <MapPinIcon className="h-3.5 w-3.5" />
-              <span className="text-right">{address}</span>
+              <span className="text-right break-all">{address}</span>
             </div>
           )}
           {mobile && (
