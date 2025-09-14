@@ -53,10 +53,49 @@ export type OrganizationListResponse = {
 
 export interface OrganizationMember {
   id: number;
-  user_name: string;
-  image: string;
-  email: string;
+  active: boolean;
+  updated_by_id: number | null;
   user_id: number;
+  days: string[];
+  start_time: string | null;
+  total_hours: number | null;
+  created_at: string;
+  updated_at: string;
+  created_by_id: number | null;
+  deleted_at: string | null;
+  organization_id: number;
+  shift: string | null;
+  end_time: string | null;
+  client_handle_limit: number | null;
+  user: User;
+  member_roles: any[];
+}
+
+export interface User {
+  image: string | null;
+  two_fa_enabled: boolean;
+  is_staff: boolean;
+  mobile: string | null;
+  two_fa_secret: string | null;
+  attributes: {
+    organization_id: number;
+  };
+  phone_code: string | null;
+  two_fa_auth_url: string | null;
+  created_at: string;
+  address: string | null;
+  is_online: boolean;
+  updated_at: string;
+  country: string | null;
+  last_seen: string;
+  id: number;
+  language: string;
+  email_verified_at: string;
+  name: string;
+  password: string;
+  is_superuser: boolean;
+  email: string;
+  is_active: boolean;
 }
 
 export interface OrganizationMemberResponse {
