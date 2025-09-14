@@ -11,7 +11,7 @@ const AccountInformation = () => {
   const authData = useAuthStore((state) => state.authData);
   console.log(authData);
   return (
-    <div className="font-outfit max-h-40 w-full bg-white">
+    <div className="font-outfit w-full bg-white">
       <ProfileSection
         name={authData?.data?.user?.name ?? ''}
         email={authData?.data?.user?.email ?? ''}

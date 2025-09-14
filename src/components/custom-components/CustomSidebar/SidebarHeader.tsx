@@ -71,7 +71,7 @@ const SidebarHeader: React.FC = () => {
         <RiMenu2Fill />
       </button>
 
-      <Link href={ROUTES.DASHBOARD} className="flex items-center">
+      <Link href={ROUTES.YOUR_INBOXES.MAIN_INBOX} className="flex items-center">
         {/* Fix logo container width to avoid shifting */}
         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center">
           {logoSrc ? (

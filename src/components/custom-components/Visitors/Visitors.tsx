@@ -6,7 +6,7 @@ import Heading from '@/components/custom-components/Visitors/Heading';
 import CurrentVisitors from '@/components/custom-components/Visitors/CurrentVisitors';
 import { Icons } from '@/components/ui/Icons';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getVisitors } from '@/services/visitors/getVisitors';
+import { VisitorsService } from '@/services/visitors/visitors';
 
 const LoadingMapSkeleton = () => (
   <div className="h-[541px] w-full">
@@ -30,7 +30,7 @@ const Visitors = () => {
   useEffect(() => {
     const fetchVisitorLocations = async () => {
       try {
-        const data = await getVisitors();
+        const data = await VisitorsService.getVisitors();
         if (data?.data?.visitors_by_location) {
           const locations = data.data.visitors_by_location.map((loc: any) => ({
             lat: loc.latitude,

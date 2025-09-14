@@ -14,7 +14,9 @@ const Settings = ({ children }: { children: React.ReactNode }) => {
 
       <div className="flex-1">
         <SettingsHeader />
-        <div className="px-24 pt-11">{children}</div>
+        <div className="max-h-[90vh] overflow-y-auto px-20 pt-11">
+          {children}
+        </div>
       </div>
     </div>
   );
