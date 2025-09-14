@@ -69,7 +69,9 @@ const Notes: React.FC<NotesProps> = ({ ticketId }) => {
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex items-center justify-between">
                 <h2 className="font-outfit text-base font-medium text-black">
-                  {note.author}
+                  {note.author.length > 10
+                    ? `${note.author.slice(0, 10)}...`
+                    : note.author}
                 </h2>
                 <p className="font-outfit text-gray-primary text-xs font-normal">
                   {formatDistanceToNow(toNepaliDate(note.timestamp), {
