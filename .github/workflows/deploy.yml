@@ -70,5 +70,4 @@ jobs:
             echo "Starting Docker Compose services..."
             docker-compose --env-file .env up -d
 
-            echo "Running Django migrations"
-            docker-compose --env-file .env exec -T backend python manage.py migrate
+        
