@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start --port 3002",
+    "export": "next export",
     "lint:fix": "next lint --fix",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
